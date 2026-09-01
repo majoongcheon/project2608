@@ -100,11 +100,9 @@ facilitiesRouter.get('/facilities/:id', wrap(async (req, res) => {
   const ranges = cfg<any>('age.serviceRanges');
   const r = await findById(Number(req.params.id));
   if (!r) throw new ApiError(404, 'NOT_FOUND', '기관을 찾을 수 없습니다.');
-  const card = toCard(r, ranges, null);
+  const card = toCard(r, ranges, null);   // lat·lng·address 는 카드에 이미 포함된다
   res.json({
     ...card,
-    address: r.address,
-    lat: Number(r.lat), lng: Number(r.lng),
     updatedAt: r.updated_at ? new Date(r.updated_at).toISOString().slice(0, 10) : null,
   });
 }));

@@ -26,6 +26,11 @@ const locError = ref('');
 const sidos = computed(() => [...new Set(regions.value.map((r) => r.sidoName))]);
 const inSido = computed(() => regions.value.filter((r) => r.sidoName === sido.value));
 const center = computed(() => coords.value ?? regionCenter.value);
+const centerLabel = computed(() => {
+  if (coords.value) return '현재 위치';
+  const r = regions.value.find((x) => x.regionCode === regionCode.value);
+  return r ? `${r.sidoName} ${r.sigunguName}` : '기준 위치';
+});
 
 onMounted(async () => {
   events.track('MAP_ENTER');
@@ -124,7 +129,8 @@ function expand() {
       </button>
     </div>
 
-    <MapView v-if="facilities.length" :center="center" :facilities="facilities" />
+    <MapView v-if="facilities.length" :center="center" :facilities="facilities"
+             :radius-km="radiusKm" :center-label="centerLabel" />
 
     <p v-if="loading" class="notice">기관을 찾고 있습니다…</p>
 

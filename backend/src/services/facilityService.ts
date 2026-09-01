@@ -31,7 +31,10 @@ export interface FacilityRow {
 export interface FacilityCard {
   facilityId: number; name: string; distanceKm: number | null;
   serviceTypes: ServiceType[]; eligibilityNote: string; phone: string | null;
-  address?: string; lat?: number; lng?: number; updatedAt?: string;
+  // 지도 마커와 팝업에 필요하다. 기관 좌표·주소는 공개 기관 정보라
+  // 이용자 위치 보관 금지(FR-026·FR-028)와 무관하다.
+  lat: number; lng: number; address: string | null;
+  updatedAt?: string;
 }
 
 const BASE_SELECT = `
@@ -95,5 +98,8 @@ export function toCard(r: FacilityRow, ranges: any, distanceKm: number | null): 
     serviceTypes: types,
     eligibilityNote: eligibilityNote(types, ranges),
     phone: r.phone ?? null,             // null 이면 프론트가 통화 버튼을 숨긴다
+    lat: Number(r.lat),
+    lng: Number(r.lng),
+    address: r.address ?? null,
   };
 }

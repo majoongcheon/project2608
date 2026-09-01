@@ -11,7 +11,9 @@ info:
     - **무계정·익명** — 인증 스킴이 없다. 어떤 엔드포인트도 이용자를 식별하지 않는다(FR-002, 원칙 III).
     - **내부 라벨 비노출** — 판정 결과는 표시 명칭(`burdenLabel`)으로만 나간다. 내부 라벨 1~5는
       응답 본문에 포함하지 않는다(FR-010a, 원칙 II). 내부 라벨은 1이 최고부담인 역방향 척도다.
-    - **위경도 미보관** — 좌표는 요청 파라미터로만 받고 응답·로그 어디에도 남기지 않는다(FR-026, FR-028).
+    - **이용자 위경도 미보관** — 보호자의 좌표는 요청 파라미터로만 받고 응답·로그 어디에도
+      남기지 않는다(FR-026, FR-028). **기관 좌표는 이와 별개**로, 공개 기관 정보이며
+      지도 마커에 필요해 응답에 포함된다.
     - **저장소 분리** — `/events`(익명 집계)와 학습용 저장은 식별자를 공유하지 않는다(FR-032).
 
 servers:
@@ -453,16 +455,26 @@ components:
         phone:
           type: string
           nullable: true
-          description: null이면 통화 버튼을 숨기고 주소·길찾기만 제공한다(기관 58건).
+          description: null이면 통화 버튼을 숨기고 주소·길찾기만 제공한다.
+        lat:
+          type: number
+          format: double
+          description: |
+            지도 마커용 기관 좌표. **기관 좌표는 공개 기관 정보**이며 이용자 위치 보관
+            금지(FR-026·FR-028)와 무관하다. 이 값이 없으면 지도에 마커를 찍을 수 없다.
+        lng:
+          type: number
+          format: double
+        address:
+          type: string
+          nullable: true
+          description: 지도 팝업(기관명 + 주소)과 목록에 함께 쓴다.
 
     Facility:
       allOf:
         - $ref: '#/components/schemas/FacilityCard'
         - type: object
           properties:
-            address: { type: string }
-            lat: { type: number }
-            lng: { type: number }
             updatedAt: { type: string, format: date, description: 최종 갱신일(FR-019) }
 
     FacilityList:

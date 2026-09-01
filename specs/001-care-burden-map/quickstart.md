@@ -154,15 +154,16 @@ npm install
 npm run dev              # http://localhost:5173
 ```
 
-`frontend/.env.local`에 지도 SDK 키를 넣는다.
+**지도 발급 키가 필요 없다.** Leaflet + OpenStreetMap 을 쓰므로 별도 설정 없이 지도가 뜬다
+(research.md R-7, JSG-01 반영).
 
 ```bash
-VITE_API_BASE=http://localhost:3000/api/v1
-VITE_KAKAO_MAP_KEY=<발급 키>
+# frontend/.env.local — 기본값으로 충분해 보통 만들지 않아도 된다
+VITE_API_BASE=/api/v1
 ```
 
-지도 키가 없어도 **목록 경로는 동작해야 한다.** 지도는 표현 계층에만 있고 데이터 경로가
-분리되어 있기 때문이다(research.md R-7). 이 동작이 곧 "지도 표시 수단을 쓸 수 없는 상황"의
+타일 서버(OSM)를 못 받는 상황에서도 **목록 경로는 동작해야 한다.** 지도는 표현 계층에만 있고
+데이터 경로가 분리되어 있기 때문이다. 이 동작이 곧 "지도 표시 수단을 쓸 수 없는 상황"의
 목록 대체 경로다.
 
 ---

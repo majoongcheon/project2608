@@ -10,7 +10,7 @@
 
 | 영역 | 스택 |
 |---|---|
-| 프론트엔드 | Vue 3.4 + TypeScript 5 + Vite 5 + Pinia 2 + Kakao Maps JS SDK |
+| 프론트엔드 | Vue 3.4 + TypeScript 5 + Vite 5 + Pinia 2 + Leaflet(OpenStreetMap · 키 불필요) |
 | 백엔드 | Node.js 20 LTS + Express 4 + TypeScript 5 + mysql2 3 |
 | 데이터베이스 | MariaDB 12.1.2 — `ABC8pioneer3` |
 | 오프라인 학습 | Python 3.11 + scikit-learn + LightGBM + SHAP (**배포 대상 아님**) |
