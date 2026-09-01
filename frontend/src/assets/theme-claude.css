@@ -4,9 +4,7 @@
    tokens.css(Airbnb) 를 수정하지 않고 그 뒤에 얹는 오버레이 레이어다.
    main.ts 에서 tokens.css 다음에 import 되어야 한다. 순서가 바뀌면 적용되지 않는다.
 
-   테마 바꾸기 : main.ts 의 import 를
-                 theme-claude.css → theme-notion.css 로 바꾸면 Notion,
-                 줄을 지우면 Airbnb 로 돌아간다.
+   되돌리기   : main.ts 의 import 줄을 지우면 기반인 Airbnb(tokens.css)만 남는다.
    근거 문서   : DESIGN.claude.md (= claude/DESIGN.md, getdesign 산출물)
 
    ── 이 프로젝트에서 지켜야 하는 제약 ──────────────────────────────────────
