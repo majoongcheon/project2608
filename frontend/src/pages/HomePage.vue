@@ -5,91 +5,121 @@ import { useEventStore } from '../stores/events';
 import { api } from '../services/apiClient';
 const events = useEventStore();
 
-// 문항 수는 FR-004c 로 도출되어 모델 버전마다 달라진다. 값으로 박지 않고 받아 온다.
 const questionCount = ref<number | null>(null);
-
 onMounted(async () => {
   events.track('PRESURVEY_ENTER');
   try { questionCount.value = (await api.config()).questionCount ?? null; } catch { /* 숫자 없이 진행 */ }
 });
+
+// 2024 발달장애인 일과 삶 실태조사 3,000가구의 실제 분포.
+// 1이 가장 부담이 크고 5가 부담 없음인 역방향 척도다(CLAUDE.md).
+const burden = [
+  { step: 1, name: '최고부담군', n: 464,   heavy: true },
+  { step: 2, name: '고부담군',   n: 1165,  heavy: true },
+  { step: 3, name: '중간부담군', n: 916,   heavy: false },
+  { step: 4, name: '저부담군',   n: 378,   heavy: false },
+  { step: 5, name: '부담 없음',  n: 77,    heavy: false },
+];
+const TOTAL = 3000;
+const heavyN = burden.filter((b) => b.heavy).reduce((a, b) => a + b.n, 0);
+const pct = (n: number) => (n / TOTAL) * 100;
+const fmt = (n: number) => n.toLocaleString('ko-KR');
 </script>
 
 <template>
   <div class="container stack">
     <h1>어떤 도움이 필요하신가요?</h1>
+    <p class="lead measure">로그인도 회원가입도 없이, 바로 이용하실 수 있습니다.</p>
+
+    <!-- 두 메뉴를 맨 위로. 색을 나눠 한눈에 구분되게 한다.
+         두 카드는 크기·구조가 같아 비중은 동등하다(FR-001). -->
+    <nav class="menu" aria-label="주요 기능">
+      <RouterLink class="card card--diag" to="/diagnosis/start">
+        <span class="card__icon" aria-hidden="true">
+          <svg viewBox="0 0 44 44">
+            <rect x="10" y="5" width="24" height="34" rx="4.5" fill="currentColor" />
+            <path d="M16 14h12M16 21h8" stroke="#fff" stroke-width="2.2" stroke-linecap="round" />
+            <path d="M25.6 25.6c1.15-1.2 3.05-1.2 4.2 0 1.15 1.2 1.15 3.15 0 4.35L25.6 34.4l-4.2-4.45c-1.15-1.2-1.15-3.15 0-4.35 1.15-1.2 3.05-1.2 4.2 0Z"
+                  fill="#fff" />
+          </svg>
+        </span>
+        <span class="card__title">부담감 진단</span>
+        <span class="card__desc">몇 가지 질문에 답하시면 지금의 돌봄부담 수준과 <b>그렇게 본 이유</b>를 알려 드립니다.</span>
+        <span class="card__meta">
+          <template v-if="questionCount">질문 {{ questionCount }}개 · </template>약 3분
+        </span>
+      </RouterLink>
+
+      <RouterLink class="card card--map" to="/map">
+        <span class="card__icon" aria-hidden="true">
+          <svg viewBox="0 0 44 44">
+            <path d="M22 39s12-9.8 12-19a12 12 0 1 0-24 0c0 9.2 12 19 12 19Z" fill="currentColor" />
+            <circle cx="22" cy="19.4" r="4.8" fill="#fff" />
+          </svg>
+        </span>
+        <span class="card__title">복지서비스 위치 · 연락처</span>
+        <span class="card__desc">우리 지역의 주간활동 · 청소년 방과후활동 <b>신청 접수처</b>를 지도와 목록으로 찾아 드립니다.</span>
+        <span class="card__meta">전국 시군구 · 지도와 목록</span>
+      </RouterLink>
+    </nav>
 
     <!-- 인사말 -->
-    <div class="letter">
+    <div class="letter measure">
       <p>돌봄의 무게는 겉으로 잘 드러나지 않습니다.</p>
       <p class="letter__lead">그래서 몇 가지만 여쭙고,<br />지금 어느 정도인지 함께 읽어 보려 합니다.</p>
       <p class="letter__soft">정답을 가리는 자리가 아니니 편한 대로 답해 주세요.</p>
     </div>
 
-    <!-- 조사 결과. 근거이자 "혼자가 아니다" 라는 말이다.
-         출처: 2024 발달장애인 일과 삶 실태조사 3,000가구 (1~2단계 1,629가구) -->
-    <section class="stat" aria-label="조사 결과">
-      <p class="stat__lead">2024년 전국 <b>3,000가구</b>에 물었습니다.</p>
-      <p class="stat__dots" aria-hidden="true">
-        <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
-        <i></i><i></i><i></i><i></i><i></i>
+    <!-- 조사 결과 -->
+    <section class="stat" aria-labelledby="stat-h">
+      <p class="stat__eyebrow">2024년 전국 실태조사</p>
+      <h2 id="stat-h" class="stat__h">
+        <b>{{ fmt(TOTAL) }}가구</b> 가운데 <b class="hot">{{ fmt(heavyN) }}가구</b>가
+        높은 돌봄부담을 안고 있었습니다.
+      </h2>
+
+      <!-- 1~5는 순서 있는 척도라 한 색상의 명도 단계로 그린다(무지개색 금지).
+           어두울수록 부담이 크다. 색만으로 뜻이 전해지지 않게 아래 범례에
+           단계 이름과 가구 수를 모두 적는다(FR-041). -->
+      <div class="bar" role="img"
+           :aria-label="`전체 ${fmt(TOTAL)}가구 중 최고부담군 ${fmt(burden[0].n)}가구, 고부담군 ${fmt(burden[1].n)}가구, 중간부담군 ${fmt(burden[2].n)}가구, 저부담군 ${fmt(burden[3].n)}가구, 부담 없음 ${fmt(burden[4].n)}가구`">
+        <span v-for="b in burden" :key="b.step" class="bar__seg"
+              :class="`bar__seg--${b.step}`" :style="{ width: pct(b.n) + '%' }"
+              :title="`${b.name} ${fmt(b.n)}가구 (${pct(b.n).toFixed(1)}%)`"></span>
+      </div>
+      <div class="brace" aria-hidden="true">
+        <span class="brace__hot" :style="{ width: pct(heavyN) + '%' }"></span>
+        <span class="brace__rest"></span>
+      </div>
+      <p class="bar__callout">
+        <b>{{ (heavyN / TOTAL * 100).toFixed(1) }}%</b> — 절반이 넘습니다
       </p>
-      <p class="stat__body">
-        열 가구 가운데 <b>다섯 이상</b>이 높은 돌봄부담을 안고 있었습니다.
-        <span class="stat__fig">3,000가구 중 1,629가구 · 54.3%</span>
-      </p>
+
+      <ul class="legend">
+        <li v-for="b in burden" :key="b.step" :class="{ 'legend--hot': b.heavy }">
+          <i :class="`sw sw--${b.step}`" aria-hidden="true"></i>
+          <span class="legend__nm">{{ b.name }}</span>
+          <span class="legend__n">{{ fmt(b.n) }}가구</span>
+        </li>
+      </ul>
+
       <p class="stat__note">힘든 것은 당신만의 일이 아닙니다.</p>
     </section>
 
-    <nav class="menu" aria-label="주요 기능">
-      <RouterLink class="menu__card" to="/diagnosis/start">
-        <span class="menu__icon" aria-hidden="true">
-          <svg viewBox="0 0 40 40">
-            <rect x="9" y="5" width="22" height="30" rx="4" fill="var(--icon-fill)" />
-            <rect x="9" y="5" width="22" height="30" rx="4" fill="none"
-                  stroke="currentColor" stroke-width="1.7" />
-            <path d="M14 13h12M14 19h8" fill="none" stroke="currentColor"
-                  stroke-width="1.7" stroke-linecap="round" />
-            <path d="M23.4 24.4c1-1.05 2.7-1.05 3.7 0 1 1.05 1 2.75 0 3.8L23.4 32l-3.7-3.8c-1-1.05-1-2.75 0-3.8 1-1.05 2.7-1.05 3.7 0Z"
-                  fill="currentColor" />
-          </svg>
-        </span>
-        <span class="menu__title">부담감 진단</span>
-        <span class="menu__desc">몇 가지 질문에 답하시면 지금의 돌봄부담 수준과 그렇게 본 이유를 알려 드립니다.</span>
-        <span class="menu__meta">
-          <template v-if="questionCount">질문 {{ questionCount }}개 · </template>약 3분
-        </span>
-      </RouterLink>
-
-      <RouterLink class="menu__card" to="/map">
-        <span class="menu__icon" aria-hidden="true">
-          <svg viewBox="0 0 40 40">
-            <path d="M20 35s11-9 11-17.5A11 11 0 1 0 9 17.5C9 26 20 35 20 35Z" fill="var(--icon-fill)" />
-            <path d="M20 35s11-9 11-17.5A11 11 0 1 0 9 17.5C9 26 20 35 20 35Z"
-                  fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
-            <circle cx="20" cy="17" r="4.2" fill="currentColor" />
-          </svg>
-        </span>
-        <span class="menu__title">복지서비스 위치 · 연락처</span>
-        <span class="menu__desc">우리 지역의 주간활동 · 청소년 방과후활동 신청 접수처를 지도와 목록으로 찾아 드립니다.</span>
-        <span class="menu__meta">전국 시군구 · 지도와 목록</span>
-      </RouterLink>
-    </nav>
-
-    <!-- 이용 흐름. 3번이 곧 지도 메뉴라 두 메뉴가 모두 담긴다(FR-001 동등 비중) -->
+    <!-- 이용 흐름 -->
     <section class="flow" aria-label="이용 흐름">
       <h2 class="flow__h">진단은 이렇게 진행됩니다</h2>
       <ol class="flow__list">
         <li><b aria-hidden="true">1</b><span>몇 가지 질문에 답합니다.</span></li>
         <li><b aria-hidden="true">2</b><span>지금의 부담 수준과 <strong>그렇게 본 이유</strong>를 알려 드립니다.</span></li>
-        <li><b aria-hidden="true">3</b><span>가까운 신청처를 지도로 안내해 드립니다.</span></li>
+        <li><b aria-hidden="true">3</b><span>가까운 <strong class="blue">신청처를 지도로</strong> 안내해 드립니다.</span></li>
       </ol>
     </section>
 
     <!-- 맺음말 -->
     <div class="sign">
-      <p class="sign__body">
-        로그인도 회원가입도 없습니다. 답해 주신 내용은 결과를 계산하는 데에만 쓰고,
-        개인을 알아볼 수 있는 형태로 남기지 않습니다.
+      <p class="sign__body measure">
+        답해 주신 내용은 결과를 계산하는 데에만 쓰고, 개인을 알아볼 수 있는 형태로 남기지 않습니다.
       </p>
       <p class="sign__from">곁 드림</p>
     </div>
@@ -97,7 +127,40 @@ onMounted(async () => {
 </template>
 
 <style scoped>
-/* ── 인사말 — 크기와 색으로 세 단을 만든다 ── */
+.lead { font-size: 15px; color: var(--muted); margin: 0; }
+
+/* ── 두 메뉴 ────────────────────────────────────────────────────────────
+   구조·크기는 같게(동등 비중), 색만 나눈다. */
+.menu { display: grid; gap: var(--sp-base); grid-template-columns: 1fr; }
+@media (min-width: 620px) { .menu { grid-template-columns: 1fr 1fr; } }
+.card {
+  --hue: var(--primary); --hue-tx: var(--primary-on-tint);
+  display: flex; flex-direction: column; gap: var(--sp-sm);
+  border: 1px solid var(--hairline); border-top: 4px solid var(--hue);
+  border-radius: var(--radius-lg); padding: var(--sp-lg);
+  text-decoration: none; color: var(--body);
+  background: var(--canvas); box-shadow: var(--shadow-soft);
+}
+.card--map { --hue: var(--secondary); --hue-tx: var(--secondary-on-tint); }
+.card:hover { box-shadow: var(--shadow-card); border-color: var(--hairline); border-top-color: var(--hue); }
+.card__icon {
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 60px; height: 60px; border-radius: 16px;
+  background: var(--surface-strong);                       /* color-mix 미지원 폴백 */
+  background: color-mix(in srgb, var(--hue) 15%, var(--canvas));
+  color: var(--hue);
+}
+.card__icon svg { width: 40px; height: 40px; display: block; }
+.card__title { font-size: 21px; font-weight: 700; color: var(--hue-tx); line-height: 1.4; }
+.card__desc { font-size: 15px; color: var(--muted); line-height: 1.75; word-break: keep-all; }
+.card__desc b { color: var(--ink); font-weight: 700; }
+.card__meta {
+  margin-top: auto; padding-top: var(--sp-sm);
+  border-top: 1px solid var(--hairline-soft);
+  font-size: 13px; color: var(--muted-soft);
+}
+
+/* ── 인사말 ── */
 .letter { color: var(--body); }
 .letter p { margin: 0 0 var(--sp-sm); word-break: keep-all; }
 .letter p:last-child { margin-bottom: 0; }
@@ -107,61 +170,67 @@ onMounted(async () => {
 /* ── 조사 결과 ── */
 .stat {
   background: var(--surface-soft); border: 1px solid var(--hairline);
-  border-left: 3px solid var(--accent); border-radius: var(--radius-sm);
-  padding: var(--sp-lg) var(--sp-base);
+  border-radius: var(--radius-md); padding: var(--sp-lg) var(--sp-base);
 }
-.stat__lead { font-size: 14px; color: var(--muted); margin: 0 0 var(--sp-md); }
-.stat__lead b { color: var(--ink); font-weight: 700; }
-.stat__dots { display: flex; gap: 6px; margin: 0 0 var(--sp-md); flex-wrap: wrap; }
-.stat__dots i {
-  width: 15px; height: 15px; border-radius: 50%;
-  border: 1.5px solid var(--border-strong); background: transparent;
+.stat__eyebrow {
+  font-size: 12px; font-weight: 700; letter-spacing: .06em;
+  color: var(--muted-soft); margin: 0 0 var(--sp-sm);
 }
-.stat__dots i.on { background: var(--primary); border-color: var(--primary); }
-.stat__body { font-size: 17px; line-height: 1.8; color: var(--body); margin: 0 0 var(--sp-sm); word-break: keep-all; }
-.stat__body b { color: var(--primary-on-tint); font-weight: 700; font-size: 20px; }
-.stat__fig { display: block; font-size: 13px; color: var(--muted-soft); margin-top: var(--sp-xs); }
-.stat__note { font-size: 15px; color: var(--ink); font-weight: 600; margin: 0; }
+.stat__h {
+  font-size: 18px; font-weight: 400; line-height: 1.75; color: var(--body);
+  margin: 0 0 var(--sp-base); word-break: keep-all;
+}
+.stat__h b { color: var(--ink); font-weight: 700; }
+.stat__h b.hot { color: var(--primary-on-tint); font-size: 21px; }
 
-/* ── 메뉴 ── */
-.menu { display: grid; gap: var(--sp-base); grid-template-columns: 1fr; }
-@media (min-width: 640px) { .menu { grid-template-columns: 1fr 1fr; } }
-.menu__card {
-  display: flex; flex-direction: column; gap: var(--sp-sm);
-  border: 1px solid var(--hairline); border-radius: var(--radius-lg);
-  padding: var(--sp-lg); text-decoration: none; color: var(--body);
-  background: var(--canvas); box-shadow: var(--shadow-soft);
+.bar { display: flex; gap: 2px; height: 26px; margin-bottom: var(--sp-sm); }
+.bar__seg { display: block; height: 100%; }
+.bar__seg:first-child { border-radius: 4px 0 0 4px; }
+.bar__seg:last-child { border-radius: 0 4px 4px 0; }
+.bar__seg--1 { background: var(--burden-1); }
+.bar__seg--2 { background: var(--burden-2); }
+.bar__seg--3 { background: var(--burden-3); }
+.bar__seg--4 { background: var(--burden-4); }
+.bar__seg--5 { background: var(--burden-5); }
+
+/* 막대와 같은 flex·gap 구조라 간격 계산까지 일치한다. 퍼센트만 맞추면
+   2px 간격 4개 때문에 몇 px 어긋난다. */
+.brace { display: flex; gap: 2px; margin-bottom: 6px; }
+.brace__hot {
+  height: 7px; flex: none;
+  border: 2px solid var(--burden-2); border-top: 0; border-radius: 0 0 3px 3px;
 }
-.menu__card:hover { box-shadow: var(--shadow-card); border-color: var(--border-strong); }
-/* 아이콘 — 선만 있으면 비어 보인다. 옅은 살구빛 면을 깔고 그 위에 선을 얹은 뒤,
-   한 부분(하트·핀 머리)만 꽉 채워 시선이 걸리게 한다. */
-.menu__icon {
-  --icon-fill: #f6ded1;
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 54px; height: 54px; border-radius: 14px;
-  background: var(--surface-strong); color: var(--primary);
-}
-.menu__icon svg { width: 34px; height: 34px; display: block; }
-.menu__title { font-size: 20px; font-weight: 700; color: var(--ink); }
-.menu__desc { font-size: 15px; color: var(--muted); line-height: 1.75; }
-.menu__meta {
-  margin-top: auto; padding-top: var(--sp-xs);
-  font-size: 13px; color: var(--muted-soft);
-}
+.brace__rest { flex: 1; }
+.bar__callout { font-size: 14px; color: var(--muted); margin: 0 0 var(--sp-base); }
+.bar__callout b { color: var(--primary-on-tint); font-size: 17px; font-weight: 700; }
+
+.legend { list-style: none; margin: 0 0 var(--sp-base); padding: 0; display: grid; gap: 5px; }
+.legend li { display: grid; grid-template-columns: auto 1fr auto; gap: var(--sp-sm); align-items: center; font-size: 13.5px; color: var(--muted); }
+.legend--hot { color: var(--ink); font-weight: 600; }
+.sw { width: 11px; height: 11px; border-radius: 3px; display: block; }
+.sw--1 { background: var(--burden-1); } .sw--2 { background: var(--burden-2); }
+.sw--3 { background: var(--burden-3); } .sw--4 { background: var(--burden-4); }
+.sw--5 { background: var(--burden-5); border: 1px solid var(--hairline); }
+.legend__n { font-variant-numeric: tabular-nums; color: var(--muted-soft); }
+.legend--hot .legend__n { color: var(--body); }
+
+.stat__note { font-size: 16px; color: var(--ink); font-weight: 700; margin: 0; }
 
 /* ── 이용 흐름 ── */
 .flow { border-top: 1px solid var(--hairline); padding-top: var(--sp-lg); }
-.flow__h { font-size: 17px; color: var(--muted); font-weight: 600; margin: 0 0 var(--sp-md); }
+.flow__h { font-size: 16px; color: var(--muted); font-weight: 600; margin: 0 0 var(--sp-md); }
 .flow__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-md); }
+@media (min-width: 860px) { .flow__list { grid-template-columns: repeat(3, 1fr); } }
 .flow__list li { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-md); align-items: start; }
 .flow__list b {
   display: inline-flex; align-items: center; justify-content: center;
-  width: 26px; height: 26px; border-radius: 50%; flex: none;
-  background: var(--surface-strong); color: var(--primary-on-tint);
-  font-size: 14px; font-weight: 700;
+  width: 27px; height: 27px; border-radius: 50%; flex: none;
+  background: var(--primary); color: #fff; font-size: 14px; font-weight: 700;
 }
+.flow__list li:last-child b { background: var(--secondary); }
 .flow__list span { font-size: 16px; color: var(--body); word-break: keep-all; }
 .flow__list strong { color: var(--ink); font-weight: 700; }
+.flow__list strong.blue { color: var(--secondary-on-tint); }
 
 /* ── 맺음말 ── */
 .sign { border-top: 1px solid var(--hairline); padding-top: var(--sp-lg); }
