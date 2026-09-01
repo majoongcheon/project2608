@@ -31,6 +31,8 @@ export const useSurveyStore = defineStore('survey', () => {
   const startedAt = ref<number>(Date.now());
   const loaded = ref(false);
   const restored = ref(false);
+  // 문항을 못 받았을 때의 사유. 화면이 "불러오는 중" 에서 멈추지 않게 한다.
+  const loadError = ref<string | null>(null);
 
   const total = computed(() => questions.value.length);
   const current = computed(() => questions.value[index.value] ?? null);
@@ -41,15 +43,39 @@ export const useSurveyStore = defineStore('survey', () => {
 
   async function load() {
     if (loaded.value) return;
-    const [q, cfg] = await Promise.all([api.questions(), api.config().catch(() => null)]);
-    questions.value = q.questions;
-    selfReport.value = q.selfReportQuestion;
-    version.value = q.version;
-    if (cfg?.draftExpiryHours) expiryHours.value = cfg.draftExpiryHours;
-    const d = loadDraft(version.value, expiryHours.value);
-    if (d) { answers.value = d.answers; index.value = Math.min(d.index, questions.value.length - 1); restored.value = true; }
-    loaded.value = true;
+    loadError.value = null;
+    try {
+      const [q, cfg] = await Promise.all([api.questions(), api.config().catch(() => null)]);
+      // 응답에 questions 가 없으면 total·current 계산이 그대로 터진다. 빈 배열로 받는다.
+      questions.value = Array.isArray(q?.questions) ? q.questions : [];
+      selfReport.value = q?.selfReportQuestion ?? null;
+      version.value = q?.version ?? '';
+      if (cfg?.draftExpiryHours) expiryHours.value = cfg.draftExpiryHours;
+
+      if (!questions.value.length) {
+        // 200 을 받았어도 문항이 없으면 설문을 시작할 수 없다. 빈 화면 대신 사유를 남긴다.
+        loadError.value = '문항을 불러오지 못했습니다.';
+        return;
+      }
+
+      const d = loadDraft(version.value, expiryHours.value);
+      if (d) {
+        answers.value = d.answers;
+        // 문항 수가 줄면 저장된 위치가 범위를 벗어난다. 음수가 되지 않게 함께 막는다.
+        index.value = Math.max(0, Math.min(d.index, questions.value.length - 1));
+        restored.value = true;
+      } else {
+        index.value = Math.max(0, Math.min(index.value, questions.value.length - 1));
+      }
+      loaded.value = true;
+    } catch (e: any) {
+      // loaded 를 세우지 않는다. 다시 부르면 재시도된다.
+      loadError.value = e?.message ?? '문항을 불러오지 못했습니다.';
+    }
   }
+
+  /** 실패 후 다시 시도한다. */
+  async function retry() { loadError.value = null; await load(); }
 
   function persist() {
     try {
@@ -83,5 +109,6 @@ export const useSurveyStore = defineStore('survey', () => {
 
   return { questions, selfReport, version, answers, index, total, current, answeredCount,
            unanswered, loaded, restored, expiryHours, startedAt,
-           load, answer, go, next, prev, clearDraft, payloadAnswers };
+           loadError,
+           load, retry, answer, go, next, prev, clearDraft, payloadAnswers };
 });

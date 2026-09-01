@@ -42,7 +42,19 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
 
 <template>
   <div class="container stack">
-    <div v-if="!s.loaded" class="card">문항을 불러오는 중입니다…</div>
+    <!-- 실패를 먼저 본다. 그러지 않으면 "불러오는 중" 에서 영영 멈춘다. -->
+    <div v-if="s.loadError" class="card stack" role="alert">
+      <h2>문항을 불러오지 못했습니다</h2>
+      <p class="notice">
+        잠시 후 다시 시도해 주세요. 계속 같은 화면이 나오면 잠시 뒤에 다시 들어와 주세요.
+      </p>
+      <div class="nav">
+        <button class="btn" type="button" @click="s.retry()">다시 시도</button>
+        <button class="btn btn--ghost" type="button" @click="router.push('/')">처음 화면으로</button>
+      </div>
+    </div>
+
+    <div v-else-if="!s.loaded" class="card">문항을 불러오는 중입니다…</div>
 
     <template v-else-if="s.current">
       <!-- FR-005 진행률 -->
@@ -92,6 +104,15 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
         </button>
       </p>
     </template>
+
+    <!-- loaded 인데 current 가 없는 경우. 여기가 비어 있어서 빈 화면이 나왔다. -->
+    <div v-else class="card stack" role="alert">
+      <h2>진단을 이어갈 수 없습니다</h2>
+      <p class="notice">표시할 문항을 찾지 못했습니다. 처음부터 다시 시작해 주세요.</p>
+      <div class="nav">
+        <button class="btn" type="button" @click="restart">처음부터 새로 시작</button>
+      </div>
+    </div>
   </div>
 </template>
 
