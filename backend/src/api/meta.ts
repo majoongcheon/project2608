@@ -10,7 +10,11 @@ export const metaRouter = Router();
 //   판정 임계값·판정 불가 기준은 반환하지 않는다 (응답을 역산해 판정을 조작할 수 있다).
 metaRouter.get('/config', wrap(async (_req, res) => {
   const labels = cfg<any>('burden.labels');
+  // 첫 화면에서 "질문 N개" 를 안내하는 데 쓴다. 문항 수는 FR-004c 로 도출되어
+  // 모델 버전마다 달라지므로 화면에 값으로 박지 않고 여기서 내려 준다(원칙 I).
+  const { questions } = getArtifacts();
   res.json({
+    questionCount: (questions.questions as any[]).length,
     burdenLabels: Object.fromEntries(
       Object.entries(labels).map(([k, v]: any) => [k, { label: v.label, warning: v.warning }])),
     ageMappingBoundary: cfg<any>('age.mappingBoundary').boundary,
