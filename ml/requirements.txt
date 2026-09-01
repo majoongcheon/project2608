@@ -1,0 +1,6 @@
+# 오프라인 학습 전용. 런타임(배포)에는 설치되지 않는다 (research.md R-2).
+#   설치: pip3 install --target ml/.pylibs -r ml/requirements.txt
+numpy>=1.26,<2.1
+scipy>=1.11
+scikit-learn>=1.4
+pymysql>=1.1

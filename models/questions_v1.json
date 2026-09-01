@@ -1,0 +1,338 @@
+{
+  "question_set_version": "qs-v1.0.0",
+  "model_version": "v1.0.0",
+  "questions": [
+    {
+      "questionNo": 1,
+      "feature": "daily_routine_satisfaction",
+      "originalItem": "G8",
+      "text": "당사자는 요즘 하루하루의 일과를 어떻게 느끼고 있나요?",
+      "inputType": "choice",
+      "min": null,
+      "max": null,
+      "unit": null,
+      "options": [
+        {
+          "value": 1,
+          "label": "매우 싫어한다"
+        },
+        {
+          "value": 2,
+          "label": "싫어하는 편"
+        },
+        {
+          "value": 3,
+          "label": "보통"
+        },
+        {
+          "value": 4,
+          "label": "좋아하는 편"
+        },
+        {
+          "value": 5,
+          "label": "매우 좋아한다"
+        }
+      ],
+      "hasNotApplicable": false,
+      "explainTemplate": "당사자가 일과를 받아들이는 정도에 대한 응답"
+    },
+    {
+      "questionNo": 2,
+      "feature": "family_support_for_employment",
+      "originalItem": "F5",
+      "text": "당사자의 취업에 대해 가족들이 어느 정도 지지하고 있나요?",
+      "inputType": "choice",
+      "min": null,
+      "max": null,
+      "unit": null,
+      "options": [
+        {
+          "value": 1,
+          "label": "전혀 지지하지 않음"
+        },
+        {
+          "value": 2,
+          "label": "별로 지지하지 않음"
+        },
+        {
+          "value": 3,
+          "label": "보통"
+        },
+        {
+          "value": 4,
+          "label": "지지하는 편"
+        },
+        {
+          "value": 5,
+          "label": "매우 지지함"
+        }
+      ],
+      "hasNotApplicable": false,
+      "explainTemplate": "취업에 대한 가족 지지 정도에 대한 응답"
+    },
+    {
+      "questionNo": 3,
+      "feature": "help_needed_hours",
+      "originalItem": "G6",
+      "text": "돌보고 계신 당사자에게 하루 중 어느 정도의 도움이 필요한가요?",
+      "inputType": "choice",
+      "min": null,
+      "max": null,
+      "unit": null,
+      "options": [
+        {
+          "value": 1,
+          "label": "일과 대부분(하루 12시간 이상)"
+        },
+        {
+          "value": 2,
+          "label": "하루 절반 정도"
+        },
+        {
+          "value": 3,
+          "label": "하루 몇 시간 정도"
+        },
+        {
+          "value": 4,
+          "label": "아주 잠깐이면 충분"
+        },
+        {
+          "value": 5,
+          "label": "도움이 필요하지 않음"
+        }
+      ],
+      "hasNotApplicable": false,
+      "explainTemplate": "하루 중 필요한 도움의 양에 대한 응답"
+    },
+    {
+      "questionNo": 4,
+      "feature": "household_head_type",
+      "originalItem": "I4",
+      "text": "가구의 생계를 주로 책임지는 분은 누구인가요?",
+      "inputType": "choice",
+      "min": null,
+      "max": null,
+      "unit": null,
+      "options": [
+        {
+          "value": 1,
+          "label": "아버지"
+        },
+        {
+          "value": 2,
+          "label": "어머니"
+        },
+        {
+          "value": 3,
+          "label": "장애인 당사자"
+        },
+        {
+          "value": 4,
+          "label": "형제자매"
+        },
+        {
+          "value": 5,
+          "label": "조부모"
+        },
+        {
+          "value": 6,
+          "label": "배우자"
+        },
+        {
+          "value": 7,
+          "label": "자녀"
+        },
+        {
+          "value": 8,
+          "label": "기타"
+        }
+      ],
+      "hasNotApplicable": false,
+      "explainTemplate": "가구 생계를 책임지는 사람에 대한 응답"
+    },
+    {
+      "questionNo": 5,
+      "feature": "last_job_quit_reason",
+      "originalItem": "E4",
+      "text": "(일을 그만둔 적이 있다면) 마지막 일자리를 그만둔 가장 큰 이유는 무엇인가요?",
+      "inputType": "choice",
+      "min": null,
+      "max": null,
+      "unit": null,
+      "options": [
+        {
+          "value": 1,
+          "label": "계약 종료"
+        },
+        {
+          "value": 2,
+          "label": "건강 문제"
+        },
+        {
+          "value": 3,
+          "label": "임금이 맞지 않아서"
+        },
+        {
+          "value": 4,
+          "label": "적성에 맞지 않아서"
+        },
+        {
+          "value": 5,
+          "label": "출퇴근 거리"
+        },
+        {
+          "value": 6,
+          "label": "직장 내 차별·괴롭힘"
+        },
+        {
+          "value": 7,
+          "label": "업무가 너무 힘들어서"
+        },
+        {
+          "value": 8,
+          "label": "동료·상사와의 관계"
+        },
+        {
+          "value": 9,
+          "label": "근무 시간이 맞지 않아서"
+        },
+        {
+          "value": 10,
+          "label": "가족 돌봄이 필요해서"
+        },
+        {
+          "value": 11,
+          "label": "더 좋은 일자리를 찾아서"
+        },
+        {
+          "value": 12,
+          "label": "사업체 휴·폐업"
+        },
+        {
+          "value": 13,
+          "label": "권고사직·해고"
+        },
+        {
+          "value": 14,
+          "label": "학업·훈련 때문에"
+        },
+        {
+          "value": 15,
+          "label": "기타"
+        },
+        {
+          "value": null,
+          "label": "해당사항 없음"
+        }
+      ],
+      "hasNotApplicable": true,
+      "explainTemplate": "마지막 일자리를 그만둔 이유에 대한 응답"
+    },
+    {
+      "questionNo": 6,
+      "feature": "relation_to_person",
+      "originalItem": "A1",
+      "text": "응답하시는 분은 당사자와 어떤 관계인가요?",
+      "inputType": "choice",
+      "min": null,
+      "max": null,
+      "unit": null,
+      "options": [
+        {
+          "value": 1,
+          "label": "아버지"
+        },
+        {
+          "value": 2,
+          "label": "어머니"
+        },
+        {
+          "value": 3,
+          "label": "형제자매"
+        },
+        {
+          "value": 4,
+          "label": "조부모"
+        },
+        {
+          "value": 5,
+          "label": "배우자"
+        },
+        {
+          "value": 6,
+          "label": "자녀"
+        },
+        {
+          "value": 7,
+          "label": "그 외 가족"
+        },
+        {
+          "value": 8,
+          "label": "가족이 아닌 보호자"
+        }
+      ],
+      "hasNotApplicable": false,
+      "explainTemplate": "응답자와 당사자의 관계에 대한 응답"
+    },
+    {
+      "questionNo": 7,
+      "feature": "understands_work_meaning",
+      "originalItem": "F1",
+      "text": "당사자는 \"일을 한다\"는 것의 의미를 어느 정도 이해하고 있나요?",
+      "inputType": "choice",
+      "min": null,
+      "max": null,
+      "unit": null,
+      "options": [
+        {
+          "value": 1,
+          "label": "잘 이해한다"
+        },
+        {
+          "value": 2,
+          "label": "어느 정도 이해한다"
+        },
+        {
+          "value": 3,
+          "label": "거의 이해하지 못한다"
+        },
+        {
+          "value": 4,
+          "label": "전혀 이해하지 못한다"
+        }
+      ],
+      "hasNotApplicable": false,
+      "explainTemplate": "당사자가 근로의 의미를 이해하는 정도에 대한 응답"
+    }
+  ],
+  "selfReport": {
+    "questionNo": 0,
+    "feature": null,
+    "originalItem": "I13",
+    "text": "전반적으로, 돌봄으로 인한 부담을 어느 정도 느끼고 계신가요?",
+    "inputType": "choice",
+    "options": [
+      {
+        "value": 1,
+        "label": "매우 큰 부담을 느낀다"
+      },
+      {
+        "value": 2,
+        "label": "부담을 느끼는 편이다"
+      },
+      {
+        "value": 3,
+        "label": "보통이다"
+      },
+      {
+        "value": 4,
+        "label": "부담이 크지 않다"
+      },
+      {
+        "value": 5,
+        "label": "부담을 느끼지 않는다"
+      }
+    ],
+    "hasNotApplicable": false
+  }
+}

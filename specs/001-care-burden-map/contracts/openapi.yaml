@@ -1,0 +1,580 @@
+openapi: 3.1.0
+
+info:
+  title: 돌봄부담 경량 진단 및 지도 기반 복지서비스 안내 API
+  version: 1.0.0
+  description: |
+    발달장애인 보호자 대상 돌봄부담 진단(P1)과 지도 기반 복지서비스 안내(P2·P3) API.
+
+    ## 설계 제약
+
+    - **무계정·익명** — 인증 스킴이 없다. 어떤 엔드포인트도 이용자를 식별하지 않는다(FR-002, 원칙 III).
+    - **내부 라벨 비노출** — 판정 결과는 표시 명칭(`burdenLabel`)으로만 나간다. 내부 라벨 1~5는
+      응답 본문에 포함하지 않는다(FR-010a, 원칙 II). 내부 라벨은 1이 최고부담인 역방향 척도다.
+    - **위경도 미보관** — 좌표는 요청 파라미터로만 받고 응답·로그 어디에도 남기지 않는다(FR-026, FR-028).
+    - **저장소 분리** — `/events`(익명 집계)와 학습용 저장은 식별자를 공유하지 않는다(FR-032).
+
+servers:
+  - url: /api/v1
+
+tags:
+  - name: diagnosis
+    description: 진단 문항과 판정 (P1)
+  - name: facilities
+    description: 기관 조회와 지도 (P2)
+  - name: meta
+    description: 설정·모델 버전 공개 (FR-012b, FR-022)
+  - name: observability
+    description: 익명 집계 로그 (FR-027)
+
+paths:
+  /questions:
+    get:
+      tags: [diagnosis]
+      summary: 진단 문항 집합 조회
+      description: |
+        활성 문항 집합을 순서대로 반환한다. 문항 수는 사전에 고정되지 않고
+        FR-004c의 성능 기준 도출 결과로 정해지므로, 클라이언트는 `totalCount`를
+        진행률(FR-005)의 분모로 사용해야 한다. 사전 입력 3항목은 포함되지 않는다(FR-002b).
+      parameters:
+        - name: version
+          in: query
+          required: false
+          schema: { type: string }
+          description: 생략 시 활성 버전
+      responses:
+        '200':
+          description: 문항 집합
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/QuestionSet' }
+
+  /diagnoses:
+    post:
+      tags: [diagnosis]
+      summary: 진단 응답 제출 및 판정
+      description: |
+        선정 문항 응답을 받아 부담 구간을 판정하거나 판정 불가를 반환한다(FR-009).
+        진단은 이 호출 1회로 수행되며, 설문 도중 중간 결과를 반환하는 경로는 없다(FR-011b).
+
+        - 미응답 문항이 있으면 `422`와 함께 해당 문항 번호를 반환한다(FR-007).
+        - `consentTraining=false`면 판정은 동일하게 수행하되 학습용 저장을 하지 않는다(FR-033).
+          이 경우 `selfReportLevel`은 생략할 수 있다(FR-008e).
+        - p95 3초 이내에 응답해야 한다(FR-026a).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/DiagnosisRequest' }
+      responses:
+        '200':
+          description: 판정 결과
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/DiagnosisResult' }
+        '422':
+          description: 미응답 문항 존재 (FR-007)
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/UnansweredError' }
+
+  /diagnoses/{cancelToken}:
+    delete:
+      tags: [diagnosis]
+      summary: 학습용 저장 취소
+      description: |
+        결과 화면을 벗어나기 전까지 학습용 저장을 취소한다(FR-025).
+        토큰은 1회용이며 결과 응답에만 실려 나간다. 저장이 익명이라 사후 특정이 불가능하므로
+        삭제권은 이 창(window) 안에서만 성립한다.
+      parameters:
+        - name: cancelToken
+          in: path
+          required: true
+          schema: { type: string, format: uuid }
+      responses:
+        '204': { description: 삭제 완료 또는 저장된 기록 없음 (동일 응답 — 존재 여부를 노출하지 않는다) }
+        '410': { description: 취소 창이 이미 닫힘 }
+
+  /regions:
+    get:
+      tags: [facilities]
+      summary: 기준 지역 목록 (전국 229개 시군구)
+      description: |
+        전국 229개 시군구 전체를 반환한다. 지역 **선택**은 전국을 대상으로 하되,
+        조회 결과의 존재 여부는 `hasFacilityData`가 알린다(FR-016a).
+        `false`인 지역은 "정보 준비 중"과 광역 대표 문의처를 안내한다(FR-016b).
+      responses:
+        '200':
+          description: 시군구 목록
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [regions]
+                properties:
+                  regions:
+                    type: array
+                    items: { $ref: '#/components/schemas/Region' }
+
+  /facilities:
+    get:
+      tags: [facilities]
+      summary: 신청 접수처 조회
+      description: |
+        기준 위치 또는 기준 지역의 기관을 거리순으로 반환한다.
+        거리는 **직선거리(Haversine)** 이며 길찾기 경로 거리와 다를 수 있다(FR-021-1, FR-021-2).
+
+        - `lat`/`lng` 또는 `regionCode` 중 하나는 필수다. 둘 다 주면 좌표가 우선한다.
+        - `serviceType`을 주면 그 유형만, 생략하면 전체 유형에서 조회한다(FR-021i).
+        - 반경 내 결과가 없으면 빈 배열과 함께 `suggestedRadiusKm`을 반환한다(FR-020, FR-021f).
+      parameters:
+        - { name: lat, in: query, schema: { type: number, format: double } }
+        - { name: lng, in: query, schema: { type: number, format: double } }
+        - { name: regionCode, in: query, schema: { type: string, minLength: 5, maxLength: 5 } }
+        - name: serviceType
+          in: query
+          schema: { $ref: '#/components/schemas/ServiceType' }
+        - { name: radiusKm, in: query, schema: { type: number, default: 10 } }
+        - { name: limit, in: query, schema: { type: integer, default: 20, maximum: 100 } }
+      responses:
+        '200':
+          description: 기관 목록
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/FacilityList' }
+        '400':
+          description: 기준 위치·지역이 모두 없음
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Error' }
+
+  /facilities/{facilityId}:
+    get:
+      tags: [facilities]
+      summary: 기관 상세
+      description: 기관명·주소·연락처·제공 서비스·최종 갱신일을 반환한다(FR-017, FR-019).
+      parameters:
+        - { name: facilityId, in: path, required: true, schema: { type: integer } }
+      responses:
+        '200':
+          description: 기관 상세
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/Facility' }
+        '404': { description: 없음 }
+
+  /facilities/{facilityId}/reports:
+    post:
+      tags: [facilities]
+      summary: 정보 오류 신고
+      description: |
+        보호자가 기관 정보 오류를 신고한다(FR-019b). 신고자 연락처는 받지 않는다(원칙 III).
+        `detail`은 자유 입력이므로 식별 정보를 적지 않도록 클라이언트가 안내해야 한다.
+      parameters:
+        - { name: facilityId, in: path, required: true, schema: { type: integer } }
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [reportType]
+              properties:
+                reportType:
+                  type: string
+                  enum: [PHONE, ADDRESS, CLOSED, SERVICE, OTHER]
+                detail: { type: string, maxLength: 500 }
+      responses:
+        '202': { description: 접수됨 }
+
+  /config:
+    get:
+      tags: [meta]
+      summary: 공개 설정 조회
+      description: |
+        화면 표시에 필요한 설정만 반환한다(FR-022). 판정 임계값·판정 불가 기준 등
+        **판정 로직에 관한 값은 반환하지 않는다** — 노출하면 응답을 역산해 판정을 조작할 수 있다.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/PublicConfig' }
+
+  /model:
+    get:
+      tags: [meta]
+      summary: 활성 모델 버전 공개
+      description: |
+        모델 버전과 교체 시점을 공개한다(FR-012b). 버전 교체로 동일 응답의 판정이
+        달라질 수 있음을 이용자가 확인할 수 있어야 한다.
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: { $ref: '#/components/schemas/ModelVersion' }
+
+  /events:
+    post:
+      tags: [observability]
+      summary: 익명 집계 이벤트 기록
+      description: |
+        성공 기준 검증용 익명 로그를 기록한다(FR-027).
+        **서버는 FR-027이 열거한 필드만 저장하고 나머지는 폐기한다.**
+        IP·별명·문항 응답·사전 입력값·좌표는 어떤 경로로도 저장되지 않는다(FR-028).
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema: { $ref: '#/components/schemas/EventBatch' }
+      responses:
+        '204': { description: 기록됨 }
+
+components:
+  schemas:
+
+    ServiceType:
+      type: string
+      enum: [DAY_ACTIVITY, AFTERSCHOOL_YOUTH]
+      description: |
+        기관 데이터에 실제로 존재하는 유형만 사용한다(FR-021a).
+        DAY_ACTIVITY = 발달장애인 주간활동서비스(727건),
+        AFTERSCHOOL_YOUTH = 청소년 발달장애인 방과후활동서비스(556건).
+
+    QuestionSet:
+      type: object
+      required: [version, totalCount, questions, selfReportQuestion]
+      properties:
+        version: { type: string, example: "qs-v1.0.0" }
+        totalCount:
+          type: integer
+          description: 진행률(FR-005)의 분모. 사전 입력은 포함하지 않는다.
+        questions:
+          type: array
+          items: { $ref: '#/components/schemas/Question' }
+        selfReportQuestion:
+          allOf: [{ $ref: '#/components/schemas/Question' }]
+          description: |
+            자가보고 부담 문항(FR-008a). 판정 결과 표시 **전에** 제시해야 한다(FR-008c).
+            학습 이용에 동의하지 않은 보호자에게는 제시하지 않는다(FR-008e).
+
+    Question:
+      type: object
+      required: [questionNo, text, options]
+      properties:
+        questionNo: { type: integer }
+        text: { type: string }
+        options:
+          type: array
+          items:
+            type: object
+            required: [value, label]
+            properties:
+              value: { type: integer }
+              label: { type: string }
+        hasNotApplicable:
+          type: boolean
+          description: |
+            true면 "해당사항 없음" 선택지가 포함된다. 조건부 문항을 숨기지 않고
+            이 선택지로 처리하며, 모델에는 결측으로 전달된다(FR-004d).
+        notice:
+          type: string
+          description: 자가보고 문항의 목적 안내 문구(FR-008d)
+
+    DiagnosisRequest:
+      type: object
+      required: [questionSetVersion, answers, consentTraining]
+      properties:
+        questionSetVersion: { type: string }
+        answers:
+          type: array
+          description: 모든 문항에 대한 응답. "해당사항 없음"은 value=null로 보낸다.
+          items:
+            type: object
+            required: [questionNo, value]
+            properties:
+              questionNo: { type: integer }
+              value: { type: integer, nullable: true }
+        selfReportLevel:
+          type: integer
+          minimum: 1
+          maximum: 5
+          nullable: true
+          description: |
+            자가보고 부담(FR-008a). 학습 라벨 전용이며 **모델 입력으로 쓰지 않는다**(FR-008b).
+            미동의 시 생략 가능(FR-008e).
+        consentTraining:
+          type: boolean
+          description: |
+            학습·검증 이용 동의(FR-033). false여도 진단·결과·연계 안내는 동일하게 제공되며,
+            학습용 저장만 수행하지 않는다(FR-031).
+        careTargetAge:
+          type: integer
+          nullable: true
+          description: |
+            돌봄 대상 발달장애인의 **만 나이**(FR-002e). 서비스 유형 적합성 판단에만 쓰고
+            모델 입력·보관에 쓰지 않는다(FR-021g). 미입력이면 FR-021i 경로로 처리된다.
+        multipleCareTargets:
+          type: boolean
+          nullable: true
+          description: 돌봄 대상 2인 이상 여부(FR-002g). 결과 화면 안내에만 쓴다(FR-010d).
+        location:
+          type: object
+          description: 즉시 안내용 기준 위치. 보관하지 않는다(FR-026).
+          properties:
+            lat: { type: number }
+            lng: { type: number }
+            regionCode: { type: string }
+
+    DiagnosisResult:
+      type: object
+      required: [decided, modelVersion, disclaimer]
+      properties:
+        decided:
+          type: boolean
+          description: false면 판정 불가(FR-009a). 아래 표시 규칙이 달라진다.
+        burdenLabel:
+          type: string
+          nullable: true
+          enum: [최고부담군, 고부담군, 중간부담군, 저부담군, 부담 없음, null]
+          description: |
+            표시 명칭만 반환한다. **내부 라벨 숫자는 반환하지 않는다**(FR-010a, 원칙 II).
+            판정 불가면 null이며 부담 구간을 표시해서는 안 된다(FR-009a).
+        burdenDescription:
+          type: string
+          nullable: true
+          description: 구간의 의미를 일상 언어로 설명(FR-010)
+        isWarning:
+          type: boolean
+          description: |
+            최고부담군·고부담군이면 true — 경고 형태로 표시한다(FR-010b).
+            **색상·아이콘만으로 전달하지 말고 텍스트를 병기해야 한다**(FR-042).
+        contributions:
+          type: array
+          nullable: true
+          description: |
+            개별 응답에 대한 기여 요인(FR-011, FR-011a). 최소 3개.
+            판정 불가면 제시하지 않는다(FR-011c).
+          items:
+            type: object
+            required: [text, isMinor]
+            properties:
+              text: { type: string, description: 문항 코드가 아닌 읽을 수 있는 문장 }
+              isMinor:
+                type: boolean
+                description: |
+                  기여도가 임계값 미만이면 true — "판정에 일부 영향을 준 요인"으로
+                  구분해 표시한다(FR-011-1).
+        comparison:
+          type: array
+          nullable: true
+          description: |
+            참조 집단(2024 실태조사 3,000가구) 비교(FR-013a·FR-013b).
+            셀 표본 30건 이상인 항목만 포함된다(FR-013c).
+            판정 불가면 제공하지 않는다(FR-013d). 비교할 항목이 하나도 없으면
+            빈 배열이 아니라 null을 반환해 클라이언트가 영역 자체를 숨기게 한다.
+          items:
+            type: object
+            properties:
+              text: { type: string }
+              userValue: { type: string }
+              referencePct: { type: number }
+        undecidableNotice:
+          type: string
+          nullable: true
+          description: |
+            판정 불가 안내 문구(FR-021j-1). 판정이 성립하지 않았다는 사실과
+            안전망 목적을 함께 밝혀야 하며, 고부담 판정으로 읽히면 안 된다.
+        multipleTargetsNotice:
+          type: string
+          nullable: true
+          description: |
+            돌봄 대상 2인 이상일 때의 과소 추정 안내(FR-010d).
+            판정 불가면 표시하지 않는다(FR-010f). 수치 보정은 하지 않는다(FR-010e).
+        immediateReferral:
+          allOf: [{ $ref: '#/components/schemas/ImmediateReferral' }]
+          nullable: true
+          description: |
+            연계 임계값(고부담군 이상) 또는 판정 불가일 때만 채워진다(FR-021, FR-021j).
+            임계값 미만이면 null이며 지도 메뉴 이동 경로만 제시한다(FR-021c).
+        cancelToken:
+          type: string
+          format: uuid
+          nullable: true
+          description: 학습용 저장 취소 토큰(FR-025). 미동의 제출이면 null.
+        modelVersion: { type: string, description: FR-012a }
+        disclaimer:
+          type: string
+          description: 참고 정보이며 공식 복지 자격 판정이 아님(FR-013)
+
+    ImmediateReferral:
+      type: object
+      required: [facilities]
+      properties:
+        facilities:
+          type: array
+          maxItems: 3
+          description: 기준 위치에서 가까운 순 상위 3곳(설정값, FR-021)
+          items: { $ref: '#/components/schemas/FacilityCard' }
+        emphasizeCounseling:
+          type: boolean
+          description: 최고부담군이면 true — 상담 연계를 강조 표시(FR-021e)
+        ageOutOfRange:
+          type: object
+          nullable: true
+          description: |
+            대상자 연령이 매핑된 유형의 이용 대상 범위를 벗어난 경우(FR-021i-1).
+            **기관 3곳은 그대로 표시하고** 안내 문구와 다른 제도 문의처를 함께 낸다.
+            연령을 근거로 목록을 차단해서는 안 된다(FR-021i-2).
+          properties:
+            notice: { type: string }
+            alternativeContact: { type: string }
+        emptyReason:
+          type: string
+          nullable: true
+          description: 인근 기관이 없을 때의 사유와 범위 확대 안내(FR-021f)
+
+    FacilityCard:
+      type: object
+      required: [facilityId, name, distanceKm, serviceTypes, eligibilityNote]
+      properties:
+        facilityId: { type: integer }
+        name: { type: string }
+        distanceKm:
+          type: number
+          description: 직선거리(Haversine). 경로 거리와 다를 수 있음을 표기해야 한다(FR-021-2).
+        serviceTypes:
+          type: array
+          items: { $ref: '#/components/schemas/ServiceType' }
+        eligibilityNote:
+          type: string
+          description: |
+            해당 서비스의 이용 대상 조건(FR-021b). **모든 카드에 반드시 표시된다** —
+            누락률 0%가 SC-015의 측정 대상이다.
+        phone:
+          type: string
+          nullable: true
+          description: null이면 통화 버튼을 숨기고 주소·길찾기만 제공한다(기관 58건).
+
+    Facility:
+      allOf:
+        - $ref: '#/components/schemas/FacilityCard'
+        - type: object
+          properties:
+            address: { type: string }
+            lat: { type: number }
+            lng: { type: number }
+            updatedAt: { type: string, format: date, description: 최종 갱신일(FR-019) }
+
+    FacilityList:
+      type: object
+      required: [facilities, radiusKm]
+      properties:
+        facilities:
+          type: array
+          items: { $ref: '#/components/schemas/FacilityCard' }
+        radiusKm: { type: number }
+        suggestedRadiusKm:
+          type: number
+          nullable: true
+          description: 결과가 0건일 때 제안하는 확대 반경(FR-020)
+        regionDataPending:
+          type: boolean
+          description: |
+            true면 해당 시군구의 기관 데이터가 아직 확보되지 않은 상태다(FR-016b).
+            빈 지도를 그대로 보여주지 말고 "정보 준비 중"과 아래 문의처를 안내한다.
+        metroContact:
+          type: object
+          nullable: true
+          properties:
+            name: { type: string }
+            phone: { type: string }
+
+    Region:
+      type: object
+      required: [regionCode, sidoName, sigunguName, hasFacilityData]
+      properties:
+        regionCode: { type: string }
+        sidoName: { type: string }
+        sigunguName: { type: string }
+        hasFacilityData:
+          type: boolean
+          description: false인 지역은 FR-016b로 처리한다 (현재 229개 중 8개)
+
+    PublicConfig:
+      type: object
+      properties:
+        burdenLabels:
+          type: object
+          description: 내부 라벨 → 표시 명칭 매핑의 표시측 값만 포함(FR-010a)
+        ageMappingBoundary: { type: integer, example: 18 }
+        serviceAgeRanges:
+          type: object
+          description: 유형별 이용 대상 연령 범위(FR-021i-1)
+        outOfRangeNotices:
+          type: object
+          description: 만 6세 미만·만 65세 이상 안내 문구(FR-021i-3)
+        facilityCount: { type: integer, example: 3 }
+        draftExpiryHours: { type: integer, example: 24, description: FR-008-2 }
+
+    ModelVersion:
+      type: object
+      properties:
+        modelVersion: { type: string }
+        activatedAt: { type: string, format: date-time }
+        changeNotice:
+          type: string
+          description: 버전 교체로 동일 응답의 결과가 달라질 수 있다는 안내(FR-012b)
+
+    EventBatch:
+      type: object
+      required: [sessionId, events]
+      properties:
+        sessionId:
+          type: string
+          format: uuid
+          description: |
+            진단 또는 지도 이용 1회마다 새로 생성되는 난수(FR-029).
+            이용자와 연결 가능한 어떤 정보도 파생시키지 않는다.
+        events:
+          type: array
+          items:
+            type: object
+            required: [eventType, occurredAt]
+            properties:
+              eventType:
+                type: string
+                enum:
+                  - PRESURVEY_ENTER
+                  - PRESURVEY_PASS
+                  - SURVEY_START
+                  - QUESTION_MOVE
+                  - SURVEY_COMPLETE
+                  - SURVEY_ABANDON
+                  - RESULT_SHOWN
+                  - MAP_ENTER
+                  - FACILITY_DETAIL
+                  - CONTACT_ACTION
+                description: FR-027이 열거한 종류로 한정한다.
+              occurredAt: { type: string, format: date-time }
+              questionNo: { type: integer, nullable: true, description: 이탈 문항 번호 }
+              durationMs: { type: integer, nullable: true }
+              regionCode:
+                type: string
+                nullable: true
+                description: 시군구 단위까지만. 좌표는 보내지 않는다(FR-028).
+
+    UnansweredError:
+      type: object
+      required: [error, unansweredQuestionNos]
+      properties:
+        error: { type: string, example: UNANSWERED_QUESTIONS }
+        unansweredQuestionNos:
+          type: array
+          items: { type: integer }
+          description: 클라이언트는 첫 번째 문항으로 이동시켜야 한다(FR-007).
+
+    Error:
+      type: object
+      properties:
+        error: { type: string }
+        message: { type: string }

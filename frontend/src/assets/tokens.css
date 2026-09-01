@@ -1,0 +1,79 @@
+/* DESIGN.md (getdesign airbnb) 토큰을 CSS 커스텀 속성으로 옮긴 것.
+   Intent-Tasks.md 지시 · 헌법 "기술 및 데이터 제약 > 디자인".
+   ★ 부담 구간 색은 여기에 두지 않는다 — 색 단독 전달 금지(FR-041)를 지키려면
+     명칭 텍스트와 함께 컴포넌트에서 다뤄야 한다. */
+:root {
+  --primary: #ff385c;
+  --primary-active: #e00b41;
+  --primary-disabled: #ffd1da;
+  --error-text: #c13515;
+  --ink: #222222;
+  --body: #3f3f3f;
+  --muted: #6a6a6a;
+  --muted-soft: #929292;
+  --hairline: #dddddd;
+  --hairline-soft: #ebebeb;
+  --border-strong: #c1c1c1;
+  --canvas: #ffffff;
+  --surface-soft: #f7f7f7;
+  --surface-strong: #f2f2f2;
+  --on-primary: #ffffff;
+  --link: #428bff;
+
+  --sp-xxs: 2px; --sp-xs: 4px; --sp-sm: 8px; --sp-md: 12px;
+  --sp-base: 16px; --sp-lg: 24px; --sp-xl: 32px; --sp-xxl: 48px; --sp-section: 64px;
+
+  --radius-sm: 8px; --radius-md: 12px; --radius-lg: 16px; --radius-pill: 999px;
+  --shadow-card: 0 6px 16px rgba(0,0,0,.12);
+  --shadow-soft: 0 2px 4px rgba(0,0,0,.08);
+
+  --font: 'Airbnb Cereal VF', Circular, -apple-system, system-ui, 'Apple SD Gothic Neo',
+          'Noto Sans KR', Roboto, 'Helvetica Neue', sans-serif;
+}
+
+* { box-sizing: border-box; }
+html, body, #app { height: 100%; }
+body {
+  margin: 0; font-family: var(--font); color: var(--body);
+  background: var(--canvas); font-size: 16px; line-height: 1.5;
+  -webkit-font-smoothing: antialiased;
+}
+h1, h2, h3 { color: var(--ink); margin: 0 0 var(--sp-md); }
+h1 { font-size: 28px; font-weight: 700; line-height: 1.3; }
+h2 { font-size: 22px; font-weight: 600; letter-spacing: -.44px; }
+h3 { font-size: 18px; font-weight: 600; }
+p  { margin: 0 0 var(--sp-md); }
+a  { color: var(--link); }
+
+/* FR-039 — 키보드 조작이 항상 보이게. 포커스 표시를 지우지 않는다. */
+:focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
+
+.container { max-width: 720px; margin: 0 auto; padding: var(--sp-base); }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--sp-sm);
+  min-height: 48px; padding: 14px var(--sp-lg); border-radius: var(--radius-sm);
+  border: 1px solid transparent; font: inherit; font-weight: 600; cursor: pointer;
+  background: var(--primary); color: var(--on-primary);
+}
+.btn:hover:not(:disabled) { background: var(--primary-active); }
+.btn:disabled { background: var(--primary-disabled); cursor: not-allowed; }
+.btn--secondary { background: var(--canvas); color: var(--ink); border-color: var(--ink); }
+.btn--secondary:hover:not(:disabled) { background: var(--surface-strong); }
+.btn--ghost { background: transparent; color: var(--ink); border-color: var(--hairline); font-weight: 500; }
+.btn--ghost:hover:not(:disabled) { background: var(--surface-soft); }
+.btn--block { width: 100%; }
+
+.card {
+  background: var(--surface-card, var(--canvas)); border: 1px solid var(--hairline-soft);
+  border-radius: var(--radius-md); padding: var(--sp-base); box-shadow: var(--shadow-soft);
+}
+.muted { color: var(--muted); font-size: 14px; }
+.stack > * + * { margin-top: var(--sp-base); }
+.row { display: flex; gap: var(--sp-sm); flex-wrap: wrap; }
+
+/* FR-040 — 글자 확대 시 레이아웃이 깨지지 않도록 고정 높이를 쓰지 않는다 */
+@media (max-width: 480px) {
+  .container { padding: var(--sp-md); }
+  h1 { font-size: 24px; }
+}

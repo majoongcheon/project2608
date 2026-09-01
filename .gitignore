@@ -9,6 +9,25 @@ __pycache__/
 .ipynb_checkpoints/
 .venv/
 venv/
+ml/.pylibs/
+*.egg-info/
 
-# OS
+# Node
+node_modules/
+dist/
+build/
+*.log
+.eslintcache
+
+# 런타임
+logs/
+run/
+*.pid
+
+# OS / 편집기
 .DS_Store
+Thumbs.db
+*.tmp
+*.swp
+.vscode/
+.idea/

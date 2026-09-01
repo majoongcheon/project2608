@@ -1,0 +1,16 @@
+{
+  "name": "cb-db",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "migrate": "node scripts/migrate.js",
+    "seed:regions": "node seeds/regions.js",
+    "seed:facilities": "node seeds/facilities.js",
+    "seed:config": "node seeds/config.js",
+    "seed:reference": "node seeds/reference.js",
+    "seed:questions": "node seeds/questions.js",
+    "seed:all": "npm run seed:regions && npm run seed:facilities && npm run seed:config && npm run seed:reference && npm run seed:questions",
+    "verify": "node scripts/verify.js"
+  },
+  "dependencies": { "mysql2": "^3.11.0", "dotenv": "^16.4.5" }
+}
