@@ -14,99 +14,95 @@
    FR-040 : 고정 높이를 쓰지 않는다. 글자 확대 시 레이아웃이 버텨야 한다.
    FR-041 : 색만으로 의미를 전달하지 않는다. 부담 구간은 반드시 표시 명칭과 함께.
 
-   ── 편지 톤이란 무엇인가 ──────────────────────────────────────────────────
-   이 서비스는 보호자가 지친 상태에서 "고부담군입니다" 같은 무거운 결과를
-   받아보는 곳이다. 앱 화면이 아니라 편지를 읽는 느낌이어야 한다고 보고
-   아래 네 가지로 잡았다.
+   ── 이 화면이 편지처럼 보이게 하는 것 ────────────────────────────────────
+   보호자가 지친 상태에서 "고부담군입니다" 같은 무거운 결과를 받아보는 곳이다.
+   앱이 아니라 편지를 읽는 느낌이어야 한다.
 
-     1. 책상   순백이 아닌 크림 바탕.
-     2. 종이   본문은 그 위에 놓인 편지지 한 장 안에 담긴다(main .container).
-               모서리는 각지게, 윗단에 가는 머리띠 선 하나.
-     3. 글씨   제목은 한글 명조(고운바탕). 본문은 행간을 넉넉히 벌린다.
-     4. 폭     읽기 좋은 한 단 폭으로 좁힌다. 720px 는 편지엔 넓다.
-     5. 온도   회색을 쓰지 않는다. 선·그림자까지 따뜻한 색으로 간다.
+   앞선 시안에서 확인한 것 — 색만 바꾸면 편지가 되지 않는다. 화면을 지배하는
+   것은 진행바·네모 선택지·채워진 버튼 같은 위젯이고, 이것들은 무슨 색을
+   입혀도 "앱" 으로 읽힌다. 그래서 아래 네 가지를 함께 쓴다.
 
+     1. 봉투 플랩   종이 윗단을 봉투에서 꺼낸 모양으로 자른다.  ← 시안 B
+     2. 여백선      왼쪽 세로선. 공책·편지지에만 있고 카드엔 없다. ← 시안 A
+     3. 목록        선택지의 네모 상자를 없애고 밑줄 목록으로.     ← 시안 A
+     4. 온기        노란 미색이 아니라 살구빛으로. 버튼은 둥글게.  ← 시안 D
+
+   종이 자체는 각지게 두고(종이는 둥글지 않다), 눌러야 할 것만 둥글린다.
+   이 대비가 "종이 위에 놓인 버튼" 을 만든다.
    ───────────────────────────────────────────────────────────────────────── */
 
 /* Copernicus·Tiempos·StyreneB 는 한글이 없다. 그대로 두면 제목이 고딕으로
-   떨어져 편지 느낌이 사라진다. 한글 명조로 대체한다.
-   고운바탕은 노토 명조보다 획 끝이 둥글고 삐침이 부드러워 더 따뜻하다.
-   굵기가 400·700 뿐이라 제목은 700 으로 통일한다(400 은 중장년층에게 얇다). */
+   떨어져 편지 느낌이 사라진다. 고운바탕은 노토 명조보다 획 끝이 둥글고
+   삐침이 부드러워 더 따뜻하다. 굵기가 400·700 뿐이라 제목은 700 으로
+   통일한다 — 600 을 두면 브라우저가 가짜 굵기를 만들어 한글 획이 뭉갠다. */
 @import url('https://fonts.googleapis.com/css2?family=Gowun+Batang:wght@400;700&family=Inter:wght@400;500;600&display=swap');
 
 :root {
   /* ── 색 ────────────────────────────────────────────────────────────────
-     따뜻한 테라코타 하나가 강조를 전담한다. 회색은 쓰지 않는다. */
+     시안 D 의 살구빛 온기를 기준으로 잡았다. 이전 크림(#f5f0e8)은 채도가
+     거의 없어 따뜻하다기보다 회색빛 베이지였다. 회색은 쓰지 않는다. */
 
-  /* 템플릿 원본은 #cc785c 지만 흰 글자를 얹으면 3.28:1 로 AA(4.5:1) 미달이다.
-     글자가 올라가는 곳은 한 단 어두운 값을 쓰고, 원본 산호색은 글자가 없는
-     장식(--accent)으로만 남긴다. */
-  --primary: #a9583e;          /* CTA 채움·포커스 — 흰 글자 5.06:1 */
-  --primary-active: #8f472f;   /* 눌림 — 6.75:1 */
-  --primary-disabled: #e6dfd8;
-  --accent: #cc785c;           /* 원본 Coral. 글자 없는 강조에만 */
+  /* 템플릿 원본 #cc785c 는 흰 글자를 얹으면 3.28:1 로 AA(4.5:1) 미달이다.
+     시안 D 의 #c2603c 도 4.17:1 로 모자란다. 통과하는 값 중 가장 따뜻한
+     쪽을 골랐다. 원본 산호색은 글자가 없는 장식(--accent)으로만 남긴다. */
+  --primary: #b5563a;          /* CTA 채움·포커스 — 흰 글자 4.82:1 */
+  --primary-active: #96432c;
+  --primary-disabled: #ecdccf;
+  --accent: #cc785c;           /* 원본 Coral. 글자 없는 장식 전용 */
 
-  --link: #9c4f36;             /* 본문 링크. #a9583e 는 크림 위 4.46:1 로 미달 */
+  --link: #a04c31;             /* 본문 링크 — 4.88:1 */
+  --error-text: #a33232;       /* 컴포넌트에 박힌 #fff4f1 위에서도 5.70:1 */
 
-  /* 템플릿에 semantic 램프가 있다(Notion 에는 없어서 빌려 썼다).
-     다만 error #c64545 는 크림 위 4.27:1 로 미달이라 한 단 내렸다.
-     컴포넌트에 박혀 있는 경고 배경 #fff4f1 위에서도 6.05:1 로 통과한다. */
-  --error-text: #a33232;
+  /* 텍스트 — 따뜻한 갈먹색 */
+  --ink: #33221c;              /* 제목 — 12.16:1 */
+  --body: #4d3a33;             /* 본문 — 8.56:1 */
+  --muted: #6b544a;            /* 보조 — 5.63:1 */
+  --muted-soft: #7a6255;       /* 연한 보조 — 4.55:1 */
 
-  /* 텍스트 — 따뜻한 먹색 계열 */
-  --ink: #141413;              /* 제목 */
-  --body: #3d3d3a;             /* 본문 */
-  --muted: #615f59;            /* 보조 (원본 #6c6a64 는 카드 위 4.48:1 미달) */
-  --muted-soft: #6f6c65;       /* 더 옅은 보조 (원본 #8e8b82 는 3.23:1 미달) */
+  /* 면 */
+  --page: #f4e8dd;             /* 책상 — 살구빛 */
+  --paper: #fffaf5;            /* 편지지 */
+  --canvas: #fffaf5;           /* 네비·입력 — 편지지와 같은 톤 */
+  --surface-card: #fffaf5;
+  --surface-soft: #f8efe6;     /* 푸터·hover·notice */
+  --surface-strong: #f5e3d7;   /* 칩·진행바 트랙 */
 
-  /* 면 — 편지지 위에 눌러야 할 것이 떠오르는 구조.
-     var(--canvas) 는 이 코드베이스에서 네비·선택지·입력에 쓰이므로
-     "떠오르는 면"으로 두고, 편지지 바닥은 아래 body 규칙에서 따로 깐다. */
-  --canvas: #fffdf8;           /* 선택지·입력·네비 — 가장 밝은 면 */
-  --page: #f5f0e8;             /* 편지지 바닥 */
-  --surface-card: #faf9f5;     /* 카드 — 편지지와 선택지 사이 */
-  --surface-soft: #efe9de;     /* 푸터·hover·notice */
-  --surface-strong: #e8e0d2;   /* 칩·진행바·선택된 항목 */
-
-  /* 선 — 크림 대 크림은 밝기 차이가 1.1:1 밖에 안 난다. 면 색만으로는
-     경계가 안 보이므로 따뜻한 탄색 선으로 윤곽을 잡아 준다.
-     이게 "밋밋함"의 실제 해법이다. 팔레트를 바꾼다고 해결되지 않는다. */
-  --hairline: #cbb99c;         /* 선택지·입력·카드 윤곽 */
-  --hairline-soft: #e0d5c2;    /* 네비·푸터 구분선 */
-  --border-strong: #94836d;    /* 라디오 마크·강조 테두리 — 3.61:1 (1.4.11 통과) */
+  /* 선 */
+  --hairline: #e3d0c1;         /* 목록 밑줄·카드 윤곽 */
+  --hairline-soft: #eee0d4;    /* 네비·푸터 구분선 */
+  --border-strong: #967866;    /* 라디오 마크·입력 테두리 — 3.91:1 (1.4.11 통과) */
 
   --on-primary: #ffffff;
 
+  /* ── 편지 ─────────────────────────────────────────────────────────────
+     봉투 플랩과 왼쪽 여백선. 이 둘이 "카드가 아니라 편지지" 라고 말한다. */
+  --flap: #f0ded0;             /* 봉투 안쪽 — 편지지보다 한 단 진하게 */
+  --flap-h: 26px;              /* 플랩 높이 */
+  --margin-line: #d98b6f;      /* 왼쪽 여백선 — 편지지의 붉은 세로선 */
+  --margin-x: 26px;            /* 여백선 위치 */
+
   /* ── 타이포 ───────────────────────────────────────────────────────────
-     제목은 명조, 본문은 고딕. 편지의 기본 조합이다. */
+     제목은 한글 명조, 본문은 고딕. 편지의 기본 조합이다. */
   --font: 'Inter', -apple-system, BlinkMacSystemFont, 'Apple SD Gothic Neo',
           'Noto Sans KR', 'Malgun Gothic', sans-serif;
   --font-serif: 'Gowun Batang', 'Nanum Myeongjo', 'Apple SD Gothic Neo',
                 Georgia, serif;
 
-  /* ── 편지지 ───────────────────────────────────────────────────────────
-     책상 위 원고지 네모칸과, 그 위에 놓인 종이 한 장. */
-  --paper: #fffdf8;                       /* 편지지 — 가장 밝은 면 */
-
   /* ── 모서리 ───────────────────────────────────────────────────────────
-     템플릿 값이 이 코드베이스의 원래 값과 그대로 맞는다(8/12/16/pill).
-     Notion 테마에서 바꿔 놓은 것을 되돌리는 셈이다. */
-  --radius-sm: 8px;            /* 버튼·입력 */
-  --radius-md: 12px;           /* 카드·선택지 */
-  --radius-lg: 16px;           /* 결과 카드 등 큰 컨테이너 */
+     종이는 각지게, 누르는 것은 둥글게. 이 대비가 시안 D 의 온기를 만든다. */
+  --radius-sm: 10px;           /* 버튼·입력 */
+  --radius-md: 12px;           /* 카드 */
+  --radius-lg: 14px;           /* 결과 카드 */
   --radius-pill: 9999px;
 
   /* ── 그림자 ───────────────────────────────────────────────────────────
-     템플릿 철학은 "색 블록 우선, 그림자는 드물게" 지만, 크림끼리는
-     밝기 차이가 없어 카드가 배경에 묻힌다. 최소한의 그림자를 되살리되
-     검정이 아니라 먹색(#141413)을 옅게 써서 따뜻함을 유지한다. */
-  --shadow-soft: 0 1px 2px rgba(20, 20, 19, .04),
-                 0 3px 8px rgba(20, 20, 19, .05);
-  --shadow-card: 0 2px 4px rgba(20, 20, 19, .05),
-                 0 8px 20px rgba(20, 20, 19, .08);
+     검정이 아니라 갈먹색을 옅게 써서 따뜻함을 잃지 않는다. */
+  --shadow-soft: 0 1px 2px rgba(51, 34, 28, .05),
+                 0 3px 8px rgba(51, 34, 28, .06);
+  --shadow-card: 0 2px 5px rgba(51, 34, 28, .07),
+                 0 10px 24px rgba(51, 34, 28, .10);
 
-  /* ── 간격 ─────────────────────────────────────────────────────────────
-     템플릿 기준. 편지답게 문단 사이를 넉넉히 둔다. */
+  /* ── 간격 ───────────────────────────────────────────────────────────── */
   --sp-xxs: 4px;
   --sp-xl: 32px;
   --sp-xxl: 48px;
@@ -122,42 +118,50 @@ body {
 
 /* ── 편지지 한 장 ─────────────────────────────────────────────────────────
    페이지마다 .container 가 정확히 하나씩 있어(App.vue 의 main 안), 그것을
-   책상 위에 놓인 종이 한 장으로 만든다. 머리말·꼬리말의 .container 는
+   봉투에서 꺼낸 종이 한 장으로 만든다. 머리말·꼬리말의 .container 는
    main 밖이라 영향을 받지 않는다.
 
-   모서리를 2px 로 거의 각지게 두는 게 중요하다. 종이는 둥글지 않다. */
+   왼쪽 여백을 오른쪽보다 넓게 둔다. 편지지의 여백은 원래 좌우가 다르다. */
 main .container {
   position: relative;
   background: var(--paper);
   border: 1px solid var(--hairline);
-  border-radius: 2px;
+  border-radius: 2px;          /* 종이는 둥글지 않다 */
   box-shadow: var(--shadow-card);
-  padding: var(--sp-xxl) var(--sp-xl) var(--sp-xl);
+  padding: calc(var(--flap-h) + var(--sp-xl)) var(--sp-xl) var(--sp-xxl) 44px;
   margin-block: var(--sp-lg);
 }
 
-/* 편지지 윗단의 가는 선 — 편지지 상단 머리띠 */
+/* 봉투 플랩 — 종이 윗단을 봉투에서 꺼낸 모양으로 자른다 */
 main .container::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
-  height: 3px;
-  background: var(--accent);
-  border-radius: 2px 2px 0 0;
+  height: var(--flap-h);
+  background: var(--flap);
+  clip-path: polygon(0 0, 100% 0, 100% 38%, 50% 100%, 0 38%);
+  pointer-events: none;
+}
+
+/* 왼쪽 여백선 — 플랩 아래에서 시작해 종이 끝까지 */
+main .container::after {
+  content: '';
+  position: absolute;
+  left: var(--margin-x);
+  top: var(--flap-h);
+  bottom: 0;
+  border-left: 1px solid var(--margin-line);
+  pointer-events: none;
 }
 
 /* ── 제목 — 한글 명조 ─────────────────────────────────────────────────────
-   템플릿의 display 는 serif weight 400 에 음수 자간이다. 다만 한글 명조는
-   자간을 조이면 획이 뭉쳐 읽기 어려워지므로, 굵기만 살리고 자간은 0 으로 둔다.
-   마케팅용 48·64px 은 이 앱에 없으므로 720px 컨테이너 폭에 맞춰 내려 쓴다. */
+   한글 명조는 자간을 조이면 획이 뭉쳐 읽기 어려워지므로 자간은 0 으로 둔다. */
 h1, h2, h3 {
   font-family: var(--font-serif);
   color: var(--ink);
   letter-spacing: 0;
   word-break: keep-all;        /* 한글이 단어 중간에서 끊기지 않게 */
 }
-/* 고운바탕은 400·700 만 있다. 600 을 쓰면 브라우저가 가짜 굵기를 만들어
-   한글 획이 뭉개지므로 700 으로 명시한다. */
 h1 { font-size: 30px; font-weight: 700; line-height: 1.45; margin-bottom: var(--sp-lg); }
 h2 { font-size: 24px; font-weight: 700; line-height: 1.5; }
 h3 { font-size: 20px; font-weight: 700; line-height: 1.55; }
@@ -165,34 +169,56 @@ h3 { font-size: 20px; font-weight: 700; line-height: 1.55; }
 p { line-height: 1.8; }
 .muted { color: var(--muted); font-size: 14px; line-height: 1.7; }
 
-/* ── FR-039 — 포커스 표시 유지 ───────────────────────────────────────────
-   테라코타를 포커스 신호로도 쓴다. 편지지 위 4.46:1 로 3:1 을 넘는다. */
+/* ── FR-039 — 포커스 표시 유지 ─────────────────────────────────────────── */
 :focus-visible { outline: 3px solid var(--primary); outline-offset: 2px; border-radius: 4px; }
 
 /* ── 한 단 폭 ─────────────────────────────────────────────────────────────
-   720px 는 편지로 읽기엔 넓다. 한 줄이 너무 길면 눈이 다음 줄을 놓친다.
-   좁히고 여백을 키운다. */
+   720px 는 편지로 읽기엔 넓다. 한 줄이 길면 눈이 다음 줄을 놓친다. */
 .container { max-width: 640px; padding: var(--sp-xl) var(--sp-lg); }
 
-/* ── 네모칸 ───────────────────────────────────────────────────────────────
-   편지지 위에 그어 놓은 네모 칸. 종이가 이미 떠 있으므로 칸까지 그림자를
-   주면 종이가 두 겹으로 보인다. 여기서는 윤곽선과 살짝 눌린 색만 쓴다. */
+/* ── 선택지를 목록으로 ────────────────────────────────────────────────────
+   네모 상자를 밑줄로 바꾼다. 화면에서 "앱" 느낌을 내던 위젯이 여기서 사라진다.
+
+   .option 은 .vue 의 scoped 스타일이라 빌드되면 `.option[data-v-xxx]` 가 되어
+   특이도가 (0,2,0) 이다. 앞에 `main .container` 를 두면 (0,2,1) 이 되어
+   순서와 무관하게 이긴다. !important 도, 컴포넌트 수정도 필요 없다.
+
+   .choice(ConsentPage·PreSurveyPage)는 건드리지 않는다. 그쪽은 한 줄에
+   나란히 놓이는 알약 모양이라 밑줄로 바꾸면 배치가 깨진다. */
+main .container .option {
+  background: transparent;
+  border: 0;
+  border-bottom: 1px solid var(--hairline);
+  border-radius: 0;
+  padding-inline: 0;
+}
+main .container .option:hover {
+  background: transparent;
+  border-bottom-color: var(--border-strong);
+}
+main .container .option--on {
+  background: transparent;
+  border: 0;
+  border-bottom: 2px solid var(--primary);
+  border-radius: 0;
+  color: var(--ink);
+  font-weight: 700;
+}
+
+/* ── 카드 ─────────────────────────────────────────────────────────────────
+   편지지가 이미 떠 있으므로 카드까지 띄우면 종이가 두 겹으로 보인다.
+   윤곽선만 남긴다. */
 .card {
   background: var(--surface-card);
   border: 1px solid var(--hairline);
-  border-radius: var(--radius-sm);
+  border-radius: var(--radius-md);
   padding: var(--sp-lg);
   box-shadow: none;
 }
 
 /* ── 버튼 ─────────────────────────────────────────────────────────────────
-   템플릿은 버튼·입력 모두 8px 이다. pill 은 배지에만 쓴다. */
-.btn {
-  border-radius: var(--radius-sm);
-  font-weight: 600;
-  letter-spacing: 0;
-}
-/* 검은 외곽선 대신 따뜻한 선. 편지에 검정 테두리는 어울리지 않는다. */
+   종이는 각지고 버튼은 둥글다. 이 대비가 온기를 만든다. */
+.btn { border-radius: var(--radius-sm); font-weight: 600; letter-spacing: 0; }
 .btn--secondary {
   background: var(--canvas);
   color: var(--ink);
@@ -200,28 +226,27 @@ p { line-height: 1.8; }
 }
 .btn--secondary:hover:not(:disabled) { background: var(--surface-soft); }
 .btn--ghost { border-color: var(--hairline); }
-/* 비활성은 크림 안에 조용히 묻힌다. #615f59 on #e6dfd8 = 5.0:1 */
 .btn:disabled { background: var(--primary-disabled); color: var(--muted); }
 
-/* ── 링크 ─────────────────────────────────────────────────────────────────
-   편지의 밑줄 친 문장처럼. */
+/* ── 링크 ───────────────────────────────────────────────────────────────── */
 a { color: var(--link); text-underline-offset: 3px; }
 
 /* ── 반응형 ───────────────────────────────────────────────────────────────
    tokens.css 의 480px 규칙보다 뒤에 와야 하므로 여기서 다시 선언한다.
    FR-040 — 고정 높이를 쓰지 않으므로 글자를 키워도 흐른다. */
 @media (max-width: 480px) {
+  :root { --margin-x: 20px; }
   .container { padding: var(--sp-lg) var(--sp-base); }
-  /* main .container 가 특이도(0,1,1)로 더 높아 위 규칙이 편지지에는 안 먹는다.
-     같은 선택자로 다시 잡아 준다. */
-  main .container { padding: var(--sp-xl) var(--sp-base) var(--sp-lg); }
+  /* main .container 가 (0,2,1)로 더 높아 위 규칙이 편지지에는 안 먹는다. */
+  main .container {
+    padding: calc(var(--flap-h) + var(--sp-lg)) var(--sp-base) var(--sp-xl) 36px;
+  }
   h1 { font-size: 25px; }
   h2 { font-size: 21px; }
   h3 { font-size: 18px; }
 }
 
-/* 화면이 좁으면 종이가 화면을 꽉 채운다. 좌우 그림자와 여백이 어색해지므로
-   책상 여백을 없애고 종이만 남긴다. */
+/* 화면이 좁으면 종이가 화면을 꽉 채운다. 좌우 테두리를 없애 종이만 남긴다. */
 @media (max-width: 560px) {
   main .container {
     margin-inline: 0;
@@ -229,7 +254,6 @@ a { color: var(--link); text-underline-offset: 3px; }
     border-right: 0;
     border-radius: 0;
   }
-  main .container::before { border-radius: 0; }
 }
 
 /* 모바일에서 96px 푸터 여백은 과하다. */
