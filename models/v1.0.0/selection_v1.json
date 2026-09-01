@@ -1,19 +1,12 @@
 {
-  "model_version": "v1.1.0",
-  "k": 14,
+  "model_version": "v1.0.0",
+  "k": 7,
   "selected": [
-    "age_disability_suspected",
-    "caregiver_age",
     "daily_routine_satisfaction",
-    "employment_status",
     "family_support_for_employment",
-    "final_school",
     "help_needed_hours",
     "household_head_type",
-    "household_size",
     "last_job_quit_reason",
-    "overall_health",
-    "past_job_count",
     "relation_to_person",
     "understands_work_meaning"
   ],
@@ -555,8 +548,6 @@
     1.0,
     1.0
   ],
-  "k_source": "K_TARGET (제품 판단)",
-  "rule_k": 7,
   "baseline": {
     "macro_f1": 0.31795845415710555,
     "high_burden_recall": 0.7636224098234843,

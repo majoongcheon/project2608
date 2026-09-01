@@ -1,35 +1,9 @@
 {
-  "question_set_version": "qs-v1.1.0",
-  "model_version": "v1.1.0",
+  "question_set_version": "qs-v1.0.0",
+  "model_version": "v1.0.0",
   "questions": [
     {
       "questionNo": 1,
-      "feature": "age_disability_suspected",
-      "originalItem": "A6",
-      "text": "당사자의 발달장애를 처음 의심하신 것은 당사자가 몇 살 때였나요?",
-      "inputType": "number",
-      "min": 0,
-      "max": 60,
-      "unit": "세",
-      "options": [],
-      "hasNotApplicable": false,
-      "explainTemplate": "발달장애를 처음 의심한 시점에 대한 응답"
-    },
-    {
-      "questionNo": 2,
-      "feature": "caregiver_age",
-      "originalItem": "I9_2",
-      "text": "주로 돌보시는 분(주 보호자)의 만 나이는 어떻게 되나요?",
-      "inputType": "number",
-      "min": 16,
-      "max": 98,
-      "unit": "세",
-      "options": [],
-      "hasNotApplicable": false,
-      "explainTemplate": "주 보호자의 연령에 대한 응답"
-    },
-    {
-      "questionNo": 3,
       "feature": "daily_routine_satisfaction",
       "originalItem": "G8",
       "text": "당사자는 요즘 하루하루의 일과를 어떻게 느끼고 있나요?",
@@ -63,37 +37,7 @@
       "explainTemplate": "당사자가 일과를 받아들이는 정도에 대한 응답"
     },
     {
-      "questionNo": 4,
-      "feature": "employment_status",
-      "originalItem": "C2",
-      "text": "(일을 하고 있다면) 당사자의 근무 형태는 어떤가요?",
-      "inputType": "choice",
-      "min": null,
-      "max": null,
-      "unit": null,
-      "options": [
-        {
-          "value": 1,
-          "label": "임금근로자"
-        },
-        {
-          "value": 2,
-          "label": "자영업자"
-        },
-        {
-          "value": 3,
-          "label": "무급 가족종사자"
-        },
-        {
-          "value": null,
-          "label": "해당사항 없음"
-        }
-      ],
-      "hasNotApplicable": true,
-      "explainTemplate": "당사자의 종사상 지위에 대한 응답"
-    },
-    {
-      "questionNo": 5,
+      "questionNo": 2,
       "feature": "family_support_for_employment",
       "originalItem": "F5",
       "text": "당사자의 취업에 대해 가족들이 어느 정도 지지하고 있나요?",
@@ -127,49 +71,7 @@
       "explainTemplate": "취업에 대한 가족 지지 정도에 대한 응답"
     },
     {
-      "questionNo": 6,
-      "feature": "final_school",
-      "originalItem": "B1",
-      "text": "당사자가 마지막으로 다닌 학교는 어디인가요?",
-      "inputType": "choice",
-      "min": null,
-      "max": null,
-      "unit": null,
-      "options": [
-        {
-          "value": 1,
-          "label": "무학"
-        },
-        {
-          "value": 2,
-          "label": "초등학교"
-        },
-        {
-          "value": 3,
-          "label": "중학교"
-        },
-        {
-          "value": 4,
-          "label": "고등학교"
-        },
-        {
-          "value": 5,
-          "label": "전공과·직업훈련"
-        },
-        {
-          "value": 6,
-          "label": "대학교"
-        },
-        {
-          "value": 7,
-          "label": "대학원 이상"
-        }
-      ],
-      "hasNotApplicable": false,
-      "explainTemplate": "당사자의 최종 학력에 대한 응답"
-    },
-    {
-      "questionNo": 7,
+      "questionNo": 3,
       "feature": "help_needed_hours",
       "originalItem": "G6",
       "text": "돌보고 계신 당사자에게 하루 중 어느 정도의 도움이 필요한가요?",
@@ -203,7 +105,7 @@
       "explainTemplate": "하루 중 필요한 도움의 양에 대한 응답"
     },
     {
-      "questionNo": 8,
+      "questionNo": 4,
       "feature": "household_head_type",
       "originalItem": "I4",
       "text": "가구의 생계를 주로 책임지는 분은 누구인가요?",
@@ -249,20 +151,7 @@
       "explainTemplate": "가구 생계를 책임지는 사람에 대한 응답"
     },
     {
-      "questionNo": 9,
-      "feature": "household_size",
-      "originalItem": "I1",
-      "text": "생계를 함께하는 가구원은 모두 몇 명인가요? (당사자 포함)",
-      "inputType": "number",
-      "min": 1,
-      "max": 12,
-      "unit": "명",
-      "options": [],
-      "hasNotApplicable": false,
-      "explainTemplate": "함께 사는 가구원 수에 대한 응답"
-    },
-    {
-      "questionNo": 10,
+      "questionNo": 5,
       "feature": "last_job_quit_reason",
       "originalItem": "E4",
       "text": "(일을 그만둔 적이 있다면) 마지막 일자리를 그만둔 가장 큰 이유는 무엇인가요?",
@@ -340,54 +229,7 @@
       "explainTemplate": "마지막 일자리를 그만둔 이유에 대한 응답"
     },
     {
-      "questionNo": 11,
-      "feature": "overall_health",
-      "originalItem": "G1",
-      "text": "당사자의 전반적인 건강 상태는 어떤가요?",
-      "inputType": "choice",
-      "min": null,
-      "max": null,
-      "unit": null,
-      "options": [
-        {
-          "value": 1,
-          "label": "매우 나쁘다"
-        },
-        {
-          "value": 2,
-          "label": "나쁜 편"
-        },
-        {
-          "value": 3,
-          "label": "보통"
-        },
-        {
-          "value": 4,
-          "label": "좋은 편"
-        },
-        {
-          "value": 5,
-          "label": "매우 좋다"
-        }
-      ],
-      "hasNotApplicable": false,
-      "explainTemplate": "당사자의 전반적 건강 상태에 대한 응답"
-    },
-    {
-      "questionNo": 12,
-      "feature": "past_job_count",
-      "originalItem": "E2",
-      "text": "(취업 경험이 있다면) 당사자가 지금까지 일해 본 일자리는 몇 곳인가요?",
-      "inputType": "number",
-      "min": 0,
-      "max": 20,
-      "unit": "곳",
-      "options": [],
-      "hasNotApplicable": true,
-      "explainTemplate": "당사자가 경험한 일자리 수에 대한 응답"
-    },
-    {
-      "questionNo": 13,
+      "questionNo": 6,
       "feature": "relation_to_person",
       "originalItem": "A1",
       "text": "응답하시는 분은 당사자와 어떤 관계인가요?",
@@ -433,7 +275,7 @@
       "explainTemplate": "응답자와 당사자의 관계에 대한 응답"
     },
     {
-      "questionNo": 14,
+      "questionNo": 7,
       "feature": "understands_work_meaning",
       "originalItem": "F1",
       "text": "당사자는 \"일을 한다\"는 것의 의미를 어느 정도 이해하고 있나요?",
