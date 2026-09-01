@@ -11,8 +11,13 @@ const isHome = computed(() => route.name === 'home');
   <a class="skip" href="#main">본문으로 건너뛰기</a>
   <header class="top">
     <div class="top__inner container">
-      <button v-if="!isHome" class="back" type="button" aria-label="이전 화면으로" @click="router.back()">←</button>
-      <RouterLink to="/" class="brand">돌봄부담 진단 · 복지서비스 안내</RouterLink>
+      <button v-if="!isHome" class="back" type="button" aria-label="이전 화면으로" @click="router.back()">
+        <svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor"
+             stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M14.5 5 8.2 11.3a1 1 0 0 0 0 1.4L14.5 19" />
+        </svg>
+      </button>
+      <RouterLink to="/" class="brand"><span class="brand__mark">곁</span>_돌봄의 무게를 읽다</RouterLink>
     </div>
   </header>
 
@@ -37,10 +42,15 @@ const isHome = computed(() => route.name === 'home');
 .skip:focus { left: 0; }
 .top { border-bottom: 1px solid var(--hairline-soft); background: var(--canvas); position: sticky; top: 0; z-index: 10; }
 .top__inner { display: flex; align-items: center; gap: var(--sp-md); padding-block: var(--sp-md); }
-.brand { color: var(--ink); text-decoration: none; font-weight: 600; font-size: 15px; }
+.brand {
+  color: var(--ink); text-decoration: none; font-size: 17px; font-weight: 700;
+  font-family: var(--font-serif, inherit); letter-spacing: 0; word-break: keep-all;
+}
+.brand__mark { color: var(--primary); }
 .back {
+  display: inline-flex; align-items: center; justify-content: center;
   background: none; border: 1px solid var(--hairline); border-radius: var(--radius-pill);
-  width: 40px; min-height: 40px; font-size: 18px; cursor: pointer; color: var(--ink); flex: none;
+  width: 40px; min-height: 40px; cursor: pointer; color: var(--ink); flex: none;
 }
 .back:hover { background: var(--surface-soft); }
 main { min-height: 60vh; padding-block: var(--sp-lg); }

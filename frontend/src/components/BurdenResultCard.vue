@@ -13,7 +13,12 @@ defineProps<{ label: string | null; description: string | null; isWarning: boole
 
     <!-- 경고 상태를 텍스트로도 알린다 (FR-042) -->
     <p v-if="isWarning" class="result__flag">
-      <span aria-hidden="true">⚠</span> 주의가 필요한 결과입니다
+      <svg class="flag__icon" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+           stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="M12 4.3c.5 0 .97.27 1.22.72l6.35 11.2c.5.9-.14 2.01-1.22 2.01H5.65c-1.08 0-1.73-1.11-1.22-2.01l6.35-11.2c.25-.45.72-.72 1.22-.72Z" />
+        <path d="M12 9.7v3.5M12 16.1h.01" />
+      </svg>
+      주의가 필요한 결과입니다
     </p>
 
     <p class="result__label">{{ label }}</p>
@@ -27,7 +32,11 @@ defineProps<{ label: string | null; description: string | null; isWarning: boole
 .result--warn { background: #fff4f1; border-color: var(--error-text); }
 .result--calm { background: var(--surface-soft); border-color: var(--hairline); }
 .result__who { font-size: 14px; color: var(--muted); margin: 0 0 var(--sp-sm); }
-.result__flag { font-size: 15px; font-weight: 700; color: var(--error-text); margin: 0 0 var(--sp-sm); }
+.result__flag {
+  display: flex; align-items: center; gap: 7px;
+  font-size: 15px; font-weight: 700; color: var(--error-text); margin: 0 0 var(--sp-sm);
+}
+.flag__icon { width: 19px; height: 19px; flex: none; }
 .result__label { font-size: 30px; font-weight: 700; color: var(--ink); margin: 0 0 var(--sp-sm); line-height: 1.25; }
 .result__desc { font-size: 16px; color: var(--body); margin: 0; }
 </style>
