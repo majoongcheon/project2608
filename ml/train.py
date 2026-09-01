@@ -27,14 +27,14 @@ from sklearn.metrics import f1_score                                  # noqa: E4
 from questions import QUESTIONS, SELF_REPORT, build_question          # noqa: E402
 import db as dbmod                                                    # noqa: E402
 
-MODELS = ROOT / 'models'
-MODELS.mkdir(exist_ok=True)
+MODELS = ROOT / os.getenv('MODELS_DIR', 'models')
+MODELS.mkdir(parents=True, exist_ok=True)
 
 SEED = 20260901
 MISSING = -1          # 결측 센티널. 모든 코드값이 0 이상이라 -1 이 안전하게 분리된다
 CLASSES = [1, 2, 3, 4, 5]
-MODEL_VERSION = 'v1.0.0'
-QSET_VERSION = 'qs-v1.0.0'
+MODEL_VERSION = os.getenv('MODEL_VERSION', 'v1.0.0')
+QSET_VERSION = os.getenv('QSET_VERSION', 'qs-v1.0.0')
 
 # SC-004·SC-005 정지 조건
 MAX_F1_LOSS = 0.03
@@ -42,6 +42,10 @@ MAX_REC_LOSS = 0.05
 MIN_REC_ABS = 0.70
 REC_MARGIN = 0.03      # CV 에서 하한 + 마진을 확보해 test 에서의 변동을 흡수한다
 F1_MARGIN = 0.01       # 같은 이유. CV 에서 최소 k 를 그대로 고르면 잡음에 선택이 과적합된다
+
+# 문항 수를 규칙 대신 사람이 정할 때 쓴다. 0 이면 기존 규칙(최소 k)을 그대로 따른다.
+# 성능 최적점이 아니라 제품 판단이므로 selection json 에 출처를 함께 기록한다.
+K_TARGET = int(os.getenv('K_TARGET', '0'))
 
 
 # ─────────────────────────────────────────────────────────── 지표
@@ -222,7 +226,17 @@ def stage_select(d, base):
 
     # 마지막으로 조건을 만족한 지점이 최소 집합이다
     passing = [h for h in history if h['passes']]
-    best_k = min(h['k'] for h in passing) if passing else len(d['features'])
+    rule_k = min(h['k'] for h in passing) if passing else len(d['features'])
+    if K_TARGET:
+        found = [h for h in history if h['k'] == K_TARGET]
+        if not found:
+            raise SystemExit(f'K_TARGET={K_TARGET} 가 탐색 경로에 없다: {[h["k"] for h in history]}')
+        if not found[0]['passes']:
+            raise SystemExit(f'K_TARGET={K_TARGET} 는 SC-004·SC-005 정지 조건을 만족하지 않는다')
+        best_k, k_source = K_TARGET, 'K_TARGET (제품 판단)'
+        print(f'   ※ 문항 수를 K_TARGET={K_TARGET} 로 지정 — 규칙이 뽑은 최소 k={rule_k} 를 대신한다')
+    else:
+        best_k, k_source = rule_k, '규칙 (최소 k)'
     chosen = next((h for h in history if h['k'] == best_k), history[0])
     n_drop = len(d['features']) - best_k
     selected = [f for f in d['features'] if f not in dropped[:n_drop]]
@@ -230,6 +244,7 @@ def stage_select(d, base):
           f"F1 {chosen['macro_f1']:.4f} · 재현율 {chosen['high_burden_recall']:.4f}")
     return {'selected': selected, 'dropped_order': dropped, 'history': history,
             'weights': chosen['decision_weights'],
+            'k_source': k_source, 'rule_k': rule_k,
             'baseline': {'macro_f1': base['B_f1'], 'high_burden_recall': base['B_rec'],
                          'n_features': len(d['features'])}}
 
@@ -458,17 +473,21 @@ def main():
     print(f"데이터: train {len(d['y'])} / test {len(d['ytest'])} · 설명변수 {len(d['features'])}개 · "
           f"fold {sorted(set(d['folds']))}")
 
-    if cmd in ('all', 'evaluate'):
-        if cmd == 'evaluate':
-            payload = json.loads((MODELS / 'model_v1.json').read_text(encoding='utf-8'))
-            stage_evaluate(d, payload)
-            return
+    if cmd == 'evaluate':
+        payload = json.loads((MODELS / 'model_v1.json').read_text(encoding='utf-8'))
+        stage_evaluate(d, payload)
+        return
+
+    if cmd in ('all', 'build'):
         base = stage_baseline(d)
         sel = stage_select(d, base)
         cal = stage_calibrate(d, base, sel)
         payload = stage_export(d, base, sel, cal)
-        stage_evaluate(d, payload)
-        print('\n완료. models/ 아티팩트가 갱신되었습니다.')
+        if cmd == 'all':
+            stage_evaluate(d, payload)     # test 602건 1회 사용
+        else:
+            print('\n완료(build). test 602건은 사용하지 않았다.')
+        print(f'\n아티팩트: {MODELS}')
 
 
 if __name__ == '__main__':
