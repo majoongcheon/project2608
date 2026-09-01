@@ -190,7 +190,7 @@ main .container::after {
   width: 40px; height: 40px;
   border-radius: 50%;
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23f2d3de' stroke-opacity='.85' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='20' cy='20' r='13.5' stroke-width='1'/%3E%3Crect x='12.5' y='15.5' width='15' height='10' rx='2' stroke-width='1.6'/%3E%3Cpath d='M12.5 17.2 20 22l7.5-4.8' stroke-width='1.6'/%3E%3C/g%3E%3C/svg%3E")
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23f2d3de' stroke-opacity='.85' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='12.5' y='15.5' width='15' height='10' rx='2' stroke-width='1.6'/%3E%3Cpath d='M12.5 17.2 20 22l7.5-4.8' stroke-width='1.6'/%3E%3C/g%3E%3C/svg%3E")
       center / 40px 40px no-repeat,
     radial-gradient(circle at 34% 28%, var(--seal-hi) 0%, var(--seal) 55%, var(--seal-lo) 100%);
   box-shadow:
