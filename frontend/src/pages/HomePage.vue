@@ -28,8 +28,13 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
 
 <template>
   <div class="container stack">
-    <h1>어떤 도움이 필요하신가요?</h1>
-    <p class="lead measure">로그인도 회원가입도 없이, 바로 이용하실 수 있습니다.</p>
+    <header class="hero">
+      <p class="hero__eyebrow">발달장애인 보호자를 위한</p>
+      <h1 class="hero__h">어떤 <em>도움</em>이<br />필요하신가요?</h1>
+      <p class="hero__lead measure">
+        로그인도 회원가입도 없이, <b>바로</b> 이용하실 수 있습니다.
+      </p>
+    </header>
 
     <!-- 두 메뉴를 맨 위로. 색을 나눠 한눈에 구분되게 한다.
          두 카드는 크기·구조가 같아 비중은 동등하다(FR-001). -->
@@ -63,48 +68,53 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
       </RouterLink>
     </nav>
 
-    <!-- 인사말 -->
-    <div class="letter measure">
-      <p>돌봄의 무게는 겉으로 잘 드러나지 않습니다.</p>
-      <p class="letter__lead">그래서 몇 가지만 여쭙고,<br />지금 어느 정도인지 함께 읽어 보려 합니다.</p>
-      <p class="letter__soft">정답을 가리는 자리가 아니니 편한 대로 답해 주세요.</p>
+    <div class="side">
+      <!-- 인사말 -->
+      <div class="letter measure">
+        <p>돌봄의 무게는 겉으로 잘 드러나지 않습니다.</p>
+        <p class="letter__lead">그래서 몇 가지만 여쭙고,<br />지금 어느 정도인지 함께 읽어 보려 합니다.</p>
+        <p class="letter__soft">정답을 가리는 자리가 아니니 편한 대로 답해 주세요.</p>
+      </div>
+
+      <!-- 조사 결과 -->
+      <section class="stat" aria-labelledby="stat-h">
+        <p class="stat__eyebrow">2024년 전국 실태조사</p>
+        <h2 id="stat-h" class="stat__h">
+          <b>{{ fmt(TOTAL) }}가구</b> 가운데 <b class="hot">{{ fmt(heavyN) }}가구</b>가
+          높은 돌봄부담을 안고 있었습니다.
+        </h2>
+
+        <!-- 1~5는 순서 있는 척도라 한 색상의 명도 단계로 그린다(무지개색 금지).
+             어두울수록 부담이 크다. 색만으로 뜻이 전해지지 않게 아래 범례에
+             단계 이름과 가구 수를 모두 적는다(FR-041). -->
+        <div class="bar" role="img"
+             :aria-label="`전체 ${fmt(TOTAL)}가구 중 최고부담군 ${fmt(burden[0].n)}가구, 고부담군 ${fmt(burden[1].n)}가구, 중간부담군 ${fmt(burden[2].n)}가구, 저부담군 ${fmt(burden[3].n)}가구, 부담 없음 ${fmt(burden[4].n)}가구`">
+          <span v-for="b in burden" :key="b.step" class="bar__seg"
+                :class="`bar__seg--${b.step}`" :style="{ width: pct(b.n) + '%' }"
+                :title="`${b.name} ${fmt(b.n)}가구 (${pct(b.n).toFixed(1)}%)`"></span>
+        </div>
+        <div class="brace" aria-hidden="true">
+          <span class="brace__hot" :style="{ width: pct(heavyN) + '%' }"></span>
+          <span class="brace__rest"></span>
+        </div>
+        <p class="scale" aria-hidden="true">
+          <span>← 매우 부담된다</span><span>전혀 부담되지 않는다 →</span>
+        </p>
+        <p class="bar__callout">
+          <b>{{ (heavyN / TOTAL * 100).toFixed(1) }}%</b> — 절반이 넘습니다
+        </p>
+
+        <ul class="legend">
+          <li v-for="b in burden" :key="b.step" :class="{ 'legend--hot': b.heavy }">
+            <i :class="`sw sw--${b.step}`" aria-hidden="true"></i>
+            <span class="legend__nm">{{ b.name }}</span>
+            <span class="legend__n">{{ fmt(b.n) }}가구</span>
+          </li>
+        </ul>
+
+        <p class="stat__note">힘든 것은 당신만의 일이 아닙니다.</p>
+      </section>
     </div>
-
-    <!-- 조사 결과 -->
-    <section class="stat" aria-labelledby="stat-h">
-      <p class="stat__eyebrow">2024년 전국 실태조사</p>
-      <h2 id="stat-h" class="stat__h">
-        <b>{{ fmt(TOTAL) }}가구</b> 가운데 <b class="hot">{{ fmt(heavyN) }}가구</b>가
-        높은 돌봄부담을 안고 있었습니다.
-      </h2>
-
-      <!-- 1~5는 순서 있는 척도라 한 색상의 명도 단계로 그린다(무지개색 금지).
-           어두울수록 부담이 크다. 색만으로 뜻이 전해지지 않게 아래 범례에
-           단계 이름과 가구 수를 모두 적는다(FR-041). -->
-      <div class="bar" role="img"
-           :aria-label="`전체 ${fmt(TOTAL)}가구 중 최고부담군 ${fmt(burden[0].n)}가구, 고부담군 ${fmt(burden[1].n)}가구, 중간부담군 ${fmt(burden[2].n)}가구, 저부담군 ${fmt(burden[3].n)}가구, 부담 없음 ${fmt(burden[4].n)}가구`">
-        <span v-for="b in burden" :key="b.step" class="bar__seg"
-              :class="`bar__seg--${b.step}`" :style="{ width: pct(b.n) + '%' }"
-              :title="`${b.name} ${fmt(b.n)}가구 (${pct(b.n).toFixed(1)}%)`"></span>
-      </div>
-      <div class="brace" aria-hidden="true">
-        <span class="brace__hot" :style="{ width: pct(heavyN) + '%' }"></span>
-        <span class="brace__rest"></span>
-      </div>
-      <p class="bar__callout">
-        <b>{{ (heavyN / TOTAL * 100).toFixed(1) }}%</b> — 절반이 넘습니다
-      </p>
-
-      <ul class="legend">
-        <li v-for="b in burden" :key="b.step" :class="{ 'legend--hot': b.heavy }">
-          <i :class="`sw sw--${b.step}`" aria-hidden="true"></i>
-          <span class="legend__nm">{{ b.name }}</span>
-          <span class="legend__n">{{ fmt(b.n) }}가구</span>
-        </li>
-      </ul>
-
-      <p class="stat__note">힘든 것은 당신만의 일이 아닙니다.</p>
-    </section>
 
     <!-- 이용 흐름 -->
     <section class="flow" aria-label="이용 흐름">
@@ -127,7 +137,45 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
 </template>
 
 <style scoped>
-.lead { font-size: 15px; color: var(--muted); margin: 0; }
+/* ── 제목 ──────────────────────────────────────────────────────────────
+   눈썹 문구 → 큰 제목 → 안내 한 줄. 세 단이 크기·색·굵기로 갈린다. */
+.hero { display: grid; gap: var(--sp-sm); }
+.hero__eyebrow {
+  font-size: 13px; font-weight: 700; letter-spacing: .06em;
+  color: var(--primary-on-tint); margin: 0;
+}
+.hero__h {
+  font-size: 34px; font-weight: 700; line-height: 1.4; color: var(--ink);
+  margin: 0; word-break: keep-all;
+}
+/* 강조어에만 색과 밑선. 밑선은 글자 아래를 지나가는 띠라 획을 가리지 않는다. */
+.hero__h em {
+  font-style: normal; color: var(--primary-on-tint);
+  background: linear-gradient(var(--surface-strong), var(--surface-strong)) 0 82% / 100% 34% no-repeat;
+  padding-inline: 2px;
+}
+.hero__lead { font-size: 16px; color: var(--muted); margin: 0; }
+.hero__lead b { color: var(--ink); font-weight: 700; }
+
+/* 척도 양끝 — 막대가 무엇에서 무엇으로 가는지 글로 밝힌다 */
+.scale {
+  display: flex; justify-content: space-between; gap: var(--sp-sm);
+  font-size: 12px; color: var(--muted-soft); margin: 0 0 var(--sp-md);
+}
+
+/* .stack 의 간격 규칙은 .container 의 직계 자식에만 닿는다. .side 안의
+   두 덩어리는 여기서 직접 띄운다. */
+.side { display: grid; gap: var(--sp-base); }
+
+/* ── 홈페이지 모드에서 넓어진 자리를 채운다 ───────────────────────────── */
+@media (min-width: 900px) {
+  :root[data-width="wide"] .hero__h { font-size: 42px; }
+  /* 인사말과 조사 결과를 나란히 놓는다. 세로로만 쌓으면 오른쪽이 빈다. */
+  :root[data-width="wide"] .side {
+    display: grid; grid-template-columns: 1fr 1.25fr; gap: var(--sp-xl); align-items: start;
+  }
+  :root[data-width="wide"] .legend { grid-template-columns: 1fr 1fr; column-gap: var(--sp-lg); }
+}
 
 /* ── 두 메뉴 ────────────────────────────────────────────────────────────
    구조·크기는 같게(동등 비중), 색만 나눈다. */

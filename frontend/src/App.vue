@@ -36,7 +36,8 @@ const isHome = computed(() => route.name === 'home');
       </button>
       <RouterLink to="/" class="brand"><span class="brand__mark">곁</span>_돌봄의 무게를 읽다</RouterLink>
       <button class="width" type="button" @click="toggleWidth"
-              :aria-pressed="wide" :title="wide ? '좁게 보기' : '넓게 보기'">
+              :aria-pressed="wide"
+              :title="wide ? '모바일 모드로 보기' : '홈페이지 모드로 보기'">
         <svg viewBox="0 0 24 24" width="17" height="17" fill="none" stroke="currentColor"
              stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
           <template v-if="wide">
@@ -46,7 +47,7 @@ const isHome = computed(() => route.name === 'home');
             <path d="M4 5v14M20 5v14" /><path d="M8 12h8M8 12l2.5-2.5M8 12l2.5 2.5M16 12l-2.5-2.5M16 12l-2.5 2.5" />
           </template>
         </svg>
-        <span class="width__tx">{{ wide ? '좁게' : '넓게' }}</span>
+        <span class="width__tx">{{ wide ? '모바일 모드' : '홈페이지 모드' }}</span>
       </button>
     </div>
   </header>

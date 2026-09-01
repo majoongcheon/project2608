@@ -99,8 +99,14 @@
 
   /* ── 편지 ─────────────────────────────────────────────────────────────
      봉투 플랩과 왼쪽 여백선. 이 둘이 "카드가 아니라 편지지" 라고 말한다. */
-  --flap: #f0ded0;             /* 봉투 안쪽 — 편지지보다 한 단 진하게 */
-  --flap-h: 26px;              /* 플랩 높이 */
+  --flap: #e0c3a6;             /* 봉투 안쪽 — 크라프트 봉투 톤 */
+  --flap-edge: #cfae8d;        /* 접힌 자국 */
+  --flap-h: 34px;              /* 플랩 높이 */
+  /* 실링 — 자두색. 요즘 실링은 울퉁불퉁한 덩어리가 아니라
+     테두리 있는 깔끔한 원에 각인 하나가 들어간 형태다. */
+  --seal: #7d2749;
+  --seal-hi: #9c3a5f;          /* 왁스에 빛이 닿는 쪽 */
+  --seal-lo: #611c38;
   --margin-line: #d98b6f;      /* 왼쪽 여백선 — 편지지의 붉은 세로선 */
   --margin-x: 26px;            /* 여백선 위치 */
 
@@ -148,7 +154,12 @@ body {
    왼쪽 여백을 오른쪽보다 넓게 둔다. 편지지의 여백은 원래 좌우가 다르다. */
 main .container {
   position: relative;
-  background: var(--paper);
+  /* 왼쪽 여백선을 배경으로 그린다. ::before 는 플랩, ::after 는 실링이 쓰므로
+     의사요소가 남지 않는다. 플랩 아래에서 시작하도록 위치를 내린다. */
+  background:
+    linear-gradient(var(--margin-line), var(--margin-line))
+      var(--margin-x) var(--flap-h) / 1px calc(100% - var(--flap-h)) no-repeat,
+    var(--paper);
   border: 1px solid var(--hairline);
   border-radius: 2px;          /* 종이는 둥글지 않다 */
   box-shadow: var(--shadow-card);
@@ -156,25 +167,36 @@ main .container {
   margin-block: var(--sp-lg);
 }
 
-/* 봉투 플랩 — 종이 윗단을 봉투에서 꺼낸 모양으로 자른다 */
+/* 봉투 플랩 — 종이 윗단을 봉투에서 꺼낸 모양으로 자른다.
+   아래쪽에 한 단 어두운 띠를 넣어 접힌 자국을 만든다. */
 main .container::before {
   content: '';
   position: absolute;
   top: 0; left: 0; right: 0;
   height: var(--flap-h);
-  background: var(--flap);
+  background: linear-gradient(var(--flap) 0 78%, var(--flap-edge) 78% 100%);
   clip-path: polygon(0 0, 100% 0, 100% 38%, 50% 100%, 0 38%);
   pointer-events: none;
 }
 
-/* 왼쪽 여백선 — 플랩 아래에서 시작해 종이 끝까지 */
+/* 실링 — 플랩의 V 꼭짓점 위에 찍힌다. 실제 봉투에서 봉랍이 놓이는 자리다.
+   각인은 글자가 아니라 도형이다. CSS 생성 문자는 화면낭독기가 읽어 버려
+   페이지마다 같은 글자가 되풀이된다. */
 main .container::after {
   content: '';
   position: absolute;
-  left: var(--margin-x);
-  top: var(--flap-h);
-  bottom: 0;
-  border-left: 1px solid var(--margin-line);
+  top: var(--flap-h); left: 50%;
+  transform: translate(-50%, -50%);
+  width: 40px; height: 40px;
+  border-radius: 50%;
+  background:
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23f2d3de' stroke-opacity='.85' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='20' cy='20' r='13.5' stroke-width='1'/%3E%3Crect x='12.5' y='15.5' width='15' height='10' rx='2' stroke-width='1.6'/%3E%3Cpath d='M12.5 17.2 20 22l7.5-4.8' stroke-width='1.6'/%3E%3C/g%3E%3C/svg%3E")
+      center / 40px 40px no-repeat,
+    radial-gradient(circle at 34% 28%, var(--seal-hi) 0%, var(--seal) 55%, var(--seal-lo) 100%);
+  box-shadow:
+    0 1px 3px rgba(51, 34, 28, .34),
+    inset 0 1px 1px rgba(255, 255, 255, .20),
+    inset 0 -2px 3px rgba(0, 0, 0, .28);
   pointer-events: none;
 }
 
@@ -203,7 +225,7 @@ p { line-height: 1.8; }
    전환해도 편지지 자체(플랩·여백선·크림·명조)는 그대로다. 종이만 넓어진다. */
 .container { max-width: var(--sheet-w); padding: var(--sp-xl) var(--sp-lg); }
 
-:root[data-width="wide"] { --sheet-w: 980px; }
+:root[data-width="wide"] { --sheet-w: 1140px; }
 
 /* 넓혀도 글줄은 길어지면 안 된다. 읽는 덩어리는 폭을 묶어 둔다. */
 :root[data-width="wide"] .measure { max-width: 62ch; }
