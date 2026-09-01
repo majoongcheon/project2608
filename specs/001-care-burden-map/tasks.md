@@ -71,7 +71,9 @@ description: "Task list for 돌봄부담 경량 진단 및 지도 기반 복지�
       검증. **조인 키가 존재하지 않음을 스키마로 증명하는 테스트**(FR-032, 원칙 III)
 - [X] **T014** [P] `db/seeds/regions.ts` — 행정표준코드 기준 **229개 시군구** 적재.
       `center_lat`/`center_lng`(지역 직접 선택 시 기준 좌표) 포함. 적재 후 행 수 229 확인
-- [X] **T015** [P] `db/seeds/config.ts` — `cb_config_v1`에 FR-022의 설정 키 14종 기본값 적재
+- [X] **T015** [P] `db/seeds/config.ts` — `cb_config_v1`에 FR-022의 설정 키 14종 기본값 적재.
+      이 시점에는 모델이 없으므로 `undecidable.thresholds`·`contribution.minThreshold`는
+      **자리표시값**이다. 학습이 끝난 뒤 **T029a에서 반드시 재실행**해 실제 산출값으로 덮는다
       (`referral.*`, `age.*`, `undecidable.*`, `selfreport.*`, `contribution.*`, `draft.*`,
       `submit.*`, `burden.labels`). data-model.md 3.6 표 참조
 
@@ -135,6 +137,15 @@ P3 범위이므로 이 단계에서는 표시하지 않는다.
 - [X] **T029** `ml/export.py` — `models/model_v1.json`(트리 구조·`base_score`·보정 파라미터·
       `features` 순서·`classes`) 및 `models/questions_v1.json`(문항 번호 ↔ 변수 ↔ 자연어 문장 ↔
       선택지) 생성. `cb_feature_meta_v1.scale_note`를 문항 문구의 근거로 사용한다
+- [ ] **T029a** `db/seeds/config.js` **재실행** — T028·T029 산출값을 `cb_config_v1`에 반영한다.
+      `uncertainty_v1.json`의 `tau_conf`·`tau_dens` → `undecidable.thresholds`,
+      `contribution_v1.json`의 `min_threshold` → `contribution.minThreshold`.
+      **시드가 숫자를 손으로 갖지 않고 `models/*.json`에서 직접 읽어야 한다** — 값을 적어두면
+      재학습 후 갱신을 잊어 운영값과 모델값이 갈라진다. 반영 후 백엔드를 재기동해
+      `configStore` 캐시를 갱신한다(T018)
+      ```bash
+      cd db && node seeds/config.js && cd .. && ./check_project.sh restart
+      ```
 - [X] **T030** `ml/parity.py` — 3,000건 전량을 Python 추론기에 통과시켜 클래스 확률·SHAP
       기여도 기준값을 `models/parity_v1.json`에 기록
 - [X] **T031** `ml/evaluate.py --use-test` — **test 602건 1회 평가**. macro F1, 고부담 재현율,
@@ -386,6 +397,7 @@ T025 (데이터 적재·검증)
   └─► T026 (기준 모델) ─► T027 (문항 선별) ─► T028 (임계값 보정) ─► T029 (export)
                                                                         ├─► T030 (패리티 기준값)
                                                                         └─► T031 (test 1회 평가)
+T029 ─► T029a (설정 반영 + 백엔드 재기동)
 T029 ─► T033 (로더) ─► T034 (예측) ─► T035 (SHAP) ─► T036 (판정불가) ─► T037 (패리티 게이트)
 T029 ─► T038 (문항 적재) ─► T040 (GET /questions)
 T034~T036 ─► T041 (diagnosisService) ─► T044 (POST /diagnoses)
@@ -394,6 +406,9 @@ T041 ─► T059 (ResultPage)
 
 **핵심 직렬 구간** — T025→T026→T027→T028→T029는 순서를 바꿀 수 없다. 문항 선별 결과가
 임계값 보정의 입력이고, 둘 다 확정되어야 export가 가능하다.
+
+**T029a를 빠뜨리면 모델은 갱신됐는데 운영은 옛 값으로 도는 상태가 된다.** 산출물(`models/*.json`)과
+운영 설정(`cb_config_v1`)이 서로 다른 저장소이므로, 둘을 잇는 이 단계가 없으면 조용히 어긋난다.
 
 ### Within US2
 
@@ -509,6 +524,11 @@ US3(T075~T085)는 A와 B가 만나는 지점이므로 두 스토리 완료 후 �
 - **저장소 분리** — `cb_event_log_v1`과 `cb_training_response_v1`에 편의상 공통 컬럼을 하나라도
   추가하면 FR-032가 깨진다. T013이 이를 테스트로 고정한다
 - **연령의 지위** — 서비스 유형 판단 전용이며 모델 입력도 보관 대상도 아니다(T081)
+- **모델 산출값과 운영 설정의 분리** — 백엔드는 `models/*.json`이 아니라 `cb_config_v1`을 읽는다.
+  재학습 후 **T029a(설정 반영)를 돌리지 않으면 옛 임계값으로 서비스된다.** 화면에 오류가 뜨지
+  않으므로 알아채기 어렵다. 2026-09-01 실제로 발생했다 — `tauConf` 0.34(자리표시) vs
+  0.3239(산출값), `tauDens` -9.0으로 희소성 조건이 아예 발동하지 않았고,
+  `minThreshold` 0.01로 기여 요인 강약 구분이 무의미했다
 
 ### 작업 규칙
 
