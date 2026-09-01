@@ -5,8 +5,7 @@ import { useEventStore } from '../stores/events';
 import { api } from '../services/apiClient';
 const events = useEventStore();
 
-// 문항 수는 FR-004c 로 도출되어 모델 버전마다 달라진다(오늘만 7→14→7 로 바뀌었다).
-// 화면에 값으로 박지 않고 /config 에서 받아 온다. 실패하면 숫자 없이 나간다.
+// 문항 수는 FR-004c 로 도출되어 모델 버전마다 달라진다. 값으로 박지 않고 받아 온다.
 const questionCount = ref<number | null>(null);
 
 onMounted(async () => {
@@ -19,25 +18,39 @@ onMounted(async () => {
   <div class="container stack">
     <h1>어떤 도움이 필요하신가요?</h1>
 
-    <!-- 인사말 — 편지의 첫 문단 -->
+    <!-- 인사말 -->
     <div class="letter">
       <p>돌봄의 무게는 겉으로 잘 드러나지 않습니다.</p>
-      <p>그래서 몇 가지만 여쭙고, 지금 어느 정도인지 함께 읽어 보려 합니다.</p>
-      <p>정답을 가리는 자리가 아니니 편한 대로 답해 주세요.</p>
+      <p class="letter__lead">그래서 몇 가지만 여쭙고,<br />지금 어느 정도인지 함께 읽어 보려 합니다.</p>
+      <p class="letter__soft">정답을 가리는 자리가 아니니 편한 대로 답해 주세요.</p>
     </div>
 
-    <p class="muted">
-      로그인이나 회원가입 없이 두 가지를 모두 이용하실 수 있습니다.
-    </p>
+    <!-- 조사 결과. 근거이자 "혼자가 아니다" 라는 말이다.
+         출처: 2024 발달장애인 일과 삶 실태조사 3,000가구 (1~2단계 1,629가구) -->
+    <section class="stat" aria-label="조사 결과">
+      <p class="stat__lead">2024년 전국 <b>3,000가구</b>에 물었습니다.</p>
+      <p class="stat__dots" aria-hidden="true">
+        <i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i><i class="on"></i>
+        <i></i><i></i><i></i><i></i><i></i>
+      </p>
+      <p class="stat__body">
+        열 가구 가운데 <b>다섯 이상</b>이 높은 돌봄부담을 안고 있었습니다.
+        <span class="stat__fig">3,000가구 중 1,629가구 · 54.3%</span>
+      </p>
+      <p class="stat__note">힘든 것은 당신만의 일이 아닙니다.</p>
+    </section>
 
     <nav class="menu" aria-label="주요 기능">
       <RouterLink class="menu__card" to="/diagnosis/start">
         <span class="menu__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-               stroke-linecap="round" stroke-linejoin="round">
-            <rect x="4" y="2.75" width="16" height="18.5" rx="3.2" />
-            <path d="M8 7.8h8M8 11.4h5" />
-            <path d="M14.75 14.9c.6-.62 1.6-.62 2.2 0 .6.62.6 1.62 0 2.24L14.75 19.5l-2.2-2.36c-.6-.62-.6-1.62 0-2.24.6-.62 1.6-.62 2.2 0Z" />
+          <svg viewBox="0 0 40 40">
+            <rect x="9" y="5" width="22" height="30" rx="4" fill="var(--icon-fill)" />
+            <rect x="9" y="5" width="22" height="30" rx="4" fill="none"
+                  stroke="currentColor" stroke-width="1.7" />
+            <path d="M14 13h12M14 19h8" fill="none" stroke="currentColor"
+                  stroke-width="1.7" stroke-linecap="round" />
+            <path d="M23.4 24.4c1-1.05 2.7-1.05 3.7 0 1 1.05 1 2.75 0 3.8L23.4 32l-3.7-3.8c-1-1.05-1-2.75 0-3.8 1-1.05 2.7-1.05 3.7 0Z"
+                  fill="currentColor" />
           </svg>
         </span>
         <span class="menu__title">부담감 진단</span>
@@ -49,10 +62,11 @@ onMounted(async () => {
 
       <RouterLink class="menu__card" to="/map">
         <span class="menu__icon" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"
-               stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 21.2c0 0 6.6-5.4 6.6-10.4a6.6 6.6 0 1 0-13.2 0c0 5 6.6 10.4 6.6 10.4Z" />
-            <circle cx="12" cy="10.4" r="2.5" />
+          <svg viewBox="0 0 40 40">
+            <path d="M20 35s11-9 11-17.5A11 11 0 1 0 9 17.5C9 26 20 35 20 35Z" fill="var(--icon-fill)" />
+            <path d="M20 35s11-9 11-17.5A11 11 0 1 0 9 17.5C9 26 20 35 20 35Z"
+                  fill="none" stroke="currentColor" stroke-width="1.7" stroke-linejoin="round" />
+            <circle cx="20" cy="17" r="4.2" fill="currentColor" />
           </svg>
         </span>
         <span class="menu__title">복지서비스 위치 · 연락처</span>
@@ -74,15 +88,42 @@ onMounted(async () => {
     <!-- 맺음말 -->
     <div class="sign">
       <p class="sign__body">
-        답해 주신 내용은 결과를 계산하는 데에만 쓰고, 개인을 알아볼 수 있는 형태로 남기지 않습니다.
+        로그인도 회원가입도 없습니다. 답해 주신 내용은 결과를 계산하는 데에만 쓰고,
+        개인을 알아볼 수 있는 형태로 남기지 않습니다.
       </p>
       <p class="sign__from">곁 드림</p>
-      <p class="sign__src">2024년 전국 3,000가구 조사 자료를 바탕으로 만들었습니다.</p>
     </div>
   </div>
 </template>
 
 <style scoped>
+/* ── 인사말 — 크기와 색으로 세 단을 만든다 ── */
+.letter { color: var(--body); }
+.letter p { margin: 0 0 var(--sp-sm); word-break: keep-all; }
+.letter p:last-child { margin-bottom: 0; }
+.letter__lead { font-size: 19px; line-height: 1.9; color: var(--ink); font-weight: 500; }
+.letter__soft { font-size: 15px; color: var(--muted); }
+
+/* ── 조사 결과 ── */
+.stat {
+  background: var(--surface-soft); border: 1px solid var(--hairline);
+  border-left: 3px solid var(--accent); border-radius: var(--radius-sm);
+  padding: var(--sp-lg) var(--sp-base);
+}
+.stat__lead { font-size: 14px; color: var(--muted); margin: 0 0 var(--sp-md); }
+.stat__lead b { color: var(--ink); font-weight: 700; }
+.stat__dots { display: flex; gap: 6px; margin: 0 0 var(--sp-md); flex-wrap: wrap; }
+.stat__dots i {
+  width: 15px; height: 15px; border-radius: 50%;
+  border: 1.5px solid var(--border-strong); background: transparent;
+}
+.stat__dots i.on { background: var(--primary); border-color: var(--primary); }
+.stat__body { font-size: 17px; line-height: 1.8; color: var(--body); margin: 0 0 var(--sp-sm); word-break: keep-all; }
+.stat__body b { color: var(--primary-on-tint); font-weight: 700; font-size: 20px; }
+.stat__fig { display: block; font-size: 13px; color: var(--muted-soft); margin-top: var(--sp-xs); }
+.stat__note { font-size: 15px; color: var(--ink); font-weight: 600; margin: 0; }
+
+/* ── 메뉴 ── */
 .menu { display: grid; gap: var(--sp-base); grid-template-columns: 1fr; }
 @media (min-width: 640px) { .menu { grid-template-columns: 1fr 1fr; } }
 .menu__card {
@@ -92,38 +133,38 @@ onMounted(async () => {
   background: var(--canvas); box-shadow: var(--shadow-soft);
 }
 .menu__card:hover { box-shadow: var(--shadow-card); border-color: var(--border-strong); }
-.menu__icon { display: block; color: var(--primary); }
+/* 아이콘 — 선만 있으면 비어 보인다. 옅은 살구빛 면을 깔고 그 위에 선을 얹은 뒤,
+   한 부분(하트·핀 머리)만 꽉 채워 시선이 걸리게 한다. */
+.menu__icon {
+  --icon-fill: #f6ded1;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 54px; height: 54px; border-radius: 14px;
+  background: var(--surface-strong); color: var(--primary);
+}
 .menu__icon svg { width: 34px; height: 34px; display: block; }
 .menu__title { font-size: 20px; font-weight: 700; color: var(--ink); }
-.menu__desc { font-size: 15px; color: var(--muted); }
-/* 두 카드 모두 같은 자리에 같은 모양의 한 줄을 둔다 — FR-001 동등 비중 */
+.menu__desc { font-size: 15px; color: var(--muted); line-height: 1.75; }
 .menu__meta {
   margin-top: auto; padding-top: var(--sp-xs);
-  font-size: 13px; color: var(--muted-soft); letter-spacing: .01em;
+  font-size: 13px; color: var(--muted-soft);
 }
 
-/* 인사말 — 편지의 첫 문단. 명조로 두어 본문과 결을 나눈다 */
-.letter { font-family: var(--font-serif, inherit); color: var(--body); }
-.letter p { margin: 0 0 var(--sp-xs); font-size: 16.5px; line-height: 1.95; word-break: keep-all; }
-.letter p:last-child { margin-bottom: 0; }
-
-/* 이용 흐름 */
+/* ── 이용 흐름 ── */
 .flow { border-top: 1px solid var(--hairline); padding-top: var(--sp-lg); }
-.flow__h { font-size: 17px; margin: 0 0 var(--sp-md); }
-.flow__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-sm); }
-.flow__list li { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-md); align-items: baseline; }
+.flow__h { font-size: 17px; color: var(--muted); font-weight: 600; margin: 0 0 var(--sp-md); }
+.flow__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-md); }
+.flow__list li { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-md); align-items: start; }
 .flow__list b {
-  font-family: var(--font-serif, inherit); font-size: 14px; font-weight: 700;
-  color: var(--primary); min-width: 1.4em;
+  display: inline-flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 50%; flex: none;
+  background: var(--surface-strong); color: var(--primary-on-tint);
+  font-size: 14px; font-weight: 700;
 }
-.flow__list span { font-size: 15px; color: var(--body); word-break: keep-all; }
+.flow__list span { font-size: 16px; color: var(--body); word-break: keep-all; }
+.flow__list strong { color: var(--ink); font-weight: 700; }
 
-/* 맺음말 */
+/* ── 맺음말 ── */
 .sign { border-top: 1px solid var(--hairline); padding-top: var(--sp-lg); }
-.sign__body { font-size: 14.5px; color: var(--muted); margin: 0 0 var(--sp-md); word-break: keep-all; }
-.sign__from {
-  font-family: var(--font-serif, inherit); font-size: 17px; font-weight: 700;
-  color: var(--ink); text-align: right; margin: 0 0 var(--sp-sm);
-}
-.sign__src { font-size: 12.5px; color: var(--muted-soft); margin: 0; }
+.sign__body { font-size: 14px; color: var(--muted); margin: 0 0 var(--sp-md); word-break: keep-all; line-height: 1.75; }
+.sign__from { font-size: 18px; font-weight: 700; color: var(--ink); text-align: right; margin: 0; }
 </style>
