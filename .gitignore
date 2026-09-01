@@ -1,0 +1,14 @@
+# 자격증명
+.env
+*.env
+!.env.example
+
+# 파이썬
+__pycache__/
+*.py[cod]
+.ipynb_checkpoints/
+.venv/
+venv/
+
+# OS
+.DS_Store
