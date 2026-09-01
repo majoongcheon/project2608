@@ -27,5 +27,5 @@ export const env = {
   frontendPort: Number(process.env.FRONTEND_PORT || 9503),
   // FR-036: 제출자 구분용 해시의 솔트. 원본 IP 는 어디에도 저장하지 않는다.
   submitterSalt: process.env.SUBMITTER_SALT || 'dev-only-salt',
-  modelsDir: path.join(ROOT, 'models'),
+  modelsDir: path.join(ROOT, process.env.CB_MODELS_DIR || 'models'),
 };

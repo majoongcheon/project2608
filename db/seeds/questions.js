@@ -5,7 +5,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { connect, ROOT, log, ok } from '../scripts/lib.js';
 
-const src = path.join(ROOT, 'models', 'questions_v1.json');
+const src = path.join(ROOT, process.env.CB_MODELS_DIR || 'models', 'questions_v1.json');
 if (!fs.existsSync(src)) {
   console.error(`모델 문항 파일이 없습니다: ${src}\n  → python3 ml/train.py all 을 먼저 실행하세요.`);
   process.exit(1);
