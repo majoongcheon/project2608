@@ -175,6 +175,10 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
     display: grid; grid-template-columns: 1fr 1.25fr; gap: var(--sp-xl); align-items: start;
   }
   :root[data-width="wide"] .legend { grid-template-columns: 1fr 1fr; column-gap: var(--sp-lg); }
+  /* 조사 결과는 눈썹 문구와 제목을 지나서야 본문이 나오는데 인사말은 첫 줄부터
+     시작해 두 단의 높이가 어긋난다. 인사말을 다섯 줄만큼 내려 맞춘다.
+     세로로 쌓이는 모바일 모드에서는 그냥 빈틈이 되므로 여기서만 적용한다. */
+  :root[data-width="wide"] .letter { padding-top: var(--letter-drop, 9em); }
 }
 
 /* ── 두 메뉴 ────────────────────────────────────────────────────────────
