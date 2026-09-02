@@ -230,3 +230,39 @@ def test_블록_가중치는_문항수로_나눈다():
     """같은 게이트에 딸린 문항 3개는 각각 1/3 의 표를 갖는다."""
     w = gower.block_weights(['A', 'B', 'C', 'D'], {'A': 'g1', 'B': 'g1', 'C': 'g1'})
     assert w == pytest.approx([1 / 3, 1 / 3, 1 / 3, 1.0])
+
+
+from sjh_cluster import cluster
+
+
+def _two_blobs():
+    """0,1 은 서로 가깝고 2,3 도 서로 가깝다. 두 덩어리 사이는 멀다."""
+    return np.array([
+        [0.0, 0.1, 0.9, 0.9],
+        [0.1, 0.0, 0.9, 0.9],
+        [0.9, 0.9, 0.0, 0.1],
+        [0.9, 0.9, 0.1, 0.0],
+    ])
+
+
+def test_pam_두덩어리를_찾는다():
+    labels = cluster.pam(_two_blobs(), k=2, seed=1)
+    assert labels[0] == labels[1]
+    assert labels[2] == labels[3]
+    assert labels[0] != labels[2]
+
+
+def test_pam_같은_시드는_같은_결과():
+    D = _two_blobs()
+    assert np.array_equal(cluster.pam(D, k=2, seed=7), cluster.pam(D, k=2, seed=7))
+
+
+def test_pam_라벨은_0부터_k미만():
+    assert set(cluster.pam(_two_blobs(), k=2, seed=1).tolist()) == {0, 1}
+
+
+def test_계층군집도_두덩어리를_찾는다():
+    labels = cluster.hierarchical(_two_blobs(), k=2)
+    assert labels[0] == labels[1]
+    assert labels[2] == labels[3]
+    assert labels[0] != labels[2]
