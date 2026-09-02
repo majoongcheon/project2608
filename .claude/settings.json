@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "SessionStart": [
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "bash \"${CLAUDE_PROJECT_DIR:-.}/scripts/JSG-machine-id.sh\" --hook",
+            "timeout": 10,
+            "statusMessage": "기기 식별 중"
+          }
+        ]
+      }
+    ]
+  }
+}
