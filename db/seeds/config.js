@@ -1,5 +1,23 @@
 // cb_config_v1 — FR-022 가 열거한 외부화 설정 (원칙 IV)
-import { connect, log, ok } from '../scripts/lib.js';
+//
+//   학습으로 산출되는 값은 models/*.json 에서 직접 읽는다.
+//   여기에 숫자를 손으로 적어두면 재학습 후 갱신을 잊어 운영값과 모델값이 갈라진다.
+//   (2026-09-01 실제로 그렇게 어긋나 있었다: tauConf 0.34 vs 0.3239, minThreshold 0.01 vs 0.1325)
+import fs from 'node:fs';
+import path from 'node:path';
+import { connect, ROOT, log, ok } from '../scripts/lib.js';
+
+const MODELS = path.join(ROOT, process.env.CB_MODELS_DIR || 'models');
+function readModel(name) {
+  const f = path.join(MODELS, name);
+  if (!fs.existsSync(f)) {
+    console.error(`모델 산출물이 없습니다: ${f}\n  → python3 ml/train.py build 를 먼저 실행하세요.`);
+    process.exit(1);
+  }
+  return JSON.parse(fs.readFileSync(f, 'utf8'));
+}
+const UNC     = readModel('uncertainty_v1.json');
+const CONTRIB = readModel('contribution_v1.json');
 
 const CONFIG = {
   // 연계 (FR-021·FR-021e·FR-021f)
@@ -22,12 +40,18 @@ const CONFIG = {
   },
 
   // 판정 (FR-009c·FR-021j-1·FR-011-1)
-  'undecidable.thresholds':        { tauConf: 0.34, tauDens: -9.0, note: 'ml/calibrate 산출값으로 덮어쓴다' },
+  'undecidable.thresholds': {
+    tauConf: UNC.tau_conf, tauDens: UNC.tau_dens,
+    source: `models/uncertainty_v1.json (${UNC.model_version})`,
+  },
   'undecidable.noticeText': {
     text: '현재 응답만으로는 돌봄부담 수준을 정확히 판단하기 어렵습니다. 다만 필요한 지원을 놓치지 않도록 가까운 상담·서비스 기관을 안내합니다.',
     note: '판정 불가는 고부담군 판정이 아니다. 안전망 목적임을 밝힌다 (FR-021j-1)',
   },
-  'contribution.minThreshold':     { value: 0.01, note: 'ml/export 산출값으로 덮어쓴다' },
+  'contribution.minThreshold': {
+    value: CONTRIB.min_threshold,
+    source: `models/contribution_v1.json — ${CONTRIB.basis}`,
+  },
 
   // 자가보고 (FR-008d)
   'selfreport.noticeText': {
@@ -59,5 +83,6 @@ const rows = Object.entries(CONFIG).map(([k, v]) => [k, 'v1', JSON.stringify(v)]
 await con.query('DELETE FROM cb_config_v1');
 await con.query('INSERT INTO cb_config_v1 (config_key, version, value_json) VALUES ?', [rows]);
 log(`cb_config_v1 적재: ${rows.length}건`);
+log(`  모델 산출값 반영: tauConf ${UNC.tau_conf} · tauDens ${UNC.tau_dens} · minThreshold ${CONTRIB.min_threshold}`);
 for (const [k] of rows) ok(k);
 await con.end();
