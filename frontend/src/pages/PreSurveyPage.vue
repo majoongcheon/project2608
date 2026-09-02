@@ -10,13 +10,16 @@ const router = useRouter();
 const pre = usePreSurveyStore();
 const survey = useSurveyStore();
 const events = useEventStore();
-const ageText = ref(pre.careTargetAge === null ? '' : String(pre.careTargetAge));
+// type="number" 인 입력에 붙은 v-model 은 값을 number 로 캐스팅해 넣는다(Vue 의 기본 동작).
+// 비워 두면 문자열 '' 이 그대로 남아, 한 변수에 두 타입이 섞인다. 문자열로 단정하지 않는다.
+const ageText = ref<string | number>(pre.careTargetAge ?? '');
 
 onMounted(() => { void survey.load(); });
 
 function proceed() {
-  const n = Number(ageText.value);
-  pre.careTargetAge = ageText.value.trim() === '' || Number.isNaN(n) ? null : n;
+  const raw = String(ageText.value).trim();
+  const n = Number(raw);
+  pre.careTargetAge = raw === '' || Number.isNaN(n) ? null : n;
   events.track('PRESURVEY_PASS');
   router.push('/diagnosis/survey');
 }
