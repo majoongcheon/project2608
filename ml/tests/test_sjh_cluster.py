@@ -75,3 +75,37 @@ def test_join_유효한_9는_NULL_이_아니다():
 
     out = load.join_split(raw, db, {'secondary_caregiver_type': 'I8_2'})
     assert out[0]['__split'] == 'test'
+
+
+from sjh_cluster import clean
+
+
+def test_drop_전부결측_상수_식별자():
+    rows = [
+        {'ID': '1', 'ADDCODE': '11', 'WT': '1.0', 'I13': '2', 'ALLNA': '', 'CONST': '7', 'OK': '1'},
+        {'ID': '2', 'ADDCODE': '12', 'WT': '2.0', 'I13': '3', 'ALLNA': '', 'CONST': '7', 'OK': '2'},
+    ]
+    keep, reasons = clean.select_columns(rows, min_respondents=1)
+
+    assert keep == ['OK']
+    assert reasons['ALLNA'] == '전부결측'
+    assert reasons['CONST'] == '상수'
+    assert reasons['ID'] == '식별자'
+    assert reasons['ADDCODE'] == '식별자'
+    assert reasons['WT'] == '조사가중치'
+    assert reasons['I13'] == 'target'
+
+
+def test_drop_주관식_텍스트():
+    rows = [{'X_op': '기타 사유입니다', 'N': '1'}, {'X_op': '', 'N': '2'}]
+    keep, reasons = clean.select_columns(rows, min_respondents=1)
+    assert keep == ['N']
+    assert reasons['X_op'] == '주관식'
+
+
+def test_drop_응답자_적은_블록():
+    rows = [{'RARE': '1' if i == 0 else '', 'OK': str(i)} for i in range(10)]
+    keep, reasons = clean.select_columns(rows, min_respondents=5)
+    assert 'RARE' not in keep
+    assert reasons['RARE'] == '응답자 1명 < 5'
+    assert 'OK' in keep
