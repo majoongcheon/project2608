@@ -148,3 +148,33 @@ def test_혼자인_결측패턴은_게이트가_아니다():
 def test_게이트_행렬은_행마다_게이트값():
     found = gates.find_gates(_gate_rows(), ['E1', 'E2', 'A1'], min_columns=2)
     assert gates.gate_matrix(found) == [[0], [1], [1], [0]]
+
+
+from sjh_cluster import scales
+
+
+def test_이진은_binary():
+    assert scales.judge('A2', ['1', '2', '1', '2']) == 'binary'
+
+
+def test_연속형은_continuous():
+    vals = [str(v) for v in range(20, 90)]      # 고유값 70개
+    assert scales.judge('I9_2', vals) == 'continuous'
+
+
+def test_작은_정수_연속범위는_ordinal():
+    assert scales.judge('G6', ['1', '2', '3', '4', '5', '3', '2']) == 'ordinal'
+
+
+def test_구멍이_있으면_nominal():
+    """1,2,3,9 처럼 코드가 띄엄띄엄하면 순서 척도로 보지 않는다."""
+    assert scales.judge('I8_2', ['1', '2', '3', '9']) == 'nominal'
+
+
+def test_숫자가_아니면_nominal():
+    assert scales.judge('D13', ['가', '나', '다']) == 'nominal'
+
+
+def test_판정표를_한번에():
+    rows = [{'A2': '1', 'G6': '1'}, {'A2': '2', 'G6': '2'}, {'A2': '1', 'G6': '3'}]
+    assert scales.judge_all(rows, ['A2', 'G6']) == {'A2': 'binary', 'G6': 'ordinal'}
