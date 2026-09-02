@@ -57,15 +57,12 @@ export async function bootstrap() {
 
   // 2026-09-02 오전, 프론트만 새 코드로 넘어가고 백엔드가 안 따라와 화면이 비었다.
   // 프로세스가 하나 늘었으니 같은 종류의 어긋남을 기동 시점에 잡는다 (설계 4.9.5).
-  let health = null as Awaited<ReturnType<typeof inferenceHealth>>;
-  if (env.inferenceMode === 'http') {
-    health = await inferenceHealth();
-    if (health && health.questionSetVersion !== model.question_set_version) {
-      throw new Error(
-        `추론 서비스의 문항 집합이 다릅니다.\n` +
-        `  백엔드 ${model.question_set_version}\n  추론   ${health.questionSetVersion}\n` +
-        `  → 두 쪽이 같은 릴리스를 보도록 CB_MODELS_DIR 을 맞추세요`);
-    }
+  const health = await inferenceHealth();
+  if (health && health.questionSetVersion !== model.question_set_version) {
+    throw new Error(
+      `추론 서비스의 문항 집합이 다릅니다.\n` +
+      `  백엔드 ${model.question_set_version}\n  추론   ${health.questionSetVersion}\n` +
+      `  → 두 쪽이 같은 릴리스를 보도록 CB_MODELS_DIR 을 맞추세요`);
   }
 
   const app = await createApp();
@@ -74,10 +71,9 @@ export async function bootstrap() {
     console.log(`  공개 도메인 : ${env.publicOrigin}`);
     console.log(`  모델        : ${model.model_version} (${model.family}, 문항 ${model.features.length}개)`);
     console.log(`  문항 집합   : ${model.question_set_version}`);
-    console.log(`  판정 경로   : ${env.inferenceMode === 'http'
-      ? `추론 서비스 unix:${env.inferenceSocket}${health ? ' · ' + health.modelVersion : ' · 연결 안 됨'}`
-      : '내장 계산 (CB_INFERENCE=http 로 바꾸면 추론 서비스를 씁니다)'}`);
-    if (env.inferenceMode === 'http' && !health) {
+    console.log(`  추론 서비스 : unix:${env.inferenceSocket}` +
+                `${health ? ' · ' + health.modelVersion : ' · 연결 안 됨'}`);
+    if (!health) {
       console.warn('\n  [경고] 추론 서비스에 연결할 수 없습니다. 진단만 불가하고 ' +
                    '문항 조회·기관 안내는 동작합니다.\n' +
                    '         python3 -m cb_burden.serve 를 먼저 띄우세요\n');

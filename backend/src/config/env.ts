@@ -29,10 +29,8 @@ export const env = {
   submitterSalt: process.env.SUBMITTER_SALT || 'dev-only-salt',
   modelsDir: path.join(ROOT, process.env.CB_MODELS_DIR || 'models'),
 
-  // 추론 서비스 (설계 4.9). 기본값 'ts' 는 기존 동작 — 코드만 올라와도 판정이 바뀌지 않는다.
-  // 'http' 로 바꾸면 파이썬 추론 서비스를 쓴다. 되돌리기는 이 값 하나다.
+  // 추론 서비스 (설계 4.9). 판정은 파이썬이 한다 — 백엔드에 계산 코드가 없다.
   //   ★ 포트를 쓰지 않는다. 팀 배정 포트가 프론트·백엔드 둘뿐이라 유닉스 소켓으로 붙는다.
-  inferenceMode: (process.env.CB_INFERENCE || 'ts') as 'ts' | 'http',
   inferenceSocket: process.env.CB_INFERENCE_SOCKET || path.join(ROOT, 'run', 'cb-inference.sock'),
   inferenceTimeoutMs: Number(process.env.CB_INFERENCE_TIMEOUT_MS || 2000),
 };

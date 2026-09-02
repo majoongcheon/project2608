@@ -1,13 +1,10 @@
 // 판정 → 기여 요인 → 참조 비교 조립 (FR-009 ~ FR-013d)
 //   ★ 내부 라벨(1~5)은 응답 본문에 넣지 않는다. 표시 명칭만 내보낸다(FR-010a, 원칙 II).
 import { getArtifacts } from '../inference/modelLoader.js';
-import { predictProba, decide, contributions } from '../inference/predictor.js';
-import { rarity, isUndecidable } from '../inference/undecidable.js';
 import { cfg } from '../config/configStore.js';
 import { query } from '../repositories/pool.js';
 import { buildReferral, type ImmediateReferral } from './referralService.js';
 import { callInference, type InferenceResult } from './inferenceClient.js';
-import { env } from '../config/env.js';
 
 export interface AnswerInput { questionNo: number; value: number | null }
 
@@ -94,77 +91,54 @@ export async function diagnose(params: {
   multipleCareTargets: boolean | null;
   lat: number | null; lng: number | null; regionCode: string | null;
 }): Promise<DiagnosisOutput> {
-  const { model, uncertainty, contributionThreshold, questions } = getArtifacts();
+  const { model, questions } = getArtifacts();
   const row = toFeatureVector(params.answers);
 
-  // 판정 정책은 설정이 소유한다(FR-009c). 두 경로 모두 같은 값을 쓴다.
+  // 판정 정책은 설정이 소유한다(FR-009c). 파이썬은 상태 없는 계산기이고, 기준은 여기서 준다.
   const tau = cfg<{ tauConf: number; tauDens: number }>('undecidable.thresholds');
   const weights = cfg<{ weights: number[] }>('model.decisionWeights').weights;
+  const contributionThreshold = cfg<{ value: number }>('contribution.minThreshold').value;
 
-  let proba: number[];
-  let idx: number;
-  let rar: number;
-  let undecidable: boolean;
-  let remote: InferenceResult | null = null;
-
-  if (env.inferenceMode === 'http') {
-    // 파이썬 추론 서비스에 위임한다. 실패해도 예외가 오지 않는다 — 값으로 온다.
-    const outcome = await callInference({
-      answers: params.answers,
-      policy: {
-        tauConf: tau.tauConf, tauDens: tau.tauDens,
-        decisionWeights: weights, contributionMinThreshold: contributionThreshold,
-      },
+  // 판정은 파이썬 추론 서비스가 한다. 실패해도 예외가 오지 않는다 — 값으로 온다.
+  const outcome = await callInference({
+    answers: params.answers,
+    policy: {
+      tauConf: tau.tauConf, tauDens: tau.tauDens,
+      decisionWeights: weights, contributionMinThreshold: contributionThreshold,
+    },
+  });
+  if (!outcome.ok) {
+    // 틀린 판정을 내느니 안 하는 편이 낫다. 다만 기관 안내는 계속 제공한다(FR-021j 취지).
+    const referral = await buildReferral({
+      internalLabel: null, undecidable: true,
+      careTargetAge: params.careTargetAge,
+      lat: params.lat, lng: params.lng, regionCode: params.regionCode,
     });
-    if (!outcome.ok) {
-      // 틀린 판정을 내느니 안 하는 편이 낫다. 다만 기관 안내는 계속 제공한다.
-      const referral = await buildReferral({
-        internalLabel: null, undecidable: true,
-        careTargetAge: params.careTargetAge,
-        lat: params.lat, lng: params.lng, regionCode: params.regionCode,
-      });
-      return {
-        decided: false, internalLabel: null, burdenLabel: null, burdenDescription: null,
-        isWarning: false, contributions: null, comparison: null,
-        undecidableNotice: null,
-        unavailable: true,
-        unavailableNotice: cfg<any>('notice.inferenceUnavailable').text,
-        multipleTargetsNotice: null, immediateReferral: referral,
-        modelVersion: null, disclaimer: cfg<any>('notice.disclaimer').text,
-      };
-    }
-    remote = outcome.value;
-    proba = remote.proba;
-    idx = remote.internalLabel === null ? 0 : model.classes.indexOf(remote.internalLabel);
-    rar = remote.rarity;
-    undecidable = !remote.decided;
-  } else {
-    proba = predictProba(model, row);
-    idx = decide(model, proba);
-    rar = rarity(model, uncertainty, row);
-    undecidable = isUndecidable(proba, rar, tau.tauConf, tau.tauDens);
+    return {
+      decided: false, internalLabel: null, burdenLabel: null, burdenDescription: null,
+      isWarning: false, contributions: null, comparison: null,
+      undecidableNotice: null,
+      unavailable: true,
+      unavailableNotice: cfg<any>('notice.inferenceUnavailable').text,
+      multipleTargetsNotice: null, immediateReferral: referral,
+      modelVersion: null, disclaimer: cfg<any>('notice.disclaimer').text,
+    };
   }
+  const remote: InferenceResult = outcome.value;
+  const undecidable = !remote.decided;
 
   const labels = cfg<any>('burden.labels');
-  const internalLabel = undecidable ? null : model.classes[idx];
+  const internalLabel = remote.internalLabel;
   const labelInfo = internalLabel !== null ? labels[String(internalLabel)] : null;
 
   // 기여 요인 (FR-011·FR-011a·FR-011-1) — 판정 불가면 제시하지 않는다(FR-011c)
   let contribOut: { text: string; isMinor: boolean }[] | null = null;
   let topFeatures: string[] = [];
   if (!undecidable) {
-    // 순위와 강약 판단은 계산한 쪽을 그대로 쓴다. 여기서 다시 계산하면 갈라진다.
-    const ranked = remote
-      ? (remote.contributions ?? []).map((c) => ({
-          feature: c.feature, value: c.contrib, abs: Math.abs(c.contrib),
-        }))
-      : (() => {
-          const { contrib } = contributions(model, row, idx);
-          return model.features
-            .map((f, j) => ({ feature: f, value: contrib[j], abs: Math.abs(contrib[j]) }))
-            .sort((a, b) => b.abs - a.abs)
-            .slice(0, 3);
-        })();
+    // 순위와 강약 판단은 계산한 쪽(파이썬)을 그대로 쓴다. 여기서 다시 계산하면 갈라진다.
+    const ranked = (remote.contributions ?? []).map((c) => ({
+      feature: c.feature, value: c.contrib, abs: Math.abs(c.contrib),
+    }));
     topFeatures = ranked.map((r) => r.feature);
     contribOut = ranked.map((r) => {
       const q = (questions.questions as any[]).find((x) => x.feature === r.feature);
