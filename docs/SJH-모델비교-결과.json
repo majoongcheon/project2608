@@ -1,0 +1,453 @@
+{
+  "generated_at": "2026-09-02T10:32:19",
+  "note": "train 2,398건 · DB 고정 cv_fold 5-fold OOF. test 602건 미사용.",
+  "sets": {
+    "qs-v1.0.0 (7문항)": {
+      "n_features": 7,
+      "columns": [
+        "daily_routine_satisfaction",
+        "family_support_for_employment",
+        "help_needed_hours",
+        "household_head_type",
+        "last_job_quit_reason",
+        "relation_to_person",
+        "understands_work_meaning"
+      ],
+      "rows": [
+        {
+          "model": "logit",
+          "macro_f1_argmax": 0.3377,
+          "hb_recall_argmax": 0.749,
+          "accuracy_argmax": 0.4575,
+          "weights": [
+            1.1,
+            1.1,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3383,
+          "hb_recall_weighted": 0.7843,
+          "accuracy_weighted": 0.4629,
+          "binary_accuracy": 0.6943,
+          "fit_sec": 0.2
+        },
+        {
+          "model": "rf",
+          "macro_f1_argmax": 0.2945,
+          "hb_recall_argmax": 0.749,
+          "accuracy_argmax": 0.4495,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.2945,
+          "hb_recall_weighted": 0.749,
+          "accuracy_weighted": 0.4495,
+          "binary_accuracy": 0.6868,
+          "fit_sec": 1.6
+        },
+        {
+          "model": "et",
+          "macro_f1_argmax": 0.2601,
+          "hb_recall_argmax": 0.7682,
+          "accuracy_argmax": 0.4516,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.2601,
+          "hb_recall_weighted": 0.7682,
+          "accuracy_weighted": 0.4516,
+          "binary_accuracy": 0.6931,
+          "fit_sec": 1.5
+        },
+        {
+          "model": "histgb",
+          "macro_f1_argmax": 0.3175,
+          "hb_recall_argmax": 0.7199,
+          "accuracy_argmax": 0.427,
+          "weights": [
+            1.2,
+            1.2,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3194,
+          "hb_recall_weighted": 0.759,
+          "accuracy_weighted": 0.4341,
+          "binary_accuracy": 0.6739,
+          "fit_sec": 280.2
+        },
+        {
+          "model": "lgbm",
+          "macro_f1_argmax": 0.3127,
+          "hb_recall_argmax": 0.7383,
+          "accuracy_argmax": 0.4383,
+          "weights": [
+            1.1,
+            1.1,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3141,
+          "hb_recall_weighted": 0.7598,
+          "accuracy_weighted": 0.4425,
+          "binary_accuracy": 0.686,
+          "fit_sec": 44.5
+        },
+        {
+          "model": "xgb",
+          "macro_f1_argmax": 0.3311,
+          "hb_recall_argmax": 0.7329,
+          "accuracy_argmax": 0.4466,
+          "weights": [
+            1.2,
+            1.2,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3329,
+          "hb_recall_weighted": 0.7782,
+          "accuracy_weighted": 0.4516,
+          "binary_accuracy": 0.686,
+          "fit_sec": 29.3
+        },
+        {
+          "model": "catboost",
+          "macro_f1_argmax": 0.3164,
+          "hb_recall_argmax": 0.7559,
+          "accuracy_argmax": 0.4541,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3164,
+          "hb_recall_weighted": 0.7559,
+          "accuracy_weighted": 0.4541,
+          "binary_accuracy": 0.6935,
+          "fit_sec": 23.4
+        },
+        {
+          "model": "ensemble:soft-vote(전체 7종)",
+          "macro_f1_argmax": 0.3103,
+          "hb_recall_argmax": 0.7475,
+          "accuracy_argmax": 0.452,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3103,
+          "hb_recall_weighted": 0.7475,
+          "accuracy_weighted": 0.452,
+          "binary_accuracy": 0.6927
+        },
+        {
+          "model": "ensemble:soft-vote(logit+부스팅3)",
+          "macro_f1_argmax": 0.3272,
+          "hb_recall_argmax": 0.7475,
+          "accuracy_argmax": 0.4516,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3272,
+          "hb_recall_weighted": 0.7475,
+          "accuracy_weighted": 0.4516,
+          "binary_accuracy": 0.6939
+        },
+        {
+          "model": "ensemble:soft-vote(logit+lgbm)",
+          "macro_f1_argmax": 0.3237,
+          "hb_recall_argmax": 0.7437,
+          "accuracy_argmax": 0.4525,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3237,
+          "hb_recall_weighted": 0.7437,
+          "accuracy_weighted": 0.4525,
+          "binary_accuracy": 0.6906
+        },
+        {
+          "model": "ensemble:stacking(메타=로지스틱)",
+          "macro_f1_argmax": 0.2955,
+          "hb_recall_argmax": 0.7544,
+          "accuracy_argmax": 0.4583,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.2955,
+          "hb_recall_weighted": 0.7544,
+          "accuracy_weighted": 0.4583,
+          "binary_accuracy": 0.696
+        }
+      ]
+    },
+    "전체 38변수": {
+      "n_features": 38,
+      "columns": [
+        "age_disability_suspected",
+        "can_work_standard_job",
+        "caregiver_age",
+        "caregiver_employment_status",
+        "caregiver_gender",
+        "completion_status",
+        "daily_routine_satisfaction",
+        "early_aging",
+        "employment_status",
+        "exercises_regularly",
+        "family_support_for_employment",
+        "final_school",
+        "has_chronic_disease",
+        "has_job_skill_cert",
+        "health_change_yoy",
+        "help_needed_hours",
+        "household_head_type",
+        "household_size",
+        "is_employed",
+        "job_ability_mobility",
+        "job_ability_strength",
+        "last_job_quit_reason",
+        "lives_with_father",
+        "lives_with_mother",
+        "lives_with_person",
+        "overall_health",
+        "past_employment_exp",
+        "past_job_count",
+        "person_gender",
+        "person_marital_status",
+        "primary_caregiver_type",
+        "relation_to_person",
+        "school_helpfulness",
+        "secondary_caregiver_type",
+        "severe_dd_job_willingness",
+        "understands_work_meaning",
+        "wanted_to_stay_at_last_job",
+        "wants_person_employed"
+      ],
+      "rows": [
+        {
+          "model": "logit",
+          "macro_f1_argmax": 0.3161,
+          "hb_recall_argmax": 0.7122,
+          "accuracy_argmax": 0.4145,
+          "weights": [
+            1.2,
+            1.2,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.318,
+          "hb_recall_weighted": 0.7636,
+          "accuracy_weighted": 0.4199,
+          "binary_accuracy": 0.6614,
+          "fit_sec": 0.6
+        },
+        {
+          "model": "rf",
+          "macro_f1_argmax": 0.2894,
+          "hb_recall_argmax": 0.7552,
+          "accuracy_argmax": 0.4604,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.2894,
+          "hb_recall_weighted": 0.7552,
+          "accuracy_weighted": 0.4604,
+          "binary_accuracy": 0.6914,
+          "fit_sec": 1.4
+        },
+        {
+          "model": "et",
+          "macro_f1_argmax": 0.2668,
+          "hb_recall_argmax": 0.7544,
+          "accuracy_argmax": 0.4487,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.2668,
+          "hb_recall_weighted": 0.7544,
+          "accuracy_weighted": 0.4487,
+          "binary_accuracy": 0.6864,
+          "fit_sec": 1.4
+        },
+        {
+          "model": "histgb",
+          "macro_f1_argmax": 0.2944,
+          "hb_recall_argmax": 0.7091,
+          "accuracy_argmax": 0.4124,
+          "weights": [
+            1.15,
+            1.15,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.2956,
+          "hb_recall_weighted": 0.7375,
+          "accuracy_weighted": 0.4187,
+          "binary_accuracy": 0.6489,
+          "fit_sec": 286.8
+        },
+        {
+          "model": "lgbm",
+          "macro_f1_argmax": 0.3015,
+          "hb_recall_argmax": 0.7168,
+          "accuracy_argmax": 0.4149,
+          "weights": [
+            1.15,
+            1.15,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3021,
+          "hb_recall_weighted": 0.7506,
+          "accuracy_weighted": 0.4183,
+          "binary_accuracy": 0.6485,
+          "fit_sec": 72.7
+        },
+        {
+          "model": "xgb",
+          "macro_f1_argmax": 0.3135,
+          "hb_recall_argmax": 0.7322,
+          "accuracy_argmax": 0.4374,
+          "weights": [
+            1.05,
+            1.05,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3136,
+          "hb_recall_weighted": 0.7421,
+          "accuracy_weighted": 0.4383,
+          "binary_accuracy": 0.671,
+          "fit_sec": 30.4
+        },
+        {
+          "model": "catboost",
+          "macro_f1_argmax": 0.3127,
+          "hb_recall_argmax": 0.7521,
+          "accuracy_argmax": 0.4679,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3127,
+          "hb_recall_weighted": 0.7521,
+          "accuracy_weighted": 0.4679,
+          "binary_accuracy": 0.7014,
+          "fit_sec": 64.1
+        },
+        {
+          "model": "ensemble:soft-vote(전체 7종)",
+          "macro_f1_argmax": 0.3049,
+          "hb_recall_argmax": 0.7421,
+          "accuracy_argmax": 0.4479,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3049,
+          "hb_recall_weighted": 0.7421,
+          "accuracy_weighted": 0.4479,
+          "binary_accuracy": 0.6756
+        },
+        {
+          "model": "ensemble:soft-vote(logit+부스팅3)",
+          "macro_f1_argmax": 0.3137,
+          "hb_recall_argmax": 0.7391,
+          "accuracy_argmax": 0.4433,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.3137,
+          "hb_recall_weighted": 0.7391,
+          "accuracy_weighted": 0.4433,
+          "binary_accuracy": 0.6768
+        },
+        {
+          "model": "ensemble:soft-vote(logit+lgbm)",
+          "macro_f1_argmax": 0.3116,
+          "hb_recall_argmax": 0.7183,
+          "accuracy_argmax": 0.4241,
+          "weights": [
+            1.05,
+            1.05,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.312,
+          "hb_recall_weighted": 0.7375,
+          "accuracy_weighted": 0.427,
+          "binary_accuracy": 0.6622
+        },
+        {
+          "model": "ensemble:stacking(메타=로지스틱)",
+          "macro_f1_argmax": 0.31,
+          "hb_recall_argmax": 0.7521,
+          "accuracy_argmax": 0.4754,
+          "weights": [
+            1.0,
+            1.0,
+            1.0,
+            1.0,
+            1.0
+          ],
+          "macro_f1_weighted": 0.31,
+          "hb_recall_weighted": 0.7521,
+          "accuracy_weighted": 0.4754,
+          "binary_accuracy": 0.7048
+        }
+      ]
+    }
+  }
+}
