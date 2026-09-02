@@ -109,3 +109,42 @@ def test_drop_응답자_적은_블록():
     assert 'RARE' not in keep
     assert reasons['RARE'] == '응답자 1명 < 5'
     assert 'OK' in keep
+
+
+from sjh_cluster import gates
+
+
+def _gate_rows():
+    """행 1,2 는 E 블록에 응답, 행 0,3 은 미응답."""
+    return [
+        {'E1': '',  'E2': '',  'A1': '1'},
+        {'E1': '5', 'E2': '3', 'A1': '2'},
+        {'E1': '4', 'E2': '2', 'A1': '1'},
+        {'E1': '',  'E2': '',  'A1': '2'},
+    ]
+
+
+def test_같은_결측패턴_컬럼은_게이트_하나로():
+    found = gates.find_gates(_gate_rows(), ['E1', 'E2', 'A1'], min_columns=2)
+
+    assert len(found) == 1
+    g = found[0]
+    assert sorted(g['columns']) == ['E1', 'E2']
+    assert g['values'] == [0, 1, 1, 0]
+    assert g['n_answered'] == 2
+
+
+def test_결측이_없으면_게이트가_없다():
+    rows = [{'A1': '1'}, {'A1': '2'}]
+    assert gates.find_gates(rows, ['A1'], min_columns=2) == []
+
+
+def test_혼자인_결측패턴은_게이트가_아니다():
+    """min_columns 미만이면 분기가 아니라 개별 무응답으로 본다."""
+    rows = [{'A1': '', 'B1': '1'}, {'A1': '2', 'B1': '2'}]
+    assert gates.find_gates(rows, ['A1', 'B1'], min_columns=2) == []
+
+
+def test_게이트_행렬은_행마다_게이트값():
+    found = gates.find_gates(_gate_rows(), ['E1', 'E2', 'A1'], min_columns=2)
+    assert gates.gate_matrix(found) == [[0], [1], [1], [0]]
