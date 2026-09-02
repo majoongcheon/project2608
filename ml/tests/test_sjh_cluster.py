@@ -266,3 +266,50 @@ def test_계층군집도_두덩어리를_찾는다():
     assert labels[0] == labels[1]
     assert labels[2] == labels[3]
     assert labels[0] != labels[2]
+
+
+from sjh_cluster import score
+
+
+def test_고부담_리프트():
+    """군집 0 은 전원 고부담(1,2), 군집 1 은 전원 저부담."""
+    y = np.array([1, 2, 1, 4, 5, 3])
+    labels = np.array([0, 0, 0, 1, 1, 1])
+    lift = score.high_burden_lift(labels, y)
+
+    assert lift[0]['n'] == 3
+    assert lift[0]['high_ratio'] == pytest.approx(1.0)
+    assert lift[0]['lift'] == pytest.approx(2.0)      # 전체 고부담 비율 0.5
+    assert lift[1]['high_ratio'] == pytest.approx(0.0)
+
+
+def test_교차표():
+    """군집 × 부담구간 교차표. 스펙 §6 이 ARI 와 함께 보라고 한 것."""
+    y = np.array([1, 2, 3, 1, 5])
+    labels = np.array([0, 0, 0, 1, 1])
+    ct = score.crosstab(labels, y)
+    assert ct[0] == {1: 1, 2: 1, 3: 1, 4: 0, 5: 0}
+    assert ct[1] == {1: 1, 2: 0, 3: 0, 4: 0, 5: 1}
+
+
+def test_게이트_오염도_완전일치면_1():
+    labels = np.array([0, 0, 1, 1])
+    gate_rows = [[1, 0], [1, 0], [0, 1], [0, 1]]
+    assert score.gate_contamination(labels, gate_rows) == pytest.approx(1.0)
+
+
+def test_게이트_오염도_게이트가_상수면_0():
+    labels = np.array([0, 1, 0, 1])
+    gate_rows = [[1], [1], [1], [1]]
+    assert score.gate_contamination(labels, gate_rows) == pytest.approx(0.0)
+
+
+def test_널판정_상위5퍼센트_밖이면_구조있음():
+    verdict = score.null_verdict(observed=0.30, null_scores=[0.10] * 20)
+    assert verdict['structured'] is True
+    assert verdict['p_value'] == pytest.approx(0.0)
+
+
+def test_널판정_널분포와_겹치면_구조없음():
+    verdict = score.null_verdict(observed=0.11, null_scores=[0.10, 0.12, 0.11, 0.13])
+    assert verdict['structured'] is False
