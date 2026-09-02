@@ -10,6 +10,7 @@ __pycache__/
 .venv/
 venv/
 ml/.pylibs/
+ml/.pylibs*/
 *.egg-info/
 
 # Node
