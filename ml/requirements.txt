@@ -1,14 +1,25 @@
-# 오프라인 학습 전용. 런타임(배포)에는 설치되지 않는다 (research.md R-2).
+# 오프라인 학습 + 추론 서비스 (research.md R-2).
 #   설치: pip3 install --target ml/.pylibs -r ml/requirements.txt
-numpy>=1.26,<2.1
-scipy>=1.11
-scikit-learn>=1.4
-pymysql>=1.1
+#
+# ★ 버전을 못박는다. joblib 은 만든 sklearn 과 읽는 sklearn 이 같아야 한다.
+#   다르면 sklearn 이 "결과가 잘못될 수 있다"고 경고하고, 추론 서비스는 기동을 거부한다
+#   (cb_burden/serve/engine.py). 2026-09-02 conda 파이썬(sklearn 1.9.0)으로 열었을 때
+#   실제로 그 경고가 나왔다. >= 로 두면 다음 사람이 설치할 때 최신 버전이 깔려 터진다.
 
-# 테스트와 추론 서비스 (2026-09-02 추가)
-#   fastapi·uvicorn 은 사용자 계정에만 설치돼 있어 다른 장비에서 재현되지 않았다.
-#   여기에 적어 .pylibs 로 벤더링한다.
-pytest>=8.0
-fastapi>=0.115
-uvicorn>=0.30
-httpx>=0.27
+# 학습·추론 공통
+numpy==2.0.2
+scipy==1.13.1
+scikit-learn==1.6.1
+joblib==1.5.3
+
+# 스냅샷 생성·성능 기록에만 쓴다 (학습 단계와 추론 서비스는 DB 를 열지 않는다)
+pymysql==1.4.6
+
+# 추론 서비스
+fastapi==0.128.8
+uvicorn==0.39.0
+pydantic==2.13.5
+
+# 테스트
+pytest==8.4.2
+httpx==0.28.1

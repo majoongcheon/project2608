@@ -4,7 +4,6 @@ ml/train.py stage_evaluate 이관. **DB 를 건드리지 않는다** — 기록�
 가 맡는다. 그렇게 나눠야 평가를 다시 돌려도 남의 기록을 덮지 않는다(2026-09-01 사고).
 """
 import numpy as np
-from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import OneHotEncoder
 
 from cb_burden import config
@@ -14,7 +13,7 @@ from cb_burden.stages import _core
 SC = config.SUCCESS_CRITERIA
 
 
-def _baseline_on_test(snap, payload):
+def _baseline_on_test(snap, payload, logit_params=None):
     """설명변수 전체 모델을 train 으로 학습해 test 에서 평가한다 (동일 조건 비교).
 
     CV 값과 test 값을 섞어 비교하면 추정 방식이 달라 SC-004·SC-005 의 '대비 손실'이
@@ -25,7 +24,7 @@ def _baseline_on_test(snap, payload):
     w = payload.get('decision_weights')
     if payload['family'] == 'logit':
         enc = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
-        m = LogisticRegression(max_iter=2000, random_state=config.SEED)
+        m = _core.make_logit(**(logit_params or {}))
         m.fit(enc.fit_transform(X), y)
         proba = m.predict_proba(enc.transform(Xt))
     else:
@@ -36,7 +35,7 @@ def _baseline_on_test(snap, payload):
     return _core.macro_f1(yt, pred), _core.high_burden_recall(yt, pred)
 
 
-def run(snap, payload, unc, verbose=True):
+def run(snap, payload, unc, verbose=True, logit_params=None):
     feats = payload['features']
     idx = {f: i for i, f in enumerate(snap['features'])}
     cols = [idx[f] for f in feats]
@@ -52,7 +51,7 @@ def run(snap, payload, unc, verbose=True):
 
     f1 = _core.macro_f1(yt, pred)
     rec = _core.high_burden_recall(yt, pred)
-    bf1, brec = _baseline_on_test(snap, payload)
+    bf1, brec = _baseline_on_test(snap, payload, logit_params)
 
     verdict = {
         'SC-004 macro F1 손실 <= 0.03': bool(bf1 - f1 <= SC['max_f1_loss']),

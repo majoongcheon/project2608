@@ -76,6 +76,26 @@ def tune_decision_weights(proba, y):
     return list(best[0]), {'macro_f1': best[1], 'high_burden_recall': best[2]}
 
 
+# 로지스틱 기본값 — **지금 배포본을 만든 값이다.** 바꾸면 다른 모델이 나온다.
+LOGIT_DEFAULTS = {'penalty': 'l2', 'C': 1.0, 'max_iter': 2000}
+
+
+def make_logit(**over):
+    """로지스틱 회귀를 만든다. 인자를 주지 않으면 배포본과 같은 설정이다.
+
+    정규화를 실험할 때 penalty·C·l1_ratio 를 넘긴다. None 은 무시하므로
+    호출부에서 params=None 을 그대로 넘겨도 기본 동작이 유지된다.
+
+    solver 는 penalty 에 맞춰 고른다 — lbfgs 는 L1·elasticnet 을 풀지 못한다.
+    """
+    p = dict(LOGIT_DEFAULTS)
+    p.update({k: v for k, v in over.items() if v is not None})
+    solver = p.pop('solver', None)
+    if solver is None:
+        solver = 'saga' if p['penalty'] in ('l1', 'elasticnet') else 'lbfgs'
+    return LogisticRegression(solver=solver, random_state=SEED, **p)
+
+
 def make_model(family):
     if family == 'rf':
         return RandomForestClassifier(
@@ -90,7 +110,8 @@ def make_model(family):
     raise ValueError(family)
 
 
-def cv_scores(X, y, folds, features, family='rf', want_importance=False, weights=None):
+def cv_scores(X, y, folds, features, family='rf', want_importance=False, weights=None,
+              logit_params=None):
     """cv_fold 로 고정된 5-fold 교차검증. 분할을 새로 만들지 않는다(원칙 IV)."""
     f1s, recs = [], []
     imp = np.zeros(len(features))
@@ -100,7 +121,7 @@ def cv_scores(X, y, folds, features, family='rf', want_importance=False, weights
         if family == 'logit':
             enc = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
             Xtr, Xva = enc.fit_transform(X[tr]), enc.transform(X[va])
-            m = LogisticRegression(max_iter=2000, random_state=SEED)
+            m = make_logit(**(logit_params or {}))
             m.fit(Xtr, y[tr])
             proba = m.predict_proba(Xva)
             pred = decide(proba, weights)
