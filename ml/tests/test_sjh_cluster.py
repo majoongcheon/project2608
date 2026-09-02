@@ -178,3 +178,55 @@ def test_숫자가_아니면_nominal():
 def test_판정표를_한번에():
     rows = [{'A2': '1', 'G6': '1'}, {'A2': '2', 'G6': '2'}, {'A2': '1', 'G6': '3'}]
     assert scales.judge_all(rows, ['A2', 'G6']) == {'A2': 'binary', 'G6': 'ordinal'}
+
+
+from sjh_cluster import gower
+
+
+def test_같은_행은_거리0():
+    D = gower.distance(np.array([[1.0, 3.0], [1.0, 3.0]]), ['binary', 'ordinal'])
+    assert D.shape == (2, 2)
+    assert D[0, 1] == pytest.approx(0.0)
+    assert D[0, 0] == pytest.approx(0.0)
+
+
+def test_대칭이다():
+    X = np.array([[1.0, 3.0], [2.0, 5.0], [1.0, 1.0]])
+    D = gower.distance(X, ['nominal', 'ordinal'])
+    assert np.allclose(D, D.T)
+
+
+def test_이진은_일치_불일치():
+    D = gower.distance(np.array([[1.0], [2.0]]), ['binary'])
+    assert D[0, 1] == pytest.approx(1.0)
+
+
+def test_순서형은_범위로_정규화():
+    """1~5 척도에서 1 과 3 의 거리는 (3-1)/(5-1) = 0.5."""
+    D = gower.distance(np.array([[1.0], [3.0], [5.0]]), ['ordinal'])
+    assert D[0, 1] == pytest.approx(0.5)
+    assert D[0, 2] == pytest.approx(1.0)
+
+
+def test_결측은_쌍에서_제외된다():
+    """두 변수 중 하나가 결측이면 나머지 하나로만 잰다."""
+    D = gower.distance(np.array([[1.0, 1.0], [1.0, np.nan]]), ['binary', 'binary'])
+    assert D[0, 1] == pytest.approx(0.0)
+
+
+def test_모두_결측이면_거리1():
+    """비교할 변수가 하나도 없으면 최대 거리로 둔다 — 임의로 가깝다고 하지 않는다."""
+    D = gower.distance(np.array([[np.nan], [np.nan]]), ['binary'])
+    assert D[0, 1] == pytest.approx(1.0)
+
+
+def test_가중치가_반영된다():
+    Y = np.array([[1.0, 1.0], [1.0, 2.0]])      # 두 번째 변수만 불일치
+    assert gower.distance(Y, ['binary', 'binary'], [1.0, 1.0])[0, 1] == pytest.approx(0.5)
+    assert gower.distance(Y, ['binary', 'binary'], [1.0, 3.0])[0, 1] == pytest.approx(0.75)
+
+
+def test_블록_가중치는_문항수로_나눈다():
+    """같은 게이트에 딸린 문항 3개는 각각 1/3 의 표를 갖는다."""
+    w = gower.block_weights(['A', 'B', 'C', 'D'], {'A': 'g1', 'B': 'g1', 'C': 'g1'})
+    assert w == pytest.approx([1 / 3, 1 / 3, 1 / 3, 1.0])
