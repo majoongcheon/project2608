@@ -34,7 +34,22 @@ const isHome = computed(() => route.name === 'home');
           <path d="M14.5 5 8.2 11.3a1 1 0 0 0 0 1.4L14.5 19" />
         </svg>
       </button>
-      <RouterLink to="/" class="brand"><span class="brand__mark">곁</span>_돌봄의 무게를 읽다</RouterLink>
+      <RouterLink to="/" class="brand">
+        <!-- 포옹 — 뒤에서 감싸 안은 두 사람. 서비스 이름 "곁"의 그림 풀이다.
+             장식이라 aria-hidden 으로 두고, 뜻은 옆 글자가 이미 말한다. -->
+        <svg class="brand__hug" viewBox="0 0 36 30" aria-hidden="true">
+          <!-- 뒤에 선 사람 — 안아 주는 쪽 -->
+          <circle cx="22.2" cy="8" r="5.4" fill="var(--hug-back)" />
+          <path d="M12.2 30c0-8.4 4.5-12.8 10-12.8S32.2 21.6 32.2 30Z" fill="var(--hug-back)" />
+          <!-- 앞에 안긴 사람 -->
+          <circle cx="12.6" cy="12.6" r="4.6" fill="var(--hug-front)" />
+          <path d="M4 30c0-6.2 3.9-9.6 8.6-9.6S21.2 23.8 21.2 30Z" fill="var(--hug-front)" />
+          <!-- 감싼 팔 — 이 획이 있어야 '나란히 섰다'가 아니라 '안았다'로 읽힌다 -->
+          <path d="M25.4 18.6c1.9 3.4-.4 7.1-4.5 7.8-3.6.6-7-.1-9.9-1.7"
+                fill="none" stroke="var(--hug-arm)" stroke-width="3.1" stroke-linecap="round" />
+        </svg>
+        <span class="brand__tx"><span class="brand__mark">곁</span>_돌봄의 무게를 읽다</span>
+      </RouterLink>
       <button class="width" type="button" @click="toggleWidth"
               :aria-pressed="wide"
               :title="wide ? '모바일 모드로 보기' : '홈페이지 모드로 보기'">
@@ -74,9 +89,12 @@ const isHome = computed(() => route.name === 'home');
 .top { border-bottom: 1px solid var(--hairline-soft); background: var(--canvas); position: sticky; top: 0; z-index: 10; }
 .top__inner { display: flex; align-items: center; gap: var(--sp-md); padding-block: var(--sp-md); }
 .brand {
+  display: inline-flex; align-items: center; gap: var(--sp-sm);
   color: var(--ink); text-decoration: none; font-size: 17px; font-weight: 700;
   font-family: var(--font-serif, inherit); letter-spacing: 0; word-break: keep-all;
 }
+.brand__hug { width: 26px; height: 22px; flex: none; display: block; }
+.brand__tx { display: inline-block; }
 .brand__mark { color: var(--primary); }
 .width {
   display: inline-flex; align-items: center; gap: 6px; margin-left: auto;
