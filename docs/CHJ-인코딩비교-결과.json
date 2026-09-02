@@ -1,0 +1,1190 @@
+{
+  "generated_at": "2026-09-02T16:12:08",
+  "author": "최호준 (CHJ)",
+  "question": "척도를 살린 인코딩이 배포본의 전면 one-hot 보다 나은가",
+  "note": "train 2,398건만 사용. test 602건 미사용. 모델은 다항 로지스틱 하나로 고정하고 인코딩만 바꿨다. 클래스 배수는 fold 학습 부분의 내부 CV 에서만 학습했다.",
+  "setup": {
+    "n_train": 2398,
+    "question_set": "qs-v1.0.0",
+    "features": [
+      "daily_routine_satisfaction",
+      "family_support_for_employment",
+      "help_needed_hours",
+      "household_head_type",
+      "last_job_quit_reason",
+      "relation_to_person",
+      "understands_work_meaning"
+    ],
+    "var_scale": {
+      "daily_routine_satisfaction": "ordinal",
+      "family_support_for_employment": "ordinal",
+      "help_needed_hours": "ordinal",
+      "household_head_type": "nominal",
+      "last_job_quit_reason": "nominal",
+      "relation_to_person": "nominal",
+      "understands_work_meaning": "ordinal"
+    },
+    "rare_min": 30,
+    "repeats": 5,
+    "inner_splits": 3,
+    "bootstrap": 2000,
+    "baseline": "onehot"
+  },
+  "summary": {
+    "onehot": {
+      "label": "onehot (현재 배포본 방식)",
+      "design_columns": 53,
+      "n_params": 265,
+      "macro_f1": {
+        "mean": 0.3337,
+        "sd": 0.0034,
+        "per_repeat": [
+          0.3388,
+          0.334,
+          0.3342,
+          0.3295,
+          0.3321
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7552,
+        "sd": 0.0081,
+        "per_repeat": [
+          0.7559,
+          0.7567,
+          0.7667,
+          0.7444,
+          0.7521
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.6986,
+        "sd": 0.0054,
+        "per_repeat": [
+          0.7036,
+          0.6983,
+          0.6899,
+          0.7029,
+          0.6985
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7258,
+        "sd": 0.0022,
+        "per_repeat": [
+          0.7288,
+          0.7263,
+          0.7263,
+          0.7231,
+          0.7243
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6899,
+        "sd": 0.003,
+        "per_repeat": [
+          0.6943,
+          0.6902,
+          0.686,
+          0.6902,
+          0.6889
+        ]
+      },
+      "accuracy": {
+        "mean": 0.456,
+        "sd": 0.003,
+        "per_repeat": [
+          0.46,
+          0.4558,
+          0.4554,
+          0.457,
+          0.4516
+        ]
+      }
+    },
+    "scale": {
+      "label": "scale (순서형을 직선 하나로)",
+      "design_columns": 40,
+      "n_params": 200,
+      "macro_f1": {
+        "mean": 0.2892,
+        "sd": 0.0077,
+        "per_repeat": [
+          0.2778,
+          0.2896,
+          0.2914,
+          0.2991,
+          0.2881
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7695,
+        "sd": 0.0088,
+        "per_repeat": [
+          0.782,
+          0.7744,
+          0.7675,
+          0.7621,
+          0.7613
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.6981,
+        "sd": 0.0042,
+        "per_repeat": [
+          0.6918,
+          0.6959,
+          0.6998,
+          0.7018,
+          0.7011
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.732,
+        "sd": 0.0017,
+        "per_repeat": [
+          0.7341,
+          0.733,
+          0.7321,
+          0.7307,
+          0.7299
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6938,
+        "sd": 0.001,
+        "per_repeat": [
+          0.6922,
+          0.6935,
+          0.6947,
+          0.6947,
+          0.6939
+        ]
+      },
+      "accuracy": {
+        "mean": 0.457,
+        "sd": 0.0034,
+        "per_repeat": [
+          0.4533,
+          0.4533,
+          0.4595,
+          0.4583,
+          0.4604
+        ]
+      }
+    },
+    "thermo": {
+      "label": "thermo (순서형을 누적 더미로)",
+      "design_columns": 51,
+      "n_params": 255,
+      "macro_f1": {
+        "mean": 0.3334,
+        "sd": 0.0039,
+        "per_repeat": [
+          0.3372,
+          0.3373,
+          0.332,
+          0.328,
+          0.3325
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7555,
+        "sd": 0.0097,
+        "per_repeat": [
+          0.7506,
+          0.7544,
+          0.7682,
+          0.7429,
+          0.7613
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.6978,
+        "sd": 0.006,
+        "per_repeat": [
+          0.7031,
+          0.7026,
+          0.6894,
+          0.6999,
+          0.6937
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7254,
+        "sd": 0.0027,
+        "per_repeat": [
+          0.7261,
+          0.7276,
+          0.7267,
+          0.7208,
+          0.7259
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6892,
+        "sd": 0.0032,
+        "per_repeat": [
+          0.6922,
+          0.6931,
+          0.686,
+          0.6872,
+          0.6877
+        ]
+      },
+      "accuracy": {
+        "mean": 0.4563,
+        "sd": 0.0028,
+        "per_repeat": [
+          0.4575,
+          0.4604,
+          0.4545,
+          0.4558,
+          0.4533
+        ]
+      }
+    },
+    "collapse": {
+      "label": "collapse (희소 수준 병합만)",
+      "design_columns": 38,
+      "n_params": 190,
+      "macro_f1": {
+        "mean": 0.3342,
+        "sd": 0.0033,
+        "per_repeat": [
+          0.3376,
+          0.3363,
+          0.3321,
+          0.3296,
+          0.3354
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7553,
+        "sd": 0.0067,
+        "per_repeat": [
+          0.7575,
+          0.7598,
+          0.7629,
+          0.7483,
+          0.7483
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.7026,
+        "sd": 0.0024,
+        "per_repeat": [
+          0.7055,
+          0.7046,
+          0.7005,
+          0.7019,
+          0.7004
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.728,
+        "sd": 0.0037,
+        "per_repeat": [
+          0.7306,
+          0.7312,
+          0.7303,
+          0.7244,
+          0.7236
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6933,
+        "sd": 0.0033,
+        "per_repeat": [
+          0.6964,
+          0.6964,
+          0.6939,
+          0.6906,
+          0.6893
+        ]
+      },
+      "accuracy": {
+        "mean": 0.4589,
+        "sd": 0.0029,
+        "per_repeat": [
+          0.4591,
+          0.4621,
+          0.4612,
+          0.457,
+          0.455
+        ]
+      }
+    },
+    "scale_collapse": {
+      "label": "scale+collapse",
+      "design_columns": 26,
+      "n_params": 130,
+      "macro_f1": {
+        "mean": 0.2839,
+        "sd": 0.0039,
+        "per_repeat": [
+          0.2781,
+          0.2887,
+          0.2858,
+          0.284,
+          0.283
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.777,
+        "sd": 0.0094,
+        "per_repeat": [
+          0.792,
+          0.7805,
+          0.7698,
+          0.7713,
+          0.7713
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.6995,
+        "sd": 0.0044,
+        "per_repeat": [
+          0.6935,
+          0.6966,
+          0.7014,
+          0.7013,
+          0.7048
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7362,
+        "sd": 0.0021,
+        "per_repeat": [
+          0.7395,
+          0.7362,
+          0.734,
+          0.7346,
+          0.7365
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6974,
+        "sd": 0.0016,
+        "per_repeat": [
+          0.6968,
+          0.696,
+          0.6968,
+          0.6972,
+          0.7002
+        ]
+      },
+      "accuracy": {
+        "mean": 0.4596,
+        "sd": 0.0023,
+        "per_repeat": [
+          0.4583,
+          0.4587,
+          0.4604,
+          0.4575,
+          0.4633
+        ]
+      }
+    },
+    "thermo_collapse": {
+      "label": "thermo+collapse",
+      "design_columns": 36,
+      "n_params": 180,
+      "macro_f1": {
+        "mean": 0.3344,
+        "sd": 0.0032,
+        "per_repeat": [
+          0.3371,
+          0.3365,
+          0.3334,
+          0.3293,
+          0.3357
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7583,
+        "sd": 0.0061,
+        "per_repeat": [
+          0.7621,
+          0.7506,
+          0.7644,
+          0.7529,
+          0.7613
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.7018,
+        "sd": 0.003,
+        "per_repeat": [
+          0.7048,
+          0.7041,
+          0.7019,
+          0.7012,
+          0.6971
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7289,
+        "sd": 0.0029,
+        "per_repeat": [
+          0.7323,
+          0.7266,
+          0.7318,
+          0.7261,
+          0.7278
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6936,
+        "sd": 0.0028,
+        "per_repeat": [
+          0.6972,
+          0.6931,
+          0.6956,
+          0.6914,
+          0.6906
+        ]
+      },
+      "accuracy": {
+        "mean": 0.4602,
+        "sd": 0.0015,
+        "per_repeat": [
+          0.4608,
+          0.46,
+          0.4625,
+          0.4595,
+          0.4583
+        ]
+      }
+    }
+  },
+  "comparisons": [
+    {
+      "encoding": "scale",
+      "label": "scale (순서형을 직선 하나로)",
+      "vs": "onehot (현재 배포본 방식)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": -0.0445,
+          "repeat_ci95": [
+            -0.058,
+            -0.0309
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0609,
+          "boot_ci95": [
+            -0.0837,
+            -0.0406
+          ],
+          "boot_verdict": "기준선보다 낮음"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": 0.0143,
+          "repeat_ci95": [
+            0.0023,
+            0.0262
+          ],
+          "repeat_verdict": "기준선보다 높음",
+          "boot_mean_diff": 0.0261,
+          "boot_ci95": [
+            0.015,
+            0.0375
+          ],
+          "boot_verdict": "기준선보다 높음"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": -0.0006,
+          "repeat_ci95": [
+            -0.0104,
+            0.0092
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0119,
+          "boot_ci95": [
+            -0.0205,
+            -0.0031
+          ],
+          "boot_verdict": "기준선보다 낮음"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": 0.0062,
+          "repeat_ci95": [
+            0.005,
+            0.0074
+          ],
+          "repeat_verdict": "기준선보다 높음",
+          "boot_mean_diff": 0.0053,
+          "boot_ci95": [
+            -0.0027,
+            0.0137
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": 0.0039,
+          "repeat_ci95": [
+            -0.0009,
+            0.0088
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0022,
+          "boot_ci95": [
+            -0.0113,
+            0.0075
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": 0.001,
+          "repeat_ci95": [
+            -0.0064,
+            0.0084
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0068,
+          "boot_ci95": [
+            -0.0204,
+            0.0067
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    },
+    {
+      "encoding": "thermo",
+      "label": "thermo (순서형을 누적 더미로)",
+      "vs": "onehot (현재 배포본 방식)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": -0.0003,
+          "repeat_ci95": [
+            -0.0031,
+            0.0025
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0017,
+          "boot_ci95": [
+            -0.005,
+            0.0016
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": 0.0003,
+          "repeat_ci95": [
+            -0.0066,
+            0.0072
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0055,
+          "boot_ci95": [
+            -0.0115,
+            0.0
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": -0.0009,
+          "repeat_ci95": [
+            -0.0052,
+            0.0034
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0005,
+          "boot_ci95": [
+            -0.0038,
+            0.0027
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": -0.0004,
+          "repeat_ci95": [
+            -0.0029,
+            0.0022
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0028,
+          "boot_ci95": [
+            -0.0069,
+            0.0009
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": -0.0007,
+          "repeat_ci95": [
+            -0.0035,
+            0.0022
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0022,
+          "boot_ci95": [
+            -0.0063,
+            0.0017
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": 0.0003,
+          "repeat_ci95": [
+            -0.0032,
+            0.0038
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0025,
+          "boot_ci95": [
+            -0.0067,
+            0.0013
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    },
+    {
+      "encoding": "collapse",
+      "label": "collapse (희소 수준 병합만)",
+      "vs": "onehot (현재 배포본 방식)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": 0.0005,
+          "repeat_ci95": [
+            -0.0023,
+            0.0033
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0012,
+          "boot_ci95": [
+            -0.0082,
+            0.0061
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": 0.0002,
+          "repeat_ci95": [
+            -0.0045,
+            0.0048
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0014,
+          "boot_ci95": [
+            -0.007,
+            0.0101
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": 0.004,
+          "repeat_ci95": [
+            -0.0017,
+            0.0096
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0019,
+          "boot_ci95": [
+            -0.0038,
+            0.0078
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": 0.0022,
+          "repeat_ci95": [
+            -0.0005,
+            0.005
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0017,
+          "boot_ci95": [
+            -0.0043,
+            0.0076
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": 0.0034,
+          "repeat_ci95": [
+            -0.0009,
+            0.0077
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.002,
+          "boot_ci95": [
+            -0.0042,
+            0.0088
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": 0.0029,
+          "repeat_ci95": [
+            -0.0011,
+            0.007
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0007,
+          "boot_ci95": [
+            -0.0083,
+            0.0075
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    },
+    {
+      "encoding": "scale_collapse",
+      "label": "scale+collapse",
+      "vs": "onehot (현재 배포본 방식)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": -0.0498,
+          "repeat_ci95": [
+            -0.0577,
+            -0.0419
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0605,
+          "boot_ci95": [
+            -0.0831,
+            -0.0392
+          ],
+          "boot_verdict": "기준선보다 낮음"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": 0.0218,
+          "repeat_ci95": [
+            0.0067,
+            0.0369
+          ],
+          "repeat_verdict": "기준선보다 높음",
+          "boot_mean_diff": 0.0361,
+          "boot_ci95": [
+            0.024,
+            0.0484
+          ],
+          "boot_verdict": "기준선보다 높음"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": 0.0009,
+          "repeat_ci95": [
+            -0.0094,
+            0.0111
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0101,
+          "boot_ci95": [
+            -0.0193,
+            -0.0006
+          ],
+          "boot_verdict": "기준선보다 낮음"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": 0.0104,
+          "repeat_ci95": [
+            0.0082,
+            0.0126
+          ],
+          "repeat_verdict": "기준선보다 높음",
+          "boot_mean_diff": 0.0107,
+          "boot_ci95": [
+            0.0023,
+            0.0196
+          ],
+          "boot_verdict": "기준선보다 높음"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": 0.0075,
+          "repeat_ci95": [
+            0.003,
+            0.012
+          ],
+          "repeat_verdict": "기준선보다 높음",
+          "boot_mean_diff": 0.0025,
+          "boot_ci95": [
+            -0.0071,
+            0.0129
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": 0.0037,
+          "repeat_ci95": [
+            -0.0027,
+            0.01
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0016,
+          "boot_ci95": [
+            -0.0158,
+            0.0129
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    },
+    {
+      "encoding": "thermo_collapse",
+      "label": "thermo+collapse",
+      "vs": "onehot (현재 배포본 방식)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": 0.0007,
+          "repeat_ci95": [
+            -0.0021,
+            0.0035
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0017,
+          "boot_ci95": [
+            -0.009,
+            0.0057
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": 0.0031,
+          "repeat_ci95": [
+            -0.0055,
+            0.0116
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0061,
+          "boot_ci95": [
+            -0.0023,
+            0.0142
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": 0.0032,
+          "repeat_ci95": [
+            -0.004,
+            0.0103
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0012,
+          "boot_ci95": [
+            -0.0046,
+            0.007
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": 0.0032,
+          "repeat_ci95": [
+            0.0008,
+            0.0055
+          ],
+          "repeat_verdict": "기준선보다 높음",
+          "boot_mean_diff": 0.0035,
+          "boot_ci95": [
+            -0.0024,
+            0.009
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": 0.0037,
+          "repeat_ci95": [
+            -0.0005,
+            0.0079
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0029,
+          "boot_ci95": [
+            -0.0033,
+            0.0092
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": 0.0043,
+          "repeat_ci95": [
+            0.0009,
+            0.0076
+          ],
+          "repeat_verdict": "기준선보다 높음",
+          "boot_mean_diff": 0.001,
+          "boot_ci95": [
+            -0.0063,
+            0.0092
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    }
+  ],
+  "per_repeat": [
+    {
+      "repeat": 1,
+      "folds": "DB 고정 cv_fold",
+      "scores": {
+        "onehot": {
+          "macro_f1": 0.33883756047632235,
+          "hb_recall": 0.7559478127398311,
+          "hb_precision": 0.7035714285714286,
+          "hb_f1": 0.7288198298187201,
+          "binary_accuracy": 0.6943286071726439,
+          "accuracy": 0.4599666388657214
+        },
+        "scale": {
+          "macro_f1": 0.2778243432348828,
+          "hb_recall": 0.7820414428242517,
+          "hb_precision": 0.691785471826205,
+          "hb_f1": 0.7341498559077809,
+          "binary_accuracy": 0.6922435362802335,
+          "accuracy": 0.45329441201000836
+        },
+        "thermo": {
+          "macro_f1": 0.3371731631371005,
+          "hb_recall": 0.750575594781274,
+          "hb_precision": 0.7030913012221424,
+          "hb_f1": 0.7260579064587973,
+          "binary_accuracy": 0.6922435362802335,
+          "accuracy": 0.45746455379482903
+        },
+        "collapse": {
+          "macro_f1": 0.33755654870343593,
+          "hb_recall": 0.7574827321565618,
+          "hb_precision": 0.7055039313795568,
+          "hb_f1": 0.7305699481865285,
+          "binary_accuracy": 0.6964136780650542,
+          "accuracy": 0.4591326105087573
+        },
+        "scale_collapse": {
+          "macro_f1": 0.2780549295633084,
+          "hb_recall": 0.7920184190330007,
+          "hb_precision": 0.6935483870967742,
+          "hb_f1": 0.7395198853457543,
+          "binary_accuracy": 0.6968306922435363,
+          "accuracy": 0.45829858215179314
+        },
+        "thermo_collapse": {
+          "macro_f1": 0.3370697778453902,
+          "hb_recall": 0.7620874904067536,
+          "hb_precision": 0.7047551454932577,
+          "hb_f1": 0.7323008849557523,
+          "binary_accuracy": 0.6972477064220184,
+          "accuracy": 0.4608006672226856
+        }
+      }
+    },
+    {
+      "repeat": 2,
+      "folds": "층화 5-fold (seed 20260903)",
+      "scores": {
+        "onehot": {
+          "macro_f1": 0.3340170845736543,
+          "hb_recall": 0.7567152724481965,
+          "hb_precision": 0.6983002832861189,
+          "hb_f1": 0.7263351749539594,
+          "binary_accuracy": 0.6901584653878232,
+          "accuracy": 0.45579649708090075
+        },
+        "scale": {
+          "macro_f1": 0.28964314411228004,
+          "hb_recall": 0.7743668457405987,
+          "hb_precision": 0.6958620689655173,
+          "hb_f1": 0.7330185252451871,
+          "binary_accuracy": 0.6934945788156798,
+          "accuracy": 0.45329441201000836
+        },
+        "thermo": {
+          "macro_f1": 0.33730366985133364,
+          "hb_recall": 0.7544128933231006,
+          "hb_precision": 0.7026447462473195,
+          "hb_f1": 0.7276091783863806,
+          "binary_accuracy": 0.6930775646371977,
+          "accuracy": 0.4603836530442035
+        },
+        "collapse": {
+          "macro_f1": 0.33633523147439814,
+          "hb_recall": 0.7597851112816577,
+          "hb_precision": 0.7046263345195729,
+          "hb_f1": 0.7311669128508124,
+          "binary_accuracy": 0.6964136780650542,
+          "accuracy": 0.46205170975813176
+        },
+        "scale_collapse": {
+          "macro_f1": 0.2886913978236352,
+          "hb_recall": 0.7805065234075211,
+          "hb_precision": 0.6965753424657535,
+          "hb_f1": 0.736156351791531,
+          "binary_accuracy": 0.6959966638865721,
+          "accuracy": 0.45871559633027525
+        },
+        "thermo_collapse": {
+          "macro_f1": 0.33651116364271483,
+          "hb_recall": 0.750575594781274,
+          "hb_precision": 0.7041036717062635,
+          "hb_f1": 0.7265973254086181,
+          "binary_accuracy": 0.6930775646371977,
+          "accuracy": 0.4599666388657214
+        }
+      }
+    },
+    {
+      "repeat": 3,
+      "folds": "층화 5-fold (seed 20260904)",
+      "scores": {
+        "onehot": {
+          "macro_f1": 0.33415084621071717,
+          "hb_recall": 0.7666922486569455,
+          "hb_precision": 0.6899171270718232,
+          "hb_f1": 0.7262813522355506,
+          "binary_accuracy": 0.6859883236030025,
+          "accuracy": 0.4553794829024187
+        },
+        "scale": {
+          "macro_f1": 0.2913905214653438,
+          "hb_recall": 0.7674597083653109,
+          "hb_precision": 0.6997900629811057,
+          "hb_f1": 0.732064421669107,
+          "binary_accuracy": 0.6947456213511259,
+          "accuracy": 0.45954962468723937
+        },
+        "thermo": {
+          "macro_f1": 0.3319650316141681,
+          "hb_recall": 0.7682271680736761,
+          "hb_precision": 0.6893939393939394,
+          "hb_f1": 0.7266787658802177,
+          "binary_accuracy": 0.6859883236030025,
+          "accuracy": 0.45454545454545453
+        },
+        "collapse": {
+          "macro_f1": 0.33211571718609,
+          "hb_recall": 0.762854950115119,
+          "hb_precision": 0.700493305144468,
+          "hb_f1": 0.7303453343130052,
+          "binary_accuracy": 0.6939115929941618,
+          "accuracy": 0.46121768140116765
+        },
+        "scale_collapse": {
+          "macro_f1": 0.2857729900279994,
+          "hb_recall": 0.7697620874904068,
+          "hb_precision": 0.7013986013986014,
+          "hb_f1": 0.7339919502378338,
+          "binary_accuracy": 0.6968306922435363,
+          "accuracy": 0.4603836530442035
+        },
+        "thermo_collapse": {
+          "macro_f1": 0.3334365727696263,
+          "hb_recall": 0.7643898695318496,
+          "hb_precision": 0.7019027484143763,
+          "hb_f1": 0.7318148420279206,
+          "binary_accuracy": 0.69557964970809,
+          "accuracy": 0.46246872393661387
+        }
+      }
+    },
+    {
+      "repeat": 4,
+      "folds": "층화 5-fold (seed 20260905)",
+      "scores": {
+        "onehot": {
+          "macro_f1": 0.3294504175026333,
+          "hb_recall": 0.7444359171143515,
+          "hb_precision": 0.7028985507246377,
+          "hb_f1": 0.7230711889675736,
+          "binary_accuracy": 0.6901584653878232,
+          "accuracy": 0.457047539616347
+        },
+        "scale": {
+          "macro_f1": 0.2991499717443758,
+          "hb_recall": 0.7620874904067536,
+          "hb_precision": 0.7017667844522968,
+          "hb_f1": 0.7306843267108167,
+          "binary_accuracy": 0.6947456213511259,
+          "accuracy": 0.45829858215179314
+        },
+        "thermo": {
+          "macro_f1": 0.32797690437274063,
+          "hb_recall": 0.7429009976976209,
+          "hb_precision": 0.6999276934201012,
+          "hb_f1": 0.7207743857036485,
+          "binary_accuracy": 0.6872393661384487,
+          "accuracy": 0.45579649708090075
+        },
+        "collapse": {
+          "macro_f1": 0.3296000163327172,
+          "hb_recall": 0.7482732156561781,
+          "hb_precision": 0.7019438444924406,
+          "hb_f1": 0.7243684992570579,
+          "binary_accuracy": 0.6905754795663053,
+          "accuracy": 0.457047539616347
+        },
+        "scale_collapse": {
+          "macro_f1": 0.283973553151641,
+          "hb_recall": 0.7712970069071374,
+          "hb_precision": 0.7013258897418004,
+          "hb_f1": 0.7346491228070177,
+          "binary_accuracy": 0.6972477064220184,
+          "accuracy": 0.45746455379482903
+        },
+        "thermo_collapse": {
+          "macro_f1": 0.3293329532098625,
+          "hb_recall": 0.7528779739063699,
+          "hb_precision": 0.7012151536812009,
+          "hb_f1": 0.7261287934863064,
+          "binary_accuracy": 0.6914095079232694,
+          "accuracy": 0.45954962468723937
+        }
+      }
+    },
+    {
+      "repeat": 5,
+      "folds": "층화 5-fold (seed 20260906)",
+      "scores": {
+        "onehot": {
+          "macro_f1": 0.3320672112181252,
+          "hb_recall": 0.7521105141980046,
+          "hb_precision": 0.6985032074126871,
+          "hb_f1": 0.7243163340724316,
+          "binary_accuracy": 0.6889074228523769,
+          "accuracy": 0.4516263552960801
+        },
+        "scale": {
+          "macro_f1": 0.2881177045733347,
+          "hb_recall": 0.7613200306983884,
+          "hb_precision": 0.7010600706713781,
+          "hb_f1": 0.7299484915378956,
+          "binary_accuracy": 0.6939115929941618,
+          "accuracy": 0.4603836530442035
+        },
+        "thermo": {
+          "macro_f1": 0.3325411487942061,
+          "hb_recall": 0.7613200306983884,
+          "hb_precision": 0.6937062937062937,
+          "hb_f1": 0.7259421880717162,
+          "binary_accuracy": 0.6876563803169308,
+          "accuracy": 0.45329441201000836
+        },
+        "collapse": {
+          "macro_f1": 0.33537258795732156,
+          "hb_recall": 0.7482732156561781,
+          "hb_precision": 0.7004310344827587,
+          "hb_f1": 0.7235621521335807,
+          "binary_accuracy": 0.689324437030859,
+          "accuracy": 0.4549624687239366
+        },
+        "scale_collapse": {
+          "macro_f1": 0.2830479434070892,
+          "hb_recall": 0.7712970069071374,
+          "hb_precision": 0.7047685834502104,
+          "hb_f1": 0.7365335287651156,
+          "binary_accuracy": 0.7001668056713928,
+          "accuracy": 0.463302752293578
+        },
+        "thermo_collapse": {
+          "macro_f1": 0.3356791370503901,
+          "hb_recall": 0.7613200306983884,
+          "hb_precision": 0.6971187631763879,
+          "hb_f1": 0.7278063096111519,
+          "binary_accuracy": 0.6905754795663053,
+          "accuracy": 0.45829858215179314
+        }
+      }
+    }
+  ]
+}
