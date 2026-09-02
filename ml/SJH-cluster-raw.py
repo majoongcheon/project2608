@@ -17,7 +17,7 @@ from datetime import datetime
 
 import numpy as np
 
-from sjh_cluster import clean, cluster, gates, gower, load, scales, score
+from SJH_cluster_raw import clean, cluster, gates, gower, load, scales, score
 
 # 누수 6변수의 원본 컬럼 (docs/2024csv_column_mapping.xlsx 대조, FR-004b)
 LEAK_COLUMNS = {

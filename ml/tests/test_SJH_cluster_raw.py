@@ -6,7 +6,7 @@ DB 와 3,000행 CSV 없이 돌아야 한다. 모든 입력은 이 파일 안에�
 import numpy as np
 import pytest
 
-from sjh_cluster import load
+from SJH_cluster_raw import load
 
 
 def test_join_by_value_tuple_붙인다():
@@ -77,7 +77,7 @@ def test_join_유효한_9는_NULL_이_아니다():
     assert out[0]['__split'] == 'test'
 
 
-from sjh_cluster import clean
+from SJH_cluster_raw import clean
 
 
 def test_drop_전부결측_상수_식별자():
@@ -111,7 +111,7 @@ def test_drop_응답자_적은_블록():
     assert 'OK' in keep
 
 
-from sjh_cluster import gates
+from SJH_cluster_raw import gates
 
 
 def _gate_rows():
@@ -150,7 +150,7 @@ def test_게이트_행렬은_행마다_게이트값():
     assert gates.gate_matrix(found) == [[0], [1], [1], [0]]
 
 
-from sjh_cluster import scales
+from SJH_cluster_raw import scales
 
 
 def test_이진은_binary():
@@ -180,7 +180,7 @@ def test_판정표를_한번에():
     assert scales.judge_all(rows, ['A2', 'G6']) == {'A2': 'binary', 'G6': 'ordinal'}
 
 
-from sjh_cluster import gower
+from SJH_cluster_raw import gower
 
 
 def test_같은_행은_거리0():
@@ -232,7 +232,7 @@ def test_블록_가중치는_문항수로_나눈다():
     assert w == pytest.approx([1 / 3, 1 / 3, 1 / 3, 1.0])
 
 
-from sjh_cluster import cluster
+from SJH_cluster_raw import cluster
 
 
 def _two_blobs():
@@ -268,7 +268,7 @@ def test_계층군집도_두덩어리를_찾는다():
     assert labels[0] != labels[2]
 
 
-from sjh_cluster import score
+from SJH_cluster_raw import score
 
 
 def test_고부담_리프트():
