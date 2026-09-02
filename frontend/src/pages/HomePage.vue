@@ -29,7 +29,7 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
 <template>
   <div class="container stack">
     <header class="hero">
-      <p class="hero__eyebrow">발달장애인 보호자를 위한</p>
+      <p class="hero__eyebrow">발달장애인 보호자를 위한 서비스</p>
       <h1 class="hero__h">어떤 <em>도움</em>이<br />필요하신가요?</h1>
       <p class="hero__lead measure">
         로그인도 회원가입도 없이, <b>바로</b> 이용하실 수 있습니다.
@@ -72,7 +72,7 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
       <!-- 인사말 -->
       <div class="letter measure">
         <p>돌봄의 무게는 겉으로 잘 드러나지 않습니다.</p>
-        <p class="letter__lead">그래서 몇 가지만 여쭙고,<br />지금 어느 정도인지 함께 읽어 보려 합니다.</p>
+        <p class="letter__lead">그래서 몇 가지만 여쭙고, 지금 어느 정도인지 함께 읽어 보려 합니다.</p>
         <p class="letter__soft">정답을 가리는 자리가 아니니 편한 대로 답해 주세요.</p>
       </div>
 
@@ -122,7 +122,7 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
       <ol class="flow__list">
         <li><b aria-hidden="true">1</b><span>몇 가지 질문에 답합니다.</span></li>
         <li><b aria-hidden="true">2</b><span>지금의 부담 수준과 <strong>그렇게 본 이유</strong>를 알려 드립니다.</span></li>
-        <li><b aria-hidden="true">3</b><span>가까운 <strong class="blue">신청처를 지도로</strong> 안내해 드립니다.</span></li>
+        <li><b aria-hidden="true">3</b><span>가까운 <strong class="map">신청처를 지도로</strong> 안내해 드립니다.</span></li>
       </ol>
     </section>
 
@@ -151,7 +151,7 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
 /* 강조어에만 색과 밑선. 밑선은 글자 아래를 지나가는 띠라 획을 가리지 않는다. */
 .hero__h em {
   font-style: normal; color: var(--primary-on-tint);
-  background: linear-gradient(var(--surface-strong), var(--surface-strong)) 0 82% / 100% 34% no-repeat;
+  background: linear-gradient(var(--tertiary-tint), var(--tertiary-tint)) 0 82% / 100% 34% no-repeat;
   padding-inline: 2px;
 }
 .hero__lead { font-size: 16px; color: var(--muted); margin: 0; }
@@ -160,26 +160,28 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
 /* 척도 양끝 — 막대가 무엇에서 무엇으로 가는지 글로 밝힌다 */
 .scale {
   display: flex; justify-content: space-between; gap: var(--sp-sm);
-  font-size: 12px; color: var(--muted-soft); margin: 0 0 var(--sp-md);
+  font-size: 12px; color: var(--muted-soft); margin: 0 0 var(--sp-base);
 }
 
 /* .stack 의 간격 규칙은 .container 의 직계 자식에만 닿는다. .side 안의
-   두 덩어리는 여기서 직접 띄운다. */
-.side { display: grid; gap: var(--sp-base); }
+   두 덩어리는 여기서 직접 띄운다.
+   인사말과 조사 결과는 화면 폭과 상관없이 늘 위에서 아래로 읽는다. 좌우로
+   나란히 놓으면 눈이 어디를 먼저 볼지 헷갈리고 두 단의 높이도 어긋난다.
+   대신 위 두 메뉴 카드와 같은 폭을 그대로 써서 편지지의 여백선을 맞춘다. */
+.side { display: grid; gap: var(--sp-xl); }
 
 /* ── 홈페이지 모드에서 넓어진 자리를 채운다 ───────────────────────────── */
 @media (min-width: 900px) {
   :root[data-width="wide"] .hero__h { font-size: 42px; }
-  /* 인사말과 조사 결과를 나란히 놓는다. 세로로만 쌓으면 오른쪽이 빈다. */
-  :root[data-width="wide"] .side {
-    display: grid; grid-template-columns: 1fr 1.25fr; gap: var(--sp-xl); align-items: start;
-  }
-  :root[data-width="wide"] .legend { grid-template-columns: 1fr 1fr; column-gap: var(--sp-lg); }
-  /* 조사 결과는 눈썹 문구와 제목을 지나서야 본문이 나오는데 인사말은 첫 줄부터
-     시작해 두 단의 높이가 어긋난다. 인사말을 네 줄만큼 내려 맞춘다.
-     (본문 16px × 행간 1.8 × 4줄 = 115px = 7.2em)
-     세로로 쌓이는 모바일 모드에서는 그냥 빈틈이 되므로 여기서만 적용한다. */
-  :root[data-width="wide"] .letter { padding-top: var(--letter-drop, 7.2em); }
+  /* 인사말과 맺음말은 한 문장이 한 줄에 앉을 때 가장 잘 읽힌다. .measure 의
+     62ch 규칙이 도로 접어 버리므로 여기서 풀고 줄바꿈을 막는다.
+     좁은 종이(640px)에서는 넘치므로 넓은 모드에서만 건다. */
+  :root[data-width="wide"] .letter,
+  :root[data-width="wide"] .sign__body { max-width: none; }
+  :root[data-width="wide"] .letter__lead,
+  :root[data-width="wide"] .sign__body { white-space: nowrap; }
+  /* 조사 결과도 종이 폭을 다 쓴다. 안쪽 여백만 한 단 더 넓힌다. */
+  :root[data-width="wide"] .stat { padding: var(--sp-xxl) var(--sp-xl); }
 }
 
 /* ── 두 메뉴 ────────────────────────────────────────────────────────────
@@ -194,14 +196,19 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
   text-decoration: none; color: var(--body);
   background: var(--canvas); box-shadow: var(--shadow-soft);
 }
-.card--map { --hue: var(--secondary); --hue-tx: var(--secondary-on-tint); }
+/* 아이콘 글리프는 --icon-hue 로 따로 뽑아 둔다. 테두리·제목은 카드의 --hue 를
+   그대로 쓰고, 아이콘만 한 단 진하게 눌러 두 카드를 구분한다. */
+.card--map {
+  --hue: var(--secondary); --hue-tx: var(--secondary-on-tint);
+  --icon-fill: 26%; --icon-hue: var(--secondary-deep);
+}
 .card:hover { box-shadow: var(--shadow-card); border-color: var(--hairline); border-top-color: var(--hue); }
 .card__icon {
   display: inline-flex; align-items: center; justify-content: center;
   width: 60px; height: 60px; border-radius: 16px;
   background: var(--surface-strong);                       /* color-mix 미지원 폴백 */
-  background: color-mix(in srgb, var(--hue) 15%, var(--canvas));
-  color: var(--hue);
+  background: color-mix(in srgb, var(--hue) var(--icon-fill, 15%), var(--canvas));
+  color: var(--icon-hue, var(--hue));
 }
 .card__icon svg { width: 40px; height: 40px; display: block; }
 .card__title { font-size: 21px; font-weight: 700; color: var(--hue-tx); line-height: 1.4; }
@@ -214,8 +221,9 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
 }
 
 /* ── 인사말 ── */
-.letter { color: var(--body); }
-.letter p { margin: 0 0 var(--sp-sm); word-break: keep-all; }
+/* 첫 문장 앞을 한 줄 비운다. 16px × 행간 1.85 = 30px 이 빈 줄 한 개다. */
+.letter { color: var(--body); text-align: center; padding-top: 30px; }
+.letter p { margin: 0 0 var(--sp-lg); word-break: keep-all; }
 .letter p:last-child { margin-bottom: 0; }
 .letter__lead { font-size: 19px; line-height: 1.9; color: var(--ink); font-weight: 500; }
 .letter__soft { font-size: 15px; color: var(--muted); }
@@ -223,20 +231,20 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
 /* ── 조사 결과 ── */
 .stat {
   background: var(--surface-soft); border: 1px solid var(--hairline);
-  border-radius: var(--radius-md); padding: var(--sp-lg) var(--sp-base);
+  border-radius: var(--radius-md); padding: var(--sp-xl) var(--sp-lg);
 }
 .stat__eyebrow {
   font-size: 12px; font-weight: 700; letter-spacing: .06em;
-  color: var(--muted-soft); margin: 0 0 var(--sp-sm);
+  color: var(--muted-soft); margin: 0 0 var(--sp-base);
 }
 .stat__h {
-  font-size: 18px; font-weight: 400; line-height: 1.75; color: var(--body);
-  margin: 0 0 var(--sp-base); word-break: keep-all;
+  font-size: 19px; font-weight: 400; line-height: 1.95; color: var(--body);
+  margin: 0 0 var(--sp-xl); word-break: keep-all;
 }
 .stat__h b { color: var(--ink); font-weight: 700; }
-.stat__h b.hot { color: var(--primary-on-tint); font-size: 21px; }
+.stat__h b.hot { color: var(--plum-on-tint); font-size: 21px; }
 
-.bar { display: flex; gap: 2px; height: 26px; margin-bottom: var(--sp-sm); }
+.bar { display: flex; gap: 2px; height: 30px; margin-bottom: var(--sp-sm); }
 .bar__seg { display: block; height: 100%; }
 .bar__seg:first-child { border-radius: 4px 0 0 4px; }
 .bar__seg:last-child { border-radius: 0 4px 4px 0; }
@@ -254,11 +262,16 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
   border: 2px solid var(--burden-2); border-top: 0; border-radius: 0 0 3px 3px;
 }
 .brace__rest { flex: 1; }
-.bar__callout { font-size: 14px; color: var(--muted); margin: 0 0 var(--sp-base); }
-.bar__callout b { color: var(--primary-on-tint); font-size: 17px; font-weight: 700; }
+.bar__callout { font-size: 14px; color: var(--muted); margin: 0 0 var(--sp-lg); }
+.bar__callout b { color: var(--tertiary-on-tint); font-size: 17px; font-weight: 700; }
 
-.legend { list-style: none; margin: 0 0 var(--sp-base); padding: 0; display: grid; gap: 5px; }
-.legend li { display: grid; grid-template-columns: auto 1fr auto; gap: var(--sp-sm); align-items: center; font-size: 13.5px; color: var(--muted); }
+.legend { list-style: none; margin: 0 0 var(--sp-lg); padding: 0; display: grid; gap: var(--sp-md); }
+.legend li {
+  display: grid; grid-template-columns: auto 1fr auto; gap: var(--sp-md);
+  align-items: center; font-size: 14.5px; color: var(--muted);
+  padding-bottom: var(--sp-md); border-bottom: 1px solid var(--hairline-soft);
+}
+.legend li:last-child { padding-bottom: 0; border-bottom: 0; }
 .legend--hot { color: var(--ink); font-weight: 600; }
 .sw { width: 11px; height: 11px; border-radius: 3px; display: block; }
 .sw--1 { background: var(--burden-1); } .sw--2 { background: var(--burden-2); }
@@ -267,26 +280,57 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
 .legend__n { font-variant-numeric: tabular-nums; color: var(--muted-soft); }
 .legend--hot .legend__n { color: var(--body); }
 
-.stat__note { font-size: 16px; color: var(--ink); font-weight: 700; margin: 0; }
+.stat__note {
+  font-size: 17px; color: var(--ink); font-weight: 700;
+  margin: var(--sp-lg) 0 0; padding-top: var(--sp-lg);
+  border-top: 1px solid var(--hairline);
+}
 
 /* ── 이용 흐름 ── */
 .flow { border-top: 1px solid var(--hairline); padding-top: var(--sp-lg); }
-.flow__h { font-size: 16px; color: var(--muted); font-weight: 600; margin: 0 0 var(--sp-md); }
-.flow__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-md); }
-@media (min-width: 860px) { .flow__list { grid-template-columns: repeat(3, 1fr); } }
-.flow__list li { display: grid; grid-template-columns: auto 1fr; gap: var(--sp-md); align-items: start; }
+/* 제목 아래 한 줄을 비운다. 16px × 행간 1.7 = 27px 이 빈 줄 한 개다. */
+.flow__h { font-size: 16px; color: var(--muted); font-weight: 600; margin: 0 0 calc(var(--sp-md) + 27px); }
+.flow__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-base); }
+.flow__list li {
+  display: grid; grid-template-columns: auto 1fr; gap: var(--sp-md);
+  align-items: start; align-content: start;
+  border: 1px solid var(--hairline); border-radius: var(--radius-md);
+  padding: var(--sp-base); background: var(--canvas);
+}
+/* 1 → 3 으로 갈수록 동그라미가 진해진다. 걸음이 쌓여 결론으로 가는 순서를
+   명도 하나로만 말한다(무지개색 금지). 배경 명도 L 이
+   0.62 → 0.168 → 0.096 으로 단조 감소해 색을 못 봐도 순서가 읽힌다.
+   2·3 번의 흰 숫자는 각각 4.82:1 · 7.17:1 로 AA 를 넘는다. */
 .flow__list b {
   display: inline-flex; align-items: center; justify-content: center;
   width: 27px; height: 27px; border-radius: 50%; flex: none;
   background: var(--primary); color: #fff; font-size: 14px; font-weight: 700;
 }
-.flow__list li:last-child b { background: var(--secondary); }
-.flow__list span { font-size: 16px; color: var(--body); word-break: keep-all; }
+/* 첫 걸음은 가볍게 — 채운 색면 대신 연한 살구빛에 진한 숫자를 얹는다. */
+.flow__list li:first-child b {
+  background: var(--primary-disabled);                     /* color-mix 미지원 폴백 */
+  background: color-mix(in srgb, var(--primary) 20%, var(--canvas));
+  color: var(--primary-on-tint);
+}
+/* 마지막 걸음이 가장 진하다. 지도 카드 아이콘과 같은 색이라 "지도로
+   안내" 라는 문장과 위의 복지서비스 카드가 눈으로 이어진다. */
+.flow__list li:last-child b { background: var(--secondary-deep); }
+.flow__list span { font-size: 16px; line-height: 1.7; color: var(--body); word-break: keep-all; }
 .flow__list strong { color: var(--ink); font-weight: 700; }
-.flow__list strong.blue { color: var(--secondary-on-tint); }
+.flow__list strong.map { color: var(--secondary-on-tint); }
+
+/* 세 단으로 벌릴 때는 숫자를 글 옆이 아니라 글 위에 얹는다.
+   옆에 두면 칸 너비는 같아도 문장 길이가 제각각이라, 1번 문장이 짧아 다음
+   숫자까지 텅 비고 2번 문장은 길어 3번 숫자에 바싹 붙어 보인다. 숫자를 한
+   줄 위로 올리면 세 숫자가 같은 줄에 같은 간격으로 놓인다. */
+@media (min-width: 860px) {
+  .flow__list { grid-template-columns: repeat(3, 1fr); column-gap: var(--sp-xl); }
+  .flow__list li { grid-template-columns: 1fr; gap: var(--sp-base); }
+}
 
 /* ── 맺음말 ── */
 .sign { border-top: 1px solid var(--hairline); padding-top: var(--sp-lg); }
-.sign__body { font-size: 14px; color: var(--muted); margin: 0 0 var(--sp-md); word-break: keep-all; line-height: 1.75; }
-.sign__from { font-size: 18px; font-weight: 700; color: var(--ink); text-align: right; margin: 0; }
+.sign__body { font-size: 14px; color: var(--muted); margin: 0 auto; word-break: keep-all; line-height: 1.75; text-align: center; }
+/* 맺음말과 서명 사이를 두 줄 비운다. 본문 14px × 행간 1.75 × 2줄 = 49px. */
+.sign__from { font-size: 18px; font-weight: 700; color: var(--plum); text-align: right; margin: 49px 0 0; }
 </style>

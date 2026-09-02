@@ -57,20 +57,44 @@
      3.87~4.24:1 로 AA 에 미달한다. 선·점 같은 비텍스트는 --primary 그대로. */
   --primary-on-tint: #a04c31;  /* 색면 위 4.72~5.17:1 */
 
-  /* 두 번째 색 — 지도 계열. 크림 위 잉크 파랑은 만년필 편지의 색이다.
-     dataviz 검증기(scripts/validate_palette.js)로 테라코타와 짝지어 돌렸다.
-     색각이상 분리도 ΔE 16.8 로 목표 8 을 크게 넘겨 전 항목 통과.
-     (청록 계열은 채도 미달로 회색처럼 읽히거나 분리도 6 대에 걸렸다.) */
-  --secondary: #2b6ea8;          /* 면·아이콘 — 배경 대비 3:1 이상 */
-  --secondary-on-tint: #245d8f;  /* 글자로 쓸 때 — 5.55:1 */
+  /* ── 노을 팔레트 ───────────────────────────────────────────────────
+     해질녘 하늘의 색 흐름. 테라코타에서 살구·복숭아로 밝아지다 자두로
+     떨어진다. 한 계열의 온도 차라 편지지 크림 위에서 서로 다투지 않는다.
+
+       테라코타 #b5563a  주조 · 부담감 진단 · CTA
+       살구     #d2703f  보조 · 복지서비스 지도
+       복숭아   #f0b678  강조 · 통계 · 하이라이트 띠
+       자두     #7d4a5f  맺음 · 봉랍 · 최고부담
+
+     검증(크림 #fffaf5 기준) — 살구는 면 3.30:1 로 1.4.11(3:1) 통과,
+     글자로 쓸 때는 --secondary-on-tint 5.15:1 로 AA 통과.
+     테라코타↔살구 색각이상 분리도 ΔE 정상 13.7 / 적록 15.1·26.2 /
+     청황 10.5 로 전 항목이 목표 8 을 넘는다. 다만 이전 잉크 파랑의
+     80.5 보다는 좁아, 두 메뉴 카드는 색만이 아니라 아이콘 채움 강도로도
+     갈라 둔다. */
+  --secondary: #d2703f;          /* 살구 — 면·아이콘, 크림 위 3.30:1 */
+  --secondary-on-tint: #a85325;  /* 살구 글자 — 5.15:1 */
+  /* 살구를 명도만 33% 로 떨어뜨린 값(H·S 유지). 두 메뉴 카드의 아이콘이
+     테라코타(#b5563a)와 살구(#d2703f)로는 같은 색으로 읽혀서, 지도 쪽
+     아이콘과 이용 흐름 3단계를 이 값으로 확실히 눌러 준다. 흰 글자 7.17:1. */
+  --secondary-deep: #8a4420;     /* 진한 살구 — 지도 아이콘·흐름 3단계 */
+
+  --tertiary: #f0b678;           /* 복숭아 — 띠·면 전용(글자 금지, 1.74:1) */
+  --tertiary-tint: #fbe6cd;      /* 강조어 아래 지나가는 연한 띠 */
+  --tertiary-on-tint: #8a5a1f;   /* 복숭아 자리의 글자 — 5.68:1 */
+
+  --plum: #7d4a5f;               /* 자두 — 맺음·봉랍, 6.71:1 */
+  --plum-on-tint: #6b3d50;       /* 자두 글자 — 8.41:1 */
 
   /* 조사 결과 막대의 5단계. 1~5 는 순서 있는 척도이므로 무지개색이 아니라
-     한 색상의 명도 단계로 간다. 어두울수록 부담이 크다. 명도 단조 증가 확인. */
-  --burden-1: #7d3520;
-  --burden-2: #a9553a;
-  --burden-3: #c98a72;
-  --burden-4: #e0b8a6;
-  --burden-5: #efdcd2;
+     노을이 지는 순서로 간다 — 자두에서 복숭아를 지나 크림으로. 어두울수록
+     부담이 크다. 명도 L 이 0.070 → 0.128 → 0.257 → 0.533 → 0.775 로
+     단조 증가하는 것을 확인했다(색을 못 봐도 순서가 읽힌다). */
+  --burden-1: #6b3d50;         /* 자두   — 최고부담 */
+  --burden-2: #a24a32;         /* 테라코타 — 고부담 */
+  --burden-3: #d2703f;         /* 살구   — 중간부담 */
+  --burden-4: #eeb684;         /* 복숭아 — 저부담 */
+  --burden-5: #f7e0cd;         /* 크림   — 부담 없음 */
 
   /* 편지지 폭 — 머리말의 전환 단추가 :root[data-width] 로 바꾼다 */
   --sheet-w: 640px;
@@ -104,10 +128,19 @@
   --flap-h: 34px;              /* 플랩 높이 */
   /* 실링 — 자두색. 요즘 실링은 울퉁불퉁한 덩어리가 아니라
      테두리 있는 깔끔한 원에 각인 하나가 들어간 형태다. */
-  --seal: #7d2749;
-  --seal-hi: #9c3a5f;          /* 왁스에 빛이 닿는 쪽 */
-  --seal-lo: #611c38;
+  /* 봉랍 — 붉은 왁스. 앞서 쓴 #a52a2a 는 채도·명도가 낮아 크라프트
+     플랩(#e0c3a6) 위에서 어둡게 눌려 보였다. 한 단 밝히고 부드럽게 풀어
+     종이 위에 얹힌 왁스로 읽히게 한다. 세 값 모두 같은 색상(H 0°,S 53%)에서
+     명도만 나눈 것이라, 광택이 색 변화가 아니라 빛의 세기로 보인다. */
+  --seal: #cd5c5c;             /* 봉랍 — HSL 0,53%,58% · 크림 위 3.84:1 */
+  --seal-hi: #d87e7e;          /* 왁스에 빛이 닿는 쪽 — 같은 색상의 L 67% */
+  --seal-lo: #bb3a3a;          /* 그늘진 쪽 — 같은 색상의 L 48% */
   --margin-line: #d98b6f;      /* 왼쪽 여백선 — 편지지의 붉은 세로선 */
+
+  /* 포옹 일러스트 — 두 사람을 다른 색으로 나눠야 겹친 자리가 읽힌다 */
+  --hug-back: #b5563a;         /* 안아 주는 쪽 — 테라코타 */
+  --hug-front: #7d4a5f;        /* 안긴 쪽 — 자두. 26px 에서도 겹침이 읽힌다 */
+  --hug-arm: #b5563a;          /* 감싼 팔 */
   --margin-x: 26px;            /* 여백선 위치 */
 
   /* ── 타이포 ───────────────────────────────────────────────────────────
@@ -190,13 +223,13 @@ main .container::after {
   width: 40px; height: 40px;
   border-radius: 50%;
   background:
-    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23f2d3de' stroke-opacity='.85' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='12.5' y='15.5' width='15' height='10' rx='2' stroke-width='1.6'/%3E%3Cpath d='M12.5 17.2 20 22l7.5-4.8' stroke-width='1.6'/%3E%3C/g%3E%3C/svg%3E")
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cg fill='none' stroke='%23fff4e9' stroke-opacity='.9' stroke-linecap='round' stroke-linejoin='round'%3E%3Crect x='12.5' y='15.5' width='15' height='10' rx='2' stroke-width='1.6'/%3E%3Cpath d='M12.5 17.2 20 22l7.5-4.8' stroke-width='1.6'/%3E%3C/g%3E%3C/svg%3E")
       center / 40px 40px no-repeat,
     radial-gradient(circle at 34% 28%, var(--seal-hi) 0%, var(--seal) 55%, var(--seal-lo) 100%);
   box-shadow:
-    0 1px 3px rgba(51, 34, 28, .34),
-    inset 0 1px 1px rgba(255, 255, 255, .20),
-    inset 0 -2px 3px rgba(0, 0, 0, .28);
+    0 1px 3px rgba(51, 34, 28, .20),
+    inset 0 1px 1px rgba(255, 255, 255, .28),
+    inset 0 -2px 3px rgba(0, 0, 0, .14);
   pointer-events: none;
 }
 
