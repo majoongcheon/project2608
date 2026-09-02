@@ -10,7 +10,6 @@ from pathlib import Path
 import joblib
 import numpy as np
 import sklearn
-from sklearn.linear_model import LogisticRegression
 from sklearn.preprocessing import OneHotEncoder
 
 from cb_burden import config
@@ -34,7 +33,8 @@ def export_tree(t):
     }
 
 
-def run(snap, base, sel, cal, out_dir, model_version, question_set_version, verbose=True):
+def run(snap, base, sel, cal, out_dir, model_version, question_set_version,
+        verbose=True, logit_params=None):
     out_dir = Path(out_dir)
     out_dir.mkdir(parents=True, exist_ok=True)
 
@@ -60,7 +60,7 @@ def run(snap, base, sel, cal, out_dir, model_version, question_set_version, verb
         # 다항 로지스틱 — 계수 행렬만 내보내면 런타임이 내적 + softmax 로 재현한다.
         enc = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
         Xoh = enc.fit_transform(Xs)
-        model = LogisticRegression(max_iter=2000, random_state=config.SEED)
+        model = _core.make_logit(**(logit_params or {}))
         model.fit(Xoh, y)
 
         cats = [[float(v) for v in c] for c in enc.categories_]

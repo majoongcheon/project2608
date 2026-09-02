@@ -8,14 +8,39 @@
 않고 그 모듈을 쓴다 — 두 벌이 되면 갈라진다.
 """
 import json
+import os
+import warnings
 from pathlib import Path
 
 import joblib
 import numpy as np
+import sklearn
 
 from cb_burden.explain.saabas import contributions as saabas_contributions
 
 EPS = 1e-4
+ALLOW_MISMATCH = 'CB_ALLOW_SKLEARN_MISMATCH'
+
+
+def _check_sklearn_version(saved, release_dir):
+    """joblib 은 만든 sklearn 과 읽는 sklearn 이 같아야 한다.
+
+    다르면 sklearn 이 "결과가 잘못될 수 있다"고 경고만 하고 넘어간다. 경고로 두면
+    **조용히 틀린 판정**이 나갈 수 있으므로 기동을 막는다.
+    옛 파일에는 기록이 없을 수 있는데, 그건 막지 않는다.
+    """
+    now = sklearn.__version__
+    if not saved or saved == now:
+        return
+    msg = (f'모델을 만든 sklearn 과 지금 sklearn 이 다릅니다 ({release_dir})\n'
+           f'  만든 것 {saved}\n  지금   {now}\n'
+           f'  → ml/requirements.txt 의 버전으로 맞추세요:\n'
+           f'     pip3 install --target ml/.pylibs -r ml/requirements.txt\n'
+           f'  (사정을 알고 넘기려면 {ALLOW_MISMATCH}=1)')
+    if os.getenv(ALLOW_MISMATCH) == '1':
+        warnings.warn(msg, RuntimeWarning)
+        return
+    raise ValueError(msg)
 
 
 class Engine:
@@ -36,6 +61,8 @@ class Engine:
 
         def rd(name):
             return json.loads((d / name).read_text(encoding='utf-8'))
+
+        _check_sklearn_version(bundle.get('sklearn_version'), d)
 
         model_json = rd('model_v1.json')
         if list(bundle['features']) != list(model_json['features']):
