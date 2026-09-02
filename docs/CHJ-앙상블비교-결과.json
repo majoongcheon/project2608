@@ -1,0 +1,1769 @@
+{
+  "generated_at": "2026-09-02T15:13:41",
+  "author": "최호준 (CHJ)",
+  "question": "앙상블이 단일 로지스틱보다 낮은 것이 실제 차이인가, 잡음인가",
+  "note": "train 2,398건만 사용. test 602건 미사용. 클래스 배수·혼합 가중치·스태킹 메타를 모두 fold 학습 부분의 내부 CV 에서만 학습했다.",
+  "setup": {
+    "n_train": 2398,
+    "question_set": "qs-v1.0.0",
+    "features": [
+      "daily_routine_satisfaction",
+      "family_support_for_employment",
+      "help_needed_hours",
+      "household_head_type",
+      "last_job_quit_reason",
+      "relation_to_person",
+      "understands_work_meaning"
+    ],
+    "high_burden_rate": 0.5434,
+    "repeats": 5,
+    "inner_splits": 3,
+    "bootstrap": 2000,
+    "baseline": "logit"
+  },
+  "summary": {
+    "logit": {
+      "label": "logit (배포본 v1.0.0)",
+      "macro_f1": {
+        "mean": 0.3348,
+        "sd": 0.0049,
+        "per_repeat": [
+          0.3388,
+          0.3366,
+          0.3388,
+          0.3276,
+          0.332
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7564,
+        "sd": 0.0071,
+        "per_repeat": [
+          0.7559,
+          0.7598,
+          0.7659,
+          0.7536,
+          0.7467
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.7001,
+        "sd": 0.0025,
+        "per_repeat": [
+          0.7036,
+          0.7016,
+          0.6994,
+          0.6974,
+          0.6985
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7272,
+        "sd": 0.0039,
+        "per_repeat": [
+          0.7288,
+          0.7296,
+          0.7311,
+          0.7245,
+          0.7218
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6916,
+        "sd": 0.0034,
+        "per_repeat": [
+          0.6943,
+          0.6939,
+          0.6939,
+          0.6885,
+          0.6872
+        ]
+      },
+      "accuracy": {
+        "mean": 0.4575,
+        "sd": 0.0044,
+        "per_repeat": [
+          0.46,
+          0.4591,
+          0.4616,
+          0.4562,
+          0.4504
+        ]
+      }
+    },
+    "rf": {
+      "label": "rf",
+      "macro_f1": {
+        "mean": 0.2938,
+        "sd": 0.0064,
+        "per_repeat": [
+          0.2952,
+          0.2831,
+          0.2973,
+          0.2933,
+          0.2999
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7612,
+        "sd": 0.0089,
+        "per_repeat": [
+          0.7521,
+          0.7513,
+          0.769,
+          0.7698,
+          0.7636
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.6919,
+        "sd": 0.0058,
+        "per_repeat": [
+          0.6901,
+          0.7003,
+          0.6944,
+          0.6846,
+          0.69
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7248,
+        "sd": 0.0035,
+        "per_repeat": [
+          0.7198,
+          0.7249,
+          0.7298,
+          0.7247,
+          0.725
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.686,
+        "sd": 0.0042,
+        "per_repeat": [
+          0.6818,
+          0.6902,
+          0.6906,
+          0.6822,
+          0.6852
+        ]
+      },
+      "accuracy": {
+        "mean": 0.4517,
+        "sd": 0.0036,
+        "per_repeat": [
+          0.4462,
+          0.4508,
+          0.4545,
+          0.4516,
+          0.4554
+        ]
+      }
+    },
+    "lgbm": {
+      "label": "lgbm",
+      "macro_f1": {
+        "mean": 0.3251,
+        "sd": 0.0057,
+        "per_repeat": [
+          0.3196,
+          0.3199,
+          0.3298,
+          0.3322,
+          0.3242
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7474,
+        "sd": 0.0167,
+        "per_repeat": [
+          0.7652,
+          0.7552,
+          0.7529,
+          0.7421,
+          0.7214
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.6907,
+        "sd": 0.0053,
+        "per_repeat": [
+          0.6933,
+          0.6819,
+          0.6923,
+          0.6957,
+          0.6902
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7178,
+        "sd": 0.0081,
+        "per_repeat": [
+          0.7275,
+          0.7167,
+          0.7213,
+          0.7182,
+          0.7054
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6808,
+        "sd": 0.0065,
+        "per_repeat": [
+          0.6885,
+          0.6756,
+          0.6839,
+          0.6835,
+          0.6726
+        ]
+      },
+      "accuracy": {
+        "mean": 0.4438,
+        "sd": 0.0041,
+        "per_repeat": [
+          0.4479,
+          0.4454,
+          0.4433,
+          0.4454,
+          0.437
+        ]
+      }
+    },
+    "xgb": {
+      "label": "xgb",
+      "macro_f1": {
+        "mean": 0.3288,
+        "sd": 0.009,
+        "per_repeat": [
+          0.3269,
+          0.3186,
+          0.3428,
+          0.3313,
+          0.3246
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7535,
+        "sd": 0.0182,
+        "per_repeat": [
+          0.7513,
+          0.782,
+          0.7567,
+          0.7437,
+          0.7337
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.6913,
+        "sd": 0.0099,
+        "per_repeat": [
+          0.7003,
+          0.6744,
+          0.6953,
+          0.6946,
+          0.6918
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7209,
+        "sd": 0.0056,
+        "per_repeat": [
+          0.7249,
+          0.7242,
+          0.7247,
+          0.7183,
+          0.7121
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.683,
+        "sd": 0.006,
+        "per_repeat": [
+          0.6902,
+          0.6764,
+          0.6877,
+          0.6831,
+          0.6776
+        ]
+      },
+      "accuracy": {
+        "mean": 0.4487,
+        "sd": 0.0043,
+        "per_repeat": [
+          0.45,
+          0.4491,
+          0.4533,
+          0.4495,
+          0.4416
+        ]
+      }
+    },
+    "catboost": {
+      "label": "catboost",
+      "macro_f1": {
+        "mean": 0.3121,
+        "sd": 0.0124,
+        "per_repeat": [
+          0.3166,
+          0.3179,
+          0.2965,
+          0.327,
+          0.3025
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7512,
+        "sd": 0.0083,
+        "per_repeat": [
+          0.7498,
+          0.7475,
+          0.7636,
+          0.7536,
+          0.7414
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.703,
+        "sd": 0.0084,
+        "per_repeat": [
+          0.7105,
+          0.7099,
+          0.6978,
+          0.706,
+          0.691
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7263,
+        "sd": 0.0062,
+        "per_repeat": [
+          0.7296,
+          0.7282,
+          0.7292,
+          0.729,
+          0.7153
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6923,
+        "sd": 0.0076,
+        "per_repeat": [
+          0.6981,
+          0.6968,
+          0.6918,
+          0.6956,
+          0.6793
+        ]
+      },
+      "accuracy": {
+        "mean": 0.4572,
+        "sd": 0.0073,
+        "per_repeat": [
+          0.4558,
+          0.4591,
+          0.4545,
+          0.4683,
+          0.4483
+        ]
+      }
+    },
+    "soft_all": {
+      "label": "앙상블: 소프트보팅(5종)",
+      "macro_f1": {
+        "mean": 0.3212,
+        "sd": 0.007,
+        "per_repeat": [
+          0.3171,
+          0.3295,
+          0.3121,
+          0.3211,
+          0.3263
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7538,
+        "sd": 0.0036,
+        "per_repeat": [
+          0.7529,
+          0.7567,
+          0.7498,
+          0.7583,
+          0.7513
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.6995,
+        "sd": 0.0072,
+        "per_repeat": [
+          0.7083,
+          0.7023,
+          0.6984,
+          0.7002,
+          0.6885
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7256,
+        "sd": 0.0047,
+        "per_repeat": [
+          0.7299,
+          0.7285,
+          0.7232,
+          0.7281,
+          0.7185
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6902,
+        "sd": 0.0065,
+        "per_repeat": [
+          0.6972,
+          0.6935,
+          0.6881,
+          0.6922,
+          0.6802
+        ]
+      },
+      "accuracy": {
+        "mean": 0.4562,
+        "sd": 0.0047,
+        "per_repeat": [
+          0.4558,
+          0.4633,
+          0.4504,
+          0.457,
+          0.4545
+        ]
+      }
+    },
+    "soft_lin_boost": {
+      "label": "앙상블: 소프트보팅(선형+부스팅3)",
+      "macro_f1": {
+        "mean": 0.3287,
+        "sd": 0.0053,
+        "per_repeat": [
+          0.3278,
+          0.3349,
+          0.3219,
+          0.3256,
+          0.3331
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7584,
+        "sd": 0.0121,
+        "per_repeat": [
+          0.7536,
+          0.7544,
+          0.7652,
+          0.7751,
+          0.7437
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.6992,
+        "sd": 0.006,
+        "per_repeat": [
+          0.7065,
+          0.7006,
+          0.6996,
+          0.6899,
+          0.6991
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7275,
+        "sd": 0.0041,
+        "per_repeat": [
+          0.7293,
+          0.7265,
+          0.7309,
+          0.73,
+          0.7207
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6913,
+        "sd": 0.0038,
+        "per_repeat": [
+          0.696,
+          0.6914,
+          0.6939,
+          0.6885,
+          0.6868
+        ]
+      },
+      "accuracy": {
+        "mean": 0.457,
+        "sd": 0.0041,
+        "per_repeat": [
+          0.4545,
+          0.4641,
+          0.4541,
+          0.4554,
+          0.457
+        ]
+      }
+    },
+    "soft_weighted": {
+      "label": "앙상블: 가중 소프트보팅(내부CV 학습)",
+      "macro_f1": {
+        "mean": 0.3237,
+        "sd": 0.0072,
+        "per_repeat": [
+          0.3178,
+          0.3297,
+          0.3304,
+          0.3261,
+          0.3144
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7526,
+        "sd": 0.0087,
+        "per_repeat": [
+          0.7521,
+          0.7513,
+          0.7659,
+          0.7521,
+          0.7414
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.6991,
+        "sd": 0.0034,
+        "per_repeat": [
+          0.6995,
+          0.6998,
+          0.7043,
+          0.696,
+          0.696
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7249,
+        "sd": 0.0057,
+        "per_repeat": [
+          0.7249,
+          0.7246,
+          0.7338,
+          0.723,
+          0.7179
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6896,
+        "sd": 0.0054,
+        "per_repeat": [
+          0.6897,
+          0.6897,
+          0.6981,
+          0.6868,
+          0.6835
+        ]
+      },
+      "accuracy": {
+        "mean": 0.4527,
+        "sd": 0.0065,
+        "per_repeat": [
+          0.4466,
+          0.4583,
+          0.4608,
+          0.4504,
+          0.4475
+        ]
+      }
+    },
+    "stacking": {
+      "label": "앙상블: 스태킹(메타=로지스틱)",
+      "macro_f1": {
+        "mean": 0.2994,
+        "sd": 0.0074,
+        "per_repeat": [
+          0.3071,
+          0.2965,
+          0.2904,
+          0.307,
+          0.2963
+        ]
+      },
+      "hb_recall": {
+        "mean": 0.7693,
+        "sd": 0.0046,
+        "per_repeat": [
+          0.7629,
+          0.7721,
+          0.7751,
+          0.7682,
+          0.7682
+        ]
+      },
+      "hb_precision": {
+        "mean": 0.7025,
+        "sd": 0.0054,
+        "per_repeat": [
+          0.7055,
+          0.7035,
+          0.7093,
+          0.6985,
+          0.6956
+        ]
+      },
+      "hb_f1": {
+        "mean": 0.7344,
+        "sd": 0.0042,
+        "per_repeat": [
+          0.733,
+          0.7362,
+          0.7407,
+          0.7317,
+          0.7301
+        ]
+      },
+      "binary_accuracy": {
+        "mean": 0.6976,
+        "sd": 0.0053,
+        "per_repeat": [
+          0.6981,
+          0.6993,
+          0.7052,
+          0.6939,
+          0.6914
+        ]
+      },
+      "accuracy": {
+        "mean": 0.4608,
+        "sd": 0.0032,
+        "per_repeat": [
+          0.4629,
+          0.4633,
+          0.4625,
+          0.4595,
+          0.4558
+        ]
+      }
+    }
+  },
+  "comparisons": [
+    {
+      "config": "rf",
+      "label": "rf",
+      "vs": "logit (배포본 v1.0.0)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": -0.041,
+          "repeat_ci95": [
+            -0.0515,
+            -0.0305
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0435,
+          "boot_ci95": [
+            -0.0676,
+            -0.0217
+          ],
+          "boot_verdict": "기준선보다 낮음"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": 0.0048,
+          "repeat_ci95": [
+            -0.0095,
+            0.019
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0038,
+          "boot_ci95": [
+            -0.0212,
+            0.014
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": -0.0082,
+          "repeat_ci95": [
+            -0.0146,
+            -0.0018
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0135,
+          "boot_ci95": [
+            -0.0254,
+            -0.0019
+          ],
+          "boot_verdict": "기준선보다 낮음"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": -0.0023,
+          "repeat_ci95": [
+            -0.0081,
+            0.0035
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0091,
+          "boot_ci95": [
+            -0.0219,
+            0.0033
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": -0.0056,
+          "repeat_ci95": [
+            -0.0107,
+            -0.0004
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0126,
+          "boot_ci95": [
+            -0.0263,
+            0.0004
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": -0.0058,
+          "repeat_ci95": [
+            -0.0143,
+            0.0028
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0137,
+          "boot_ci95": [
+            -0.0279,
+            0.0008
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    },
+    {
+      "config": "lgbm",
+      "label": "lgbm",
+      "vs": "logit (배포본 v1.0.0)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": -0.0096,
+          "repeat_ci95": [
+            -0.0212,
+            0.002
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0193,
+          "boot_ci95": [
+            -0.0384,
+            -0.0014
+          ],
+          "boot_verdict": "기준선보다 낮음"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": -0.0091,
+          "repeat_ci95": [
+            -0.0248,
+            0.0066
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0089,
+          "boot_ci95": [
+            -0.0116,
+            0.0304
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": -0.0094,
+          "repeat_ci95": [
+            -0.0176,
+            -0.0013
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0103,
+          "boot_ci95": [
+            -0.0245,
+            0.0037
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": -0.0093,
+          "repeat_ci95": [
+            -0.0166,
+            -0.0021
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0015,
+          "boot_ci95": [
+            -0.0165,
+            0.0128
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": -0.0108,
+          "repeat_ci95": [
+            -0.0178,
+            -0.0037
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.006,
+          "boot_ci95": [
+            -0.0217,
+            0.0092
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": -0.0137,
+          "repeat_ci95": [
+            -0.0172,
+            -0.0101
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0121,
+          "boot_ci95": [
+            -0.03,
+            0.0046
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    },
+    {
+      "config": "xgb",
+      "label": "xgb",
+      "vs": "logit (배포본 v1.0.0)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": -0.0059,
+          "repeat_ci95": [
+            -0.018,
+            0.0061
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.012,
+          "boot_ci95": [
+            -0.0328,
+            0.0082
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": -0.0029,
+          "repeat_ci95": [
+            -0.0208,
+            0.015
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0045,
+          "boot_ci95": [
+            -0.0235,
+            0.0152
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": -0.0088,
+          "repeat_ci95": [
+            -0.0217,
+            0.0041
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0033,
+          "boot_ci95": [
+            -0.0168,
+            0.0106
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": -0.0063,
+          "repeat_ci95": [
+            -0.009,
+            -0.0036
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0038,
+          "boot_ci95": [
+            -0.0174,
+            0.0098
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": -0.0086,
+          "repeat_ci95": [
+            -0.0153,
+            -0.0019
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0041,
+          "boot_ci95": [
+            -0.0184,
+            0.0108
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": -0.0088,
+          "repeat_ci95": [
+            -0.0105,
+            -0.007
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.01,
+          "boot_ci95": [
+            -0.0263,
+            0.0058
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    },
+    {
+      "config": "catboost",
+      "label": "catboost",
+      "vs": "logit (배포본 v1.0.0)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": -0.0226,
+          "repeat_ci95": [
+            -0.0417,
+            -0.0036
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.022,
+          "boot_ci95": [
+            -0.0472,
+            0.0025
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": -0.0052,
+          "repeat_ci95": [
+            -0.011,
+            0.0006
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0059,
+          "boot_ci95": [
+            -0.0227,
+            0.0113
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": 0.0029,
+          "repeat_ci95": [
+            -0.006,
+            0.0118
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0071,
+          "boot_ci95": [
+            -0.0055,
+            0.0196
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": -0.0009,
+          "repeat_ci95": [
+            -0.0059,
+            0.0042
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.001,
+          "boot_ci95": [
+            -0.0113,
+            0.0133
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": 0.0008,
+          "repeat_ci95": [
+            -0.0065,
+            0.008
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0039,
+          "boot_ci95": [
+            -0.0092,
+            0.0171
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": -0.0003,
+          "repeat_ci95": [
+            -0.0094,
+            0.0089
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.004,
+          "boot_ci95": [
+            -0.0196,
+            0.0113
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    },
+    {
+      "config": "soft_all",
+      "label": "앙상블: 소프트보팅(5종)",
+      "vs": "logit (배포본 v1.0.0)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": -0.0136,
+          "repeat_ci95": [
+            -0.0259,
+            -0.0012
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0215,
+          "boot_ci95": [
+            -0.0414,
+            -0.0032
+          ],
+          "boot_verdict": "기준선보다 낮음"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": -0.0026,
+          "repeat_ci95": [
+            -0.0131,
+            0.0079
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0031,
+          "boot_ci95": [
+            -0.02,
+            0.0146
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": -0.0006,
+          "repeat_ci95": [
+            -0.0077,
+            0.0065
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0048,
+          "boot_ci95": [
+            -0.0066,
+            0.0167
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": -0.0015,
+          "repeat_ci95": [
+            -0.007,
+            0.004
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0011,
+          "boot_ci95": [
+            -0.0108,
+            0.0133
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": -0.0013,
+          "repeat_ci95": [
+            -0.0075,
+            0.0048
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.003,
+          "boot_ci95": [
+            -0.0096,
+            0.0163
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": -0.0013,
+          "repeat_ci95": [
+            -0.0094,
+            0.0069
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.004,
+          "boot_ci95": [
+            -0.0183,
+            0.01
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    },
+    {
+      "config": "soft_lin_boost",
+      "label": "앙상블: 소프트보팅(선형+부스팅3)",
+      "vs": "logit (배포본 v1.0.0)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": -0.0061,
+          "repeat_ci95": [
+            -0.0155,
+            0.0033
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0108,
+          "boot_ci95": [
+            -0.031,
+            0.0098
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": 0.002,
+          "repeat_ci95": [
+            -0.0117,
+            0.0157
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0022,
+          "boot_ci95": [
+            -0.0189,
+            0.0137
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": -0.0009,
+          "repeat_ci95": [
+            -0.0059,
+            0.004
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.003,
+          "boot_ci95": [
+            -0.0087,
+            0.0154
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": 0.0003,
+          "repeat_ci95": [
+            -0.0036,
+            0.0043
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0006,
+          "boot_ci95": [
+            -0.0114,
+            0.0122
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": -0.0003,
+          "repeat_ci95": [
+            -0.0021,
+            0.0016
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0018,
+          "boot_ci95": [
+            -0.0109,
+            0.0146
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": -0.0004,
+          "repeat_ci95": [
+            -0.0081,
+            0.0073
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0052,
+          "boot_ci95": [
+            -0.0196,
+            0.0088
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    },
+    {
+      "config": "soft_weighted",
+      "label": "앙상블: 가중 소프트보팅(내부CV 학습)",
+      "vs": "logit (배포본 v1.0.0)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": -0.0111,
+          "repeat_ci95": [
+            -0.0211,
+            -0.0011
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0209,
+          "boot_ci95": [
+            -0.0435,
+            0.0021
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": -0.0038,
+          "repeat_ci95": [
+            -0.0079,
+            0.0003
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0039,
+          "boot_ci95": [
+            -0.0205,
+            0.0125
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": -0.001,
+          "repeat_ci95": [
+            -0.0053,
+            0.0033
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0041,
+          "boot_ci95": [
+            -0.0164,
+            0.008
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": -0.0023,
+          "repeat_ci95": [
+            -0.0061,
+            0.0015
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.004,
+          "boot_ci95": [
+            -0.0158,
+            0.0083
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": -0.002,
+          "repeat_ci95": [
+            -0.0065,
+            0.0025
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0046,
+          "boot_ci95": [
+            -0.0175,
+            0.0088
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": -0.0048,
+          "repeat_ci95": [
+            -0.0112,
+            0.0017
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": -0.0133,
+          "boot_ci95": [
+            -0.0275,
+            0.0008
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    },
+    {
+      "config": "stacking",
+      "label": "앙상블: 스태킹(메타=로지스틱)",
+      "vs": "logit (배포본 v1.0.0)",
+      "metrics": {
+        "macro_f1": {
+          "repeat_mean_diff": -0.0353,
+          "repeat_ci95": [
+            -0.0481,
+            -0.0225
+          ],
+          "repeat_verdict": "기준선보다 낮음",
+          "boot_mean_diff": -0.0316,
+          "boot_ci95": [
+            -0.0524,
+            -0.0133
+          ],
+          "boot_verdict": "기준선보다 낮음"
+        },
+        "hb_recall": {
+          "repeat_mean_diff": 0.0129,
+          "repeat_ci95": [
+            0.0059,
+            0.0199
+          ],
+          "repeat_verdict": "기준선보다 높음",
+          "boot_mean_diff": 0.0072,
+          "boot_ci95": [
+            -0.0084,
+            0.0225
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_precision": {
+          "repeat_mean_diff": 0.0024,
+          "repeat_ci95": [
+            -0.0034,
+            0.0081
+          ],
+          "repeat_verdict": "차이 없음 (잡음)",
+          "boot_mean_diff": 0.0019,
+          "boot_ci95": [
+            -0.0094,
+            0.0132
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "hb_f1": {
+          "repeat_mean_diff": 0.0072,
+          "repeat_ci95": [
+            0.0047,
+            0.0097
+          ],
+          "repeat_verdict": "기준선보다 높음",
+          "boot_mean_diff": 0.0043,
+          "boot_ci95": [
+            -0.0069,
+            0.015
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "binary_accuracy": {
+          "repeat_mean_diff": 0.006,
+          "repeat_ci95": [
+            0.0022,
+            0.0098
+          ],
+          "repeat_verdict": "기준선보다 높음",
+          "boot_mean_diff": 0.0038,
+          "boot_ci95": [
+            -0.0084,
+            0.0154
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        },
+        "accuracy": {
+          "repeat_mean_diff": 0.0033,
+          "repeat_ci95": [
+            0.0012,
+            0.0054
+          ],
+          "repeat_verdict": "기준선보다 높음",
+          "boot_mean_diff": 0.003,
+          "boot_ci95": [
+            -0.0109,
+            0.0167
+          ],
+          "boot_verdict": "차이 없음 (잡음)"
+        }
+      }
+    }
+  ],
+  "per_repeat": [
+    {
+      "repeat": 1,
+      "folds": "DB 고정 cv_fold",
+      "scores": {
+        "logit": {
+          "macro_f1": 0.33883756047632235,
+          "hb_recall": 0.7559478127398311,
+          "hb_precision": 0.7035714285714286,
+          "hb_f1": 0.7288198298187201,
+          "binary_accuracy": 0.6943286071726439,
+          "accuracy": 0.4599666388657214
+        },
+        "rf": {
+          "macro_f1": 0.29521583702914317,
+          "hb_recall": 0.7521105141980046,
+          "hb_precision": 0.6901408450704225,
+          "hb_f1": 0.7197943444730076,
+          "binary_accuracy": 0.6818181818181818,
+          "accuracy": 0.4462051709758132
+        },
+        "lgbm": {
+          "macro_f1": 0.31960009981751974,
+          "hb_recall": 0.7651573292402148,
+          "hb_precision": 0.6933240611961057,
+          "hb_f1": 0.7274717256475738,
+          "binary_accuracy": 0.6884904086738949,
+          "accuracy": 0.44787322768974147
+        },
+        "xgb": {
+          "macro_f1": 0.3269344932974505,
+          "hb_recall": 0.7513430544896393,
+          "hb_precision": 0.7002861230329042,
+          "hb_f1": 0.7249166975194372,
+          "binary_accuracy": 0.6901584653878232,
+          "accuracy": 0.4499582985821518
+        },
+        "catboost": {
+          "macro_f1": 0.31664166530615084,
+          "hb_recall": 0.7498081350729087,
+          "hb_precision": 0.7105454545454546,
+          "hb_f1": 0.7296489917849142,
+          "binary_accuracy": 0.6980817347789825,
+          "accuracy": 0.45579649708090075
+        },
+        "soft_all": {
+          "macro_f1": 0.31706987402038006,
+          "hb_recall": 0.7528779739063699,
+          "hb_precision": 0.7083032490974729,
+          "hb_f1": 0.7299107142857143,
+          "binary_accuracy": 0.6972477064220184,
+          "accuracy": 0.45579649708090075
+        },
+        "soft_lin_boost": {
+          "macro_f1": 0.32776307532957066,
+          "hb_recall": 0.7536454336147352,
+          "hb_precision": 0.7064748201438849,
+          "hb_f1": 0.7292981804678795,
+          "binary_accuracy": 0.6959966638865721,
+          "accuracy": 0.45454545454545453
+        },
+        "soft_weighted": {
+          "macro_f1": 0.31782860374339733,
+          "hb_recall": 0.7521105141980046,
+          "hb_precision": 0.6995003568879372,
+          "hb_f1": 0.7248520710059172,
+          "binary_accuracy": 0.6897414512093412,
+          "accuracy": 0.44662218515429525
+        },
+        "stacking": {
+          "macro_f1": 0.30711305126403365,
+          "hb_recall": 0.762854950115119,
+          "hb_precision": 0.7054648687012065,
+          "hb_f1": 0.7330383480825958,
+          "binary_accuracy": 0.6980817347789825,
+          "accuracy": 0.4628857381150959
+        }
+      }
+    },
+    {
+      "repeat": 2,
+      "folds": "층화 5-fold (seed 20260903)",
+      "scores": {
+        "logit": {
+          "macro_f1": 0.336599768392393,
+          "hb_recall": 0.7597851112816577,
+          "hb_precision": 0.7016300496102055,
+          "hb_f1": 0.7295504789977892,
+          "binary_accuracy": 0.6939115929941618,
+          "accuracy": 0.4591326105087573
+        },
+        "rf": {
+          "macro_f1": 0.2831100582649351,
+          "hb_recall": 0.7513430544896393,
+          "hb_precision": 0.7002861230329042,
+          "hb_f1": 0.7249166975194372,
+          "binary_accuracy": 0.6901584653878232,
+          "accuracy": 0.4507923269391159
+        },
+        "lgbm": {
+          "macro_f1": 0.3198679957437827,
+          "hb_recall": 0.7551803530314658,
+          "hb_precision": 0.681912681912682,
+          "hb_f1": 0.7166788055353241,
+          "binary_accuracy": 0.6755629691409508,
+          "accuracy": 0.445371142618849
+        },
+        "xgb": {
+          "macro_f1": 0.3185744432451159,
+          "hb_recall": 0.7820414428242517,
+          "hb_precision": 0.6743878226340172,
+          "hb_f1": 0.7242359630419332,
+          "binary_accuracy": 0.6763969974979149,
+          "accuracy": 0.44912427022518764
+        },
+        "catboost": {
+          "macro_f1": 0.3178947504736388,
+          "hb_recall": 0.7475057559478128,
+          "hb_precision": 0.7099125364431487,
+          "hb_f1": 0.7282242990654206,
+          "binary_accuracy": 0.6968306922435363,
+          "accuracy": 0.4591326105087573
+        },
+        "soft_all": {
+          "macro_f1": 0.32947253740514226,
+          "hb_recall": 0.7567152724481965,
+          "hb_precision": 0.7022792022792023,
+          "hb_f1": 0.7284817140746213,
+          "binary_accuracy": 0.6934945788156798,
+          "accuracy": 0.463302752293578
+        },
+        "soft_lin_boost": {
+          "macro_f1": 0.33490538760444766,
+          "hb_recall": 0.7544128933231006,
+          "hb_precision": 0.7006414825374199,
+          "hb_f1": 0.7265336289726534,
+          "binary_accuracy": 0.6914095079232694,
+          "accuracy": 0.4641367806505421
+        },
+        "soft_weighted": {
+          "macro_f1": 0.3296731694463908,
+          "hb_recall": 0.7513430544896393,
+          "hb_precision": 0.6997855611150822,
+          "hb_f1": 0.7246484085862323,
+          "binary_accuracy": 0.6897414512093412,
+          "accuracy": 0.45829858215179314
+        },
+        "stacking": {
+          "macro_f1": 0.2964516989421172,
+          "hb_recall": 0.7720644666155027,
+          "hb_precision": 0.7034965034965035,
+          "hb_f1": 0.7361873399195024,
+          "binary_accuracy": 0.6993327773144287,
+          "accuracy": 0.463302752293578
+        }
+      }
+    },
+    {
+      "repeat": 3,
+      "folds": "층화 5-fold (seed 20260904)",
+      "scores": {
+        "logit": {
+          "macro_f1": 0.33879297663227803,
+          "hb_recall": 0.7659247889485802,
+          "hb_precision": 0.6993693062368606,
+          "hb_f1": 0.7311355311355312,
+          "binary_accuracy": 0.6939115929941618,
+          "accuracy": 0.4616346955796497
+        },
+        "rf": {
+          "macro_f1": 0.2972839008663598,
+          "hb_recall": 0.7689946277820414,
+          "hb_precision": 0.6943866943866944,
+          "hb_f1": 0.7297887836853606,
+          "binary_accuracy": 0.6905754795663053,
+          "accuracy": 0.45454545454545453
+        },
+        "lgbm": {
+          "macro_f1": 0.3297525557328245,
+          "hb_recall": 0.7528779739063699,
+          "hb_precision": 0.6923076923076923,
+          "hb_f1": 0.7213235294117648,
+          "binary_accuracy": 0.6839032527105922,
+          "accuracy": 0.4432860717264387
+        },
+        "xgb": {
+          "macro_f1": 0.3427501196761625,
+          "hb_recall": 0.7567152724481965,
+          "hb_precision": 0.6953455571227081,
+          "hb_f1": 0.7247335538404999,
+          "binary_accuracy": 0.6876563803169308,
+          "accuracy": 0.45329441201000836
+        },
+        "catboost": {
+          "macro_f1": 0.2964939006914928,
+          "hb_recall": 0.7636224098234843,
+          "hb_precision": 0.6977559607293128,
+          "hb_f1": 0.7292048369366069,
+          "binary_accuracy": 0.6918265221017514,
+          "accuracy": 0.45454545454545453
+        },
+        "soft_all": {
+          "macro_f1": 0.3120918434195851,
+          "hb_recall": 0.7498081350729087,
+          "hb_precision": 0.6983559685489635,
+          "hb_f1": 0.7231680236861584,
+          "binary_accuracy": 0.6880733944954128,
+          "accuracy": 0.45037531276063386
+        },
+        "soft_lin_boost": {
+          "macro_f1": 0.32191454987506884,
+          "hb_recall": 0.7651573292402148,
+          "hb_precision": 0.6996491228070175,
+          "hb_f1": 0.7309384164222874,
+          "binary_accuracy": 0.6939115929941618,
+          "accuracy": 0.4541284403669725
+        },
+        "soft_weighted": {
+          "macro_f1": 0.33037835855089137,
+          "hb_recall": 0.7659247889485802,
+          "hb_precision": 0.7043048694424842,
+          "hb_f1": 0.7338235294117647,
+          "binary_accuracy": 0.6980817347789825,
+          "accuracy": 0.4608006672226856
+        },
+        "stacking": {
+          "macro_f1": 0.29037143373311924,
+          "hb_recall": 0.7751343054489639,
+          "hb_precision": 0.7092696629213483,
+          "hb_f1": 0.7407407407407407,
+          "binary_accuracy": 0.7051709758131777,
+          "accuracy": 0.46246872393661387
+        }
+      }
+    },
+    {
+      "repeat": 4,
+      "folds": "층화 5-fold (seed 20260905)",
+      "scores": {
+        "logit": {
+          "macro_f1": 0.3275671001918804,
+          "hb_recall": 0.7536454336147352,
+          "hb_precision": 0.6974431818181818,
+          "hb_f1": 0.7244559203246035,
+          "binary_accuracy": 0.6884904086738949,
+          "accuracy": 0.4562135112593828
+        },
+        "rf": {
+          "macro_f1": 0.29328047791675216,
+          "hb_recall": 0.7697620874904068,
+          "hb_precision": 0.6846416382252559,
+          "hb_f1": 0.7247109826589595,
+          "binary_accuracy": 0.6822351959966639,
+          "accuracy": 0.4516263552960801
+        },
+        "lgbm": {
+          "macro_f1": 0.3321781499959712,
+          "hb_recall": 0.7421335379892555,
+          "hb_precision": 0.6956834532374101,
+          "hb_f1": 0.7181581878945414,
+          "binary_accuracy": 0.6834862385321101,
+          "accuracy": 0.445371142618849
+        },
+        "xgb": {
+          "macro_f1": 0.33131341767110706,
+          "hb_recall": 0.7436684574059862,
+          "hb_precision": 0.6946236559139785,
+          "hb_f1": 0.7183098591549296,
+          "binary_accuracy": 0.683069224353628,
+          "accuracy": 0.44954128440366975
+        },
+        "catboost": {
+          "macro_f1": 0.3270477093137362,
+          "hb_recall": 0.7536454336147352,
+          "hb_precision": 0.7059669302659957,
+          "hb_f1": 0.7290274684484039,
+          "binary_accuracy": 0.69557964970809,
+          "accuracy": 0.4683069224353628
+        },
+        "soft_all": {
+          "macro_f1": 0.32113687468417484,
+          "hb_recall": 0.758250191864927,
+          "hb_precision": 0.7002126151665485,
+          "hb_f1": 0.7280766396462786,
+          "binary_accuracy": 0.6922435362802335,
+          "accuracy": 0.457047539616347
+        },
+        "soft_lin_boost": {
+          "macro_f1": 0.3256397260243746,
+          "hb_recall": 0.7751343054489639,
+          "hb_precision": 0.6898907103825137,
+          "hb_f1": 0.7300325262016624,
+          "binary_accuracy": 0.6884904086738949,
+          "accuracy": 0.4553794829024187
+        },
+        "soft_weighted": {
+          "macro_f1": 0.3261130691525761,
+          "hb_recall": 0.7521105141980046,
+          "hb_precision": 0.6960227272727273,
+          "hb_f1": 0.7229804500184435,
+          "binary_accuracy": 0.6868223519599667,
+          "accuracy": 0.45037531276063386
+        },
+        "stacking": {
+          "macro_f1": 0.3070134762633451,
+          "hb_recall": 0.7682271680736761,
+          "hb_precision": 0.6985345429169574,
+          "hb_f1": 0.7317251461988303,
+          "binary_accuracy": 0.6939115929941618,
+          "accuracy": 0.45954962468723937
+        }
+      }
+    },
+    {
+      "repeat": 5,
+      "folds": "층화 5-fold (seed 20260906)",
+      "scores": {
+        "logit": {
+          "macro_f1": 0.3320179952114253,
+          "hb_recall": 0.7467382962394474,
+          "hb_precision": 0.6984924623115578,
+          "hb_f1": 0.7218100890207716,
+          "binary_accuracy": 0.6872393661384487,
+          "accuracy": 0.45037531276063386
+        },
+        "rf": {
+          "macro_f1": 0.29992419899267986,
+          "hb_recall": 0.7636224098234843,
+          "hb_precision": 0.6900138696255201,
+          "hb_f1": 0.7249544626593808,
+          "binary_accuracy": 0.6851542952460383,
+          "accuracy": 0.4553794829024187
+        },
+        "lgbm": {
+          "macro_f1": 0.32418623005916763,
+          "hb_recall": 0.7214121258633922,
+          "hb_precision": 0.6901615271659325,
+          "hb_f1": 0.7054409005628519,
+          "binary_accuracy": 0.6726438698915763,
+          "accuracy": 0.4370308590492077
+        },
+        "xgb": {
+          "macro_f1": 0.3245538339590101,
+          "hb_recall": 0.7336914811972371,
+          "hb_precision": 0.6917510853835022,
+          "hb_f1": 0.7121042830540038,
+          "binary_accuracy": 0.6776480400333611,
+          "accuracy": 0.4416180150125104
+        },
+        "catboost": {
+          "macro_f1": 0.30250730335553994,
+          "hb_recall": 0.7413660782808903,
+          "hb_precision": 0.6909871244635193,
+          "hb_f1": 0.7152906330988521,
+          "binary_accuracy": 0.6793160967472894,
+          "accuracy": 0.4482902418682235
+        },
+        "soft_all": {
+          "macro_f1": 0.32627755910982165,
+          "hb_recall": 0.7513430544896393,
+          "hb_precision": 0.6884669479606188,
+          "hb_f1": 0.7185321100917431,
+          "binary_accuracy": 0.6801501251042535,
+          "accuracy": 0.45454545454545453
+        },
+        "soft_lin_boost": {
+          "macro_f1": 0.3330654212664634,
+          "hb_recall": 0.7436684574059862,
+          "hb_precision": 0.6991341991341992,
+          "hb_f1": 0.720714020081815,
+          "binary_accuracy": 0.6868223519599667,
+          "accuracy": 0.457047539616347
+        },
+        "soft_weighted": {
+          "macro_f1": 0.314362680248236,
+          "hb_recall": 0.7413660782808903,
+          "hb_precision": 0.6959654178674352,
+          "hb_f1": 0.7179487179487181,
+          "binary_accuracy": 0.6834862385321101,
+          "accuracy": 0.44745621351125936
+        },
+        "stacking": {
+          "macro_f1": 0.29628955793907913,
+          "hb_recall": 0.7682271680736761,
+          "hb_precision": 0.6956219596942321,
+          "hb_f1": 0.7301239970824216,
+          "binary_accuracy": 0.6914095079232694,
+          "accuracy": 0.45579649708090075
+        }
+      }
+    }
+  ]
+}
