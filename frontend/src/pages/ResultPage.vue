@@ -6,6 +6,7 @@ import { useResultStore } from '../stores/result';
 import { usePreSurveyStore } from '../stores/preSurvey';
 import { useEventStore } from '../stores/events';
 import { api } from '../services/apiClient';
+import UnavailableNotice from '../components/UnavailableNotice.vue';
 import BurdenResultCard from '../components/BurdenResultCard.vue';
 import ContributionList from '../components/ContributionList.vue';
 import ReferenceComparison from '../components/ReferenceComparison.vue';
@@ -34,6 +35,10 @@ function restart() { store.clear(); pre.reset(); events.renew(); router.push('/'
     <!-- 판정된 경우 -->
     <BurdenResultCard v-if="r.decided" :label="r.burdenLabel" :description="r.burdenDescription"
                       :is-warning="r.isWarning" :name="pre.displayName()" />
+
+    <!-- 추론 서비스 장애 — 판정 불가와 구분한다. 부담 수준과 무관하다 (설계 4.9.4) -->
+    <UnavailableNotice v-else-if="r.unavailable"
+                       :name="pre.displayName()" :notice="r.unavailableNotice" />
 
     <!-- 판정 불가 (FR-009a·FR-021j-1) — 부담 구간을 표시하지 않는다 -->
     <section v-else class="undecided" aria-label="판정 결과 안내">

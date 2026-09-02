@@ -328,6 +328,7 @@ def stage_export(d, base, sel, cal):
         'trained_at': time.strftime('%Y-%m-%dT%H:%M:%S'),
     }
 
+    enc = None                      # logit 이 아니면 인코더가 없다 (아래 joblib 묶음에서 씀)
     if family == 'logit':
         # 다항 로지스틱 — 계수 행렬만 내보내면 런타임이 내적 + softmax 로 재현한다.
         # 기여도가 정확히 분해되어(선형 SHAP) FR-011 설명에 유리하다.
@@ -391,6 +392,27 @@ def stage_export(d, base, sel, cal):
         json.dumps({'min_threshold': thr, 'basis': 'train 표본 300건 기여도 절댓값 55분위'},
                    ensure_ascii=False), encoding='utf-8')
 
+    # 분석용 원본 모델 — **배포 대상이 아니다.** 백엔드는 models/*.json 만 읽는다.
+    #   JSON 은 추론에 필요한 계수만 담아, 학습된 객체가 필요한 일(다른 방식의 확률 보정,
+    #   predict_proba 외의 sklearn 기능, 하이퍼파라미터 확인)은 재학습해야만 가능했다.
+    #   객체를 그대로 남겨 그 재학습을 없앤다. 되읽을 때 sklearn 버전이 다르면 경고가 뜬다.
+    import joblib
+    import sklearn
+    joblib.dump({
+        'model_version': MODEL_VERSION,
+        'question_set_version': QSET_VERSION,
+        'family': family,
+        'features': sel['selected'],
+        'classes': CLASSES,
+        'decision_weights': sel['weights'],
+        'missing_sentinel': MISSING,
+        'model': model,                 # 학습된 추정기 그대로
+        'encoder': enc,                 # logit 이면 OneHotEncoder, 아니면 None
+        'sklearn_version': sklearn.__version__,
+        'trained_at': payload['trained_at'],
+        'note': '분석 전용. 런타임은 이 파일을 읽지 않는다.',
+    }, MODELS / 'model_v1.joblib')
+
     size = (MODELS / 'model_v1.json').stat().st_size / 1e6
     shape = (f"트리 {len(payload['trees'])}개" if 'trees' in payload
              else f"계수 {len(payload['coef'])}x{len(payload['coef'][0])}")
@@ -399,6 +421,7 @@ def stage_export(d, base, sel, cal):
     print(f"   uncertainty_v1.json   τ_conf={cal['tau_conf']:.4f} τ_dens={cal['tau_dens']:.4f}")
     print(f"   questions_v1.json     문항 {len(questions)}개 + 자가보고 1개")
     print(f"   contribution_v1.json  임계값 {thr:.5f}")
+    print(f"   model_v1.joblib       분석용 원본 (배포 대상 아님)")
     return payload
 
 

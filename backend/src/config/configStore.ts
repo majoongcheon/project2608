@@ -10,6 +10,7 @@ const REQUIRED = [
   'contribution.minThreshold', 'selfreport.noticeText', 'burden.labels',
   'draft.expiryHours', 'submit.rateLimit', 'notice.disclaimer',
   'notice.modelChange', 'notice.cancelWindow', 'notice.multipleTargets',
+  'model.decisionWeights', 'notice.inferenceUnavailable',
 ] as const;
 
 let cache: Record<string, any> = {};

@@ -16,6 +16,7 @@ function readModel(name) {
   }
   return JSON.parse(fs.readFileSync(f, 'utf8'));
 }
+const MODEL   = readModel('model_v1.json');
 const UNC     = readModel('uncertainty_v1.json');
 const CONTRIB = readModel('contribution_v1.json');
 
@@ -48,6 +49,22 @@ const CONFIG = {
     text: '현재 응답만으로는 돌봄부담 수준을 정확히 판단하기 어렵습니다. 다만 필요한 지원을 놓치지 않도록 가까운 상담·서비스 기관을 안내합니다.',
     note: '판정 불가는 고부담군 판정이 아니다. 안전망 목적임을 밝힌다 (FR-021j-1)',
   },
+  // 결정 가중치 — 정책이지 학습 산출물이 아니다. 설정이 소유한다(FR-022).
+  //   고부담(1·2)에 가산점을 주어 놓치지 않는 쪽으로 기울인다(SC-005).
+  //   학습 산출물과 갈라지면 백엔드가 기동 때 경고한다.
+  'model.decisionWeights': {
+    weights: MODEL.decision_weights,
+    source: `models/model_v1.json (${MODEL.model_version})`,
+  },
+
+  // 추론 서비스에 연결하지 못했을 때 (설계 4.9.4)
+  //   판정 불가가 아니라 일시적 장애다. 부담 수준과 무관하다는 점을 밝힌다.
+  'notice.inferenceUnavailable': {
+    text: '지금은 진단 결과를 드릴 수 없습니다. 잠시 후 다시 시도해 주세요. ' +
+          '다만 필요한 지원을 놓치지 않도록 가까운 상담·서비스 기관을 안내합니다.',
+    note: '판정 불가(FR-009a)와 구분되는 문구여야 한다. 부담이 높다는 뜻이 아니다',
+  },
+
   'contribution.minThreshold': {
     value: CONTRIB.min_threshold,
     source: `models/contribution_v1.json — ${CONTRIB.basis}`,

@@ -1,0 +1,15 @@
+{
+  "created_at": "2026-09-02T12:34:01+09:00",
+  "source_view": "v_cb_tree_v1",
+  "rows": 3000,
+  "features": 38,
+  "split": {
+    "test": 602,
+    "train": 2398
+  },
+  "sha256": "2f88db8e99f02f021698521b1c285bb0795d23a817eb399deb394a3fbc1451ba",
+  "db": {
+    "host": "mis.iptime.org",
+    "database": "ABC8pioneer3"
+  }
+}

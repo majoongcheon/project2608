@@ -4,10 +4,29 @@
 
 ```bash
 pip3 install --target ml/.pylibs -r ml/requirements.txt
-python3 ml/train.py all        # baseline → select → calibrate → export → evaluate
-python3 ml/parity.py           # TS 추론기 대조용 기준값 3,000건 생성
-cd backend && npx vitest run tests/parity   # 릴리스 게이트
+
+# 새 파이프라인 (cb_burden 패키지)
+export PYTHONPATH=ml/.pylibs:ml
+python3 -m cb_burden snapshot --out data/snapshots/cb_dataset_<날짜>.csv.gz
+python3 -m cb_burden train --snapshot <path> --model-version <ver> --question-set-version <qs>
+python3 -m cb_burden evaluate models/runs/<run_id>     # test 602건 — 여기서 단 한 번만
+python3 -m cb_burden verify   models/runs/<run_id>
+python3 -m cb_burden promote  models/runs/<run_id> --as <ver>
+python3 -m pytest ml/tests
+
+# 추론 서비스
+python3 -m cb_burden.serve --release models      # run/cb-inference.sock (포트 안 씀)
+
+# 옛 파이프라인 (이관 중이라 남겨 둠 — 새 것이 안정되면 ml/legacy/ 로 옮긴다)
+python3 ml/train.py all
 ```
+
+## 새 구조에서 달라진 것
+
+- **학습은 DB 를 읽지 않는다.** 고정된 스냅샷 파일만 읽고, 시작할 때 sha256 을 대조한다
+- **학습은 `models/runs/<run_id>/` 에만 쓴다.** 배포본은 `promote` 로만 바뀐다
+- `evaluate` 를 `train` 에서 분리했다 — test 602건이 매 실행마다 소모되지 않는다
+- `pytest ml/tests` 가 DB 없이 전부 돈다
 
 ## 파일
 

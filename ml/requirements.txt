@@ -4,3 +4,11 @@ numpy>=1.26,<2.1
 scipy>=1.11
 scikit-learn>=1.4
 pymysql>=1.1
+
+# 테스트와 추론 서비스 (2026-09-02 추가)
+#   fastapi·uvicorn 은 사용자 계정에만 설치돼 있어 다른 장비에서 재현되지 않았다.
+#   여기에 적어 .pylibs 로 벤더링한다.
+pytest>=8.0
+fastapi>=0.115
+uvicorn>=0.30
+httpx>=0.27

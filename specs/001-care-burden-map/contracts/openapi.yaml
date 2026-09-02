@@ -386,6 +386,17 @@ components:
           description: |
             판정 불가 안내 문구(FR-021j-1). 판정이 성립하지 않았다는 사실과
             안전망 목적을 함께 밝혀야 하며, 고부담 판정으로 읽히면 안 된다.
+        unavailable:
+          type: boolean
+          description: |
+            추론 서비스에 연결하지 못해 판정을 내지 못한 경우 true.
+            **판정 불가(FR-009a)와 다르다** — 부담 수준과 무관한 일시적 장애다.
+            이 경우 burdenLabel·contributions·comparison·undecidableNotice 는 모두 null 이고
+            immediateReferral 은 그대로 제공된다(FR-021j 와 같은 안전망 취지).
+        unavailableNotice:
+          type: string
+          nullable: true
+          description: 장애 안내 문구(FR-022 설정 `notice.inferenceUnavailable`). 정상이면 null.
         multipleTargetsNotice:
           type: string
           nullable: true

@@ -1,0 +1,12 @@
+{
+  "created_at": "2026-09-02T12:32:07+09:00",
+  "source_view": "synthetic",
+  "rows": 300,
+  "features": 8,
+  "split": {
+    "train": 240,
+    "test": 60
+  },
+  "sha256": "2558e0fc083c600f5870f4c0d2f75bcb1e3f72d012e75e531c31608158b901ee",
+  "db": {}
+}

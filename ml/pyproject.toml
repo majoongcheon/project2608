@@ -1,0 +1,13 @@
+[project]
+name = "cb-burden"
+version = "0.1.0"
+description = "돌봄부담 진단 모델 학습·추론"
+requires-python = ">=3.9"
+
+# 참고 — 지금은 pip install --target ml/.pylibs 로 벤더링한다(원칙 V, Docker 금지).
+# 이 진입점은 패키지를 정식 설치할 때만 만들어진다. 평소에는 python -m cb_burden 을 쓴다.
+[project.scripts]
+cb-burden = "cb_burden.cli:main"
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

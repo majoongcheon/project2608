@@ -6,6 +6,8 @@ import { rarity, isUndecidable } from '../inference/undecidable.js';
 import { cfg } from '../config/configStore.js';
 import { query } from '../repositories/pool.js';
 import { buildReferral, type ImmediateReferral } from './referralService.js';
+import { callInference, type InferenceResult } from './inferenceClient.js';
+import { env } from '../config/env.js';
 
 export interface AnswerInput { questionNo: number; value: number | null }
 
@@ -18,9 +20,12 @@ export interface DiagnosisOutput {
   contributions: { text: string; isMinor: boolean }[] | null;
   comparison: { text: string; userValue: string; referencePct: number }[] | null;
   undecidableNotice: string | null;
+  // 추론 서비스에 연결하지 못한 경우. 판정 불가와 다르다 — 부담 수준과 무관한 장애다.
+  unavailable: boolean;
+  unavailableNotice: string | null;
   multipleTargetsNotice: string | null;
   immediateReferral: ImmediateReferral | null;
-  modelVersion: string;
+  modelVersion: string | null;
   disclaimer: string;
 }
 
@@ -92,10 +97,53 @@ export async function diagnose(params: {
   const { model, uncertainty, contributionThreshold, questions } = getArtifacts();
   const row = toFeatureVector(params.answers);
 
-  const proba = predictProba(model, row);
-  const idx = decide(model, proba);
-  const rar = rarity(model, uncertainty, row);
-  const undecidable = isUndecidable(proba, rar, uncertainty.tau_conf, uncertainty.tau_dens);
+  // 판정 정책은 설정이 소유한다(FR-009c). 두 경로 모두 같은 값을 쓴다.
+  const tau = cfg<{ tauConf: number; tauDens: number }>('undecidable.thresholds');
+  const weights = cfg<{ weights: number[] }>('model.decisionWeights').weights;
+
+  let proba: number[];
+  let idx: number;
+  let rar: number;
+  let undecidable: boolean;
+  let remote: InferenceResult | null = null;
+
+  if (env.inferenceMode === 'http') {
+    // 파이썬 추론 서비스에 위임한다. 실패해도 예외가 오지 않는다 — 값으로 온다.
+    const outcome = await callInference({
+      answers: params.answers,
+      policy: {
+        tauConf: tau.tauConf, tauDens: tau.tauDens,
+        decisionWeights: weights, contributionMinThreshold: contributionThreshold,
+      },
+    });
+    if (!outcome.ok) {
+      // 틀린 판정을 내느니 안 하는 편이 낫다. 다만 기관 안내는 계속 제공한다.
+      const referral = await buildReferral({
+        internalLabel: null, undecidable: true,
+        careTargetAge: params.careTargetAge,
+        lat: params.lat, lng: params.lng, regionCode: params.regionCode,
+      });
+      return {
+        decided: false, internalLabel: null, burdenLabel: null, burdenDescription: null,
+        isWarning: false, contributions: null, comparison: null,
+        undecidableNotice: null,
+        unavailable: true,
+        unavailableNotice: cfg<any>('notice.inferenceUnavailable').text,
+        multipleTargetsNotice: null, immediateReferral: referral,
+        modelVersion: null, disclaimer: cfg<any>('notice.disclaimer').text,
+      };
+    }
+    remote = outcome.value;
+    proba = remote.proba;
+    idx = remote.internalLabel === null ? 0 : model.classes.indexOf(remote.internalLabel);
+    rar = remote.rarity;
+    undecidable = !remote.decided;
+  } else {
+    proba = predictProba(model, row);
+    idx = decide(model, proba);
+    rar = rarity(model, uncertainty, row);
+    undecidable = isUndecidable(proba, rar, tau.tauConf, tau.tauDens);
+  }
 
   const labels = cfg<any>('burden.labels');
   const internalLabel = undecidable ? null : model.classes[idx];
@@ -105,11 +153,18 @@ export async function diagnose(params: {
   let contribOut: { text: string; isMinor: boolean }[] | null = null;
   let topFeatures: string[] = [];
   if (!undecidable) {
-    const { contrib } = contributions(model, row, idx);
-    const ranked = model.features
-      .map((f, j) => ({ feature: f, value: contrib[j], abs: Math.abs(contrib[j]) }))
-      .sort((a, b) => b.abs - a.abs)
-      .slice(0, Math.max(3, 3));
+    // 순위와 강약 판단은 계산한 쪽을 그대로 쓴다. 여기서 다시 계산하면 갈라진다.
+    const ranked = remote
+      ? (remote.contributions ?? []).map((c) => ({
+          feature: c.feature, value: c.contrib, abs: Math.abs(c.contrib),
+        }))
+      : (() => {
+          const { contrib } = contributions(model, row, idx);
+          return model.features
+            .map((f, j) => ({ feature: f, value: contrib[j], abs: Math.abs(contrib[j]) }))
+            .sort((a, b) => b.abs - a.abs)
+            .slice(0, 3);
+        })();
     topFeatures = ranked.map((r) => r.feature);
     contribOut = ranked.map((r) => {
       const q = (questions.questions as any[]).find((x) => x.feature === r.feature);
@@ -146,6 +201,8 @@ export async function diagnose(params: {
     contributions: contribOut,
     comparison,
     undecidableNotice: undecidable ? cfg<any>('undecidable.noticeText').text : null,
+    unavailable: false,
+    unavailableNotice: null,
     // FR-010d — 단, 판정 불가면 표시하지 않는다(FR-010f)
     multipleTargetsNotice:
       !undecidable && params.multipleCareTargets ? cfg<any>('notice.multipleTargets').text : null,

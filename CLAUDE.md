@@ -70,11 +70,24 @@ OS 계정·MAC·호스트명·git 작성자·**Claude 기억 저장소까지 전
 ## 명령
 
 ```bash
-cd backend && npm run dev      # :3000
-cd frontend && npm run dev     # :5173
-cd ml && python -m ml.train --stage export
-cd backend && npm run test:parity   # Python↔TS 추론 일치 (릴리스 게이트)
+# 기동 순서 — 추론 → 백엔드. 백엔드가 기동 때 추론 서비스의 문항 집합을 대조한다.
+PYTHONPATH=ml/.pylibs:ml python3 -m cb_burden.serve --release models   # 유닉스 소켓, 포트 안 씀
+cd backend && npm run dev      # :9523  (CB_INFERENCE=http 로 추론 서비스 사용)
+cd frontend && npm run dev     # :9503
+
+# 학습 — 스냅샷을 먼저 만들고, 학습은 models/runs/ 에만 쓴다. 배포본은 promote 로만 바뀐다.
+PYTHONPATH=ml/.pylibs:ml python3 -m cb_burden snapshot --out data/snapshots/<날짜>.csv.gz
+PYTHONPATH=ml/.pylibs:ml python3 -m cb_burden train --snapshot <path> \
+    --model-version <ver> --question-set-version <qs>
+PYTHONPATH=ml/.pylibs:ml python3 -m cb_burden evaluate models/runs/<run_id>   # test 1회만
+PYTHONPATH=ml/.pylibs:ml python3 -m cb_burden promote models/runs/<run_id> --as <ver>
+
+PYTHONPATH=ml/.pylibs:ml python3 -m pytest ml/tests      # 골든 포함 (릴리스 게이트)
+cd backend && npm run test:parity                        # TS 추론 (B7 제거 전까지)
 ```
+
+**판정 경로 전환** — `CB_INFERENCE` 가 `ts`(기본, 내장 계산) 또는 `http`(파이썬 추론 서비스).
+문제가 생기면 이 값 하나로 되돌린다.
 
 ## 자격증명
 

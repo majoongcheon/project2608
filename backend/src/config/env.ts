@@ -28,4 +28,11 @@ export const env = {
   // FR-036: 제출자 구분용 해시의 솔트. 원본 IP 는 어디에도 저장하지 않는다.
   submitterSalt: process.env.SUBMITTER_SALT || 'dev-only-salt',
   modelsDir: path.join(ROOT, process.env.CB_MODELS_DIR || 'models'),
+
+  // 추론 서비스 (설계 4.9). 기본값 'ts' 는 기존 동작 — 코드만 올라와도 판정이 바뀌지 않는다.
+  // 'http' 로 바꾸면 파이썬 추론 서비스를 쓴다. 되돌리기는 이 값 하나다.
+  //   ★ 포트를 쓰지 않는다. 팀 배정 포트가 프론트·백엔드 둘뿐이라 유닉스 소켓으로 붙는다.
+  inferenceMode: (process.env.CB_INFERENCE || 'ts') as 'ts' | 'http',
+  inferenceSocket: process.env.CB_INFERENCE_SOCKET || path.join(ROOT, 'run', 'cb-inference.sock'),
+  inferenceTimeoutMs: Number(process.env.CB_INFERENCE_TIMEOUT_MS || 2000),
 };
