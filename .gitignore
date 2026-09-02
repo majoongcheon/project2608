@@ -34,3 +34,6 @@ Thumbs.db
 
 # 빌드 캐시
 *.tsbuildinfo
+
+# 세션별 작성자 장부 (기기 로컬)
+.claude/session-authors.local.json
