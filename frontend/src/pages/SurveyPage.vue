@@ -183,9 +183,15 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
 .progress__bar { height: 8px; background: var(--surface-strong); border-radius: var(--radius-pill); overflow: hidden; }
 .progress__bar span { display: block; height: 100%; background: var(--primary); transition: width .25s; }
 .progress__text { font-size: 14px; color: var(--muted); margin: var(--sp-xs) 0 0; }
-/* 진행 표시와 두 칸 띄우고, 좁은 화면에서는 아랫줄로 내려간다. */
-.whois { margin-left: 2ch; color: var(--muted-soft); }
-@media (max-width: 560px) { .whois { display: block; margin-left: 0; margin-top: 2px; } }
+/* 진행 표시와 두 칸 띄우고, 좁은 화면에서는 아랫줄로 내려간다.
+   흐린 글씨로 두었더니 눈에 걸리지 않아 그냥 지나쳤다(기획자 확인).
+   이 문장은 문항을 잘못 읽는 것을 막는 말이라 **진행 표시보다 진하게** 둔다 —
+   숫자(1 / 7 문항)는 안내가 아니라 위치 표시일 뿐이다. */
+.whois {
+  margin-left: 2ch;
+  font-size: 15px; font-weight: 700; color: var(--ink);
+}
+@media (max-width: 560px) { .whois { display: block; margin-left: 0; margin-top: 6px; } }
 .q { font-size: 20px; line-height: 1.4; }
 /* 조건(괄호)과 물음을 각자의 줄에. 각 줄은 좁은 화면에서 제 안에서 접힌다. */
 .q__l { display: block; }
