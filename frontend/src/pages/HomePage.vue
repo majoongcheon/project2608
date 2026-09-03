@@ -1,15 +1,18 @@
 <script setup lang="ts">
 // FR-001 — 두 메뉴를 동등한 비중으로. 사전 절차 없이 곧바로 진입(FR-002).
-import { onMounted, ref } from 'vue';
+//
+// 2026-09-03 전면 개편 — awwwards SOTD 두 건에서 가져온 네 가지.
+//   ① 큰 활자   대제목을 화면 폭까지(clamp 40~104px). 본문과 6.5배차.
+//   ② 넓은 여백 섹션 간격을 본문 행간의 8~10배로.
+//   ③ 이미지    노을 아래 두 사람. 저장소에 그림 파일이 하나도 없어 직접 그렸다.
+//   ④ 모션      스크롤 등장 + 히어로 시차. prefers-reduced-motion 이면 전부 끈다.
+// 카드 테두리를 걷어내고 괘선과 여백으로 가른다 — 상자가 있으면 '앱'으로 읽힌다.
+import { onMounted, onBeforeUnmount, ref } from 'vue';
 import { useEventStore } from '../stores/events';
 import { api } from '../services/apiClient';
 const events = useEventStore();
 
 const questionCount = ref<number | null>(null);
-onMounted(async () => {
-  events.track('PRESURVEY_ENTER');
-  try { questionCount.value = (await api.config()).questionCount ?? null; } catch { /* 숫자 없이 진행 */ }
-});
 
 // 2024 발달장애인 일과 삶 실태조사 3,000가구의 실제 분포.
 // 1이 가장 부담이 크고 5가 부담 없음인 역방향 척도다(CLAUDE.md).
@@ -24,87 +27,228 @@ const TOTAL = 3000;
 const heavyN = burden.filter((b) => b.heavy).reduce((a, b) => a + b.n, 0);
 const pct = (n: number) => (n / TOTAL) * 100;
 const fmt = (n: number) => n.toLocaleString('ko-KR');
+
+// ── 모션 ────────────────────────────────────────────────────────────────
+// 원칙 하나 — 연출이 실패해도 내용은 보여야 한다. 관찰자를 못 만들면
+// 모든 .reveal 에 즉시 .is-in 을 붙여 정지 상태로 둔다.
+const art = ref<HTMLElement | null>(null);
+let io: IntersectionObserver | null = null;
+let raf = 0;
+
+function showAll(root: ParentNode) {
+  root.querySelectorAll('.reveal').forEach((el) => el.classList.add('is-in'));
+}
+
+onMounted(async () => {
+  events.track('PRESURVEY_ENTER');
+  try { questionCount.value = (await api.config()).questionCount ?? null; } catch { /* 숫자 없이 진행 */ }
+
+  const still = window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+  if (still || typeof IntersectionObserver === 'undefined') { showAll(document); return; }
+
+  // 안전장치 — 관찰자가 어떤 이유로든 안 걸리면(임베드·프리렌더·탭 비활성)
+  // 1.2초 뒤 남은 것을 전부 켠다. 연출보다 내용이 우선이다.
+  window.setTimeout(() => showAll(document), 1200);
+
+  io = new IntersectionObserver(
+    (entries) => entries.forEach((e) => {
+      if (e.isIntersecting) { e.target.classList.add('is-in'); io?.unobserve(e.target); }
+    }),
+    // 아래에서 12% 올라왔을 때 시작한다. 화면에 걸치자마자 켜면 이미 다 읽은
+    // 뒤에 움직여서 오히려 방해가 된다.
+    { rootMargin: '0px 0px -12% 0px', threshold: 0.01 },
+  );
+  document.querySelectorAll('.reveal').forEach((el) => io!.observe(el));
+
+  // 히어로 시차 — 스크롤량의 일부만 그림에 준다. 값이 크면 멀미가 난다.
+  const onScroll = () => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      const y = window.scrollY;
+      if (art.value && y < window.innerHeight * 1.2) {
+        art.value.style.setProperty('--shift', `${y * 0.12}px`);
+        art.value.style.setProperty('--shift-far', `${y * 0.045}px`);
+      }
+    });
+  };
+  window.addEventListener('scroll', onScroll, { passive: true });
+  onBeforeUnmount(() => window.removeEventListener('scroll', onScroll));
+});
+
+onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); });
 </script>
 
 <template>
-  <div class="container stack">
-    <header class="hero">
-      <p class="hero__eyebrow">발달장애인 보호자를 위한 서비스</p>
-      <h1 class="hero__h">어떤 <em>도움</em>이<br />필요하신가요?</h1>
-      <p class="hero__lead measure">
-        로그인도 회원가입도 없이, <b>바로</b> 이용하실 수 있습니다.
-      </p>
-    </header>
+  <div class="home">
+    <!-- ── 히어로 ────────────────────────────────────────────────────────
+         그림이 먼저 오고 글이 그 위에 앉는다. 레퍼런스 둘 다 첫 화면에서
+         UI 를 보여 주지 않는다. -->
+    <header class="hero bleed">
+      <div ref="art" class="hero__art parallax" aria-hidden="true">
+        <svg class="hero__svg" viewBox="0 0 1200 620" preserveAspectRatio="xMidYMax slice">
+          <defs>
+            <!-- 종이 결. 색면이 넓어질수록 매끈하면 인쇄물이 아니라 화면으로
+                 읽힌다. 아주 옅게만 얹는다. -->
+            <filter id="grain">
+              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" />
+              <feColorMatrix type="saturate" values="0" />
+              <feComponentTransfer><feFuncA type="linear" slope="0.055" /></feComponentTransfer>
+            </filter>
+            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#fffaf5" />
+              <stop offset="62%" stop-color="#fdeede" />
+              <stop offset="100%" stop-color="#f7ddc4" />
+            </linearGradient>
+            <radialGradient id="sun" cx="50%" cy="50%" r="50%">
+              <stop offset="0%" stop-color="#f9cf9c" />
+              <stop offset="100%" stop-color="#f0b678" />
+            </radialGradient>
+          </defs>
 
-    <!-- 두 메뉴를 맨 위로. 색을 나눠 한눈에 구분되게 한다.
-         두 카드는 크기·구조가 같아 비중은 동등하다(FR-001). -->
-    <nav class="menu" aria-label="주요 기능">
-      <RouterLink class="card card--diag" to="/diagnosis/start">
-        <span class="card__icon" aria-hidden="true">
-          <svg viewBox="0 0 44 44">
-            <rect x="10" y="5" width="24" height="34" rx="4.5" fill="currentColor" />
-            <path d="M16 14h12M16 21h8" stroke="#fff" stroke-width="2.2" stroke-linecap="round" />
-            <path d="M25.6 25.6c1.15-1.2 3.05-1.2 4.2 0 1.15 1.2 1.15 3.15 0 4.35L25.6 34.4l-4.2-4.45c-1.15-1.2-1.15-3.15 0-4.35 1.15-1.2 3.05-1.2 4.2 0Z"
-                  fill="#fff" />
-          </svg>
-        </span>
-        <span class="card__title">부담감 진단</span>
-        <span class="card__desc">몇 가지 질문에 답하시면 지금의 돌봄부담 수준과 <b>그렇게 본 이유</b>를 알려 드립니다.</span>
-        <span class="card__meta">
-          <template v-if="questionCount">질문 {{ questionCount }}개 · </template>약 3분
-        </span>
-      </RouterLink>
+          <rect width="1200" height="620" fill="url(#sky)" />
+          <!-- 해 — 지평선에 반쯤 걸린다. 저녁이지 밤이 아니다. -->
+          <circle class="far" cx="820" cy="392" r="132" fill="url(#sun)" opacity=".9" />
 
-      <RouterLink class="card card--map" to="/map">
-        <span class="card__icon" aria-hidden="true">
-          <svg viewBox="0 0 44 44">
-            <path d="M22 39s12-9.8 12-19a12 12 0 1 0-24 0c0 9.2 12 19 12 19Z" fill="currentColor" />
-            <circle cx="22" cy="19.4" r="4.8" fill="#fff" />
-          </svg>
-        </span>
-        <span class="card__title">복지서비스 위치 · 연락처</span>
-        <span class="card__desc">우리 지역의 주간활동 · 청소년 방과후활동 <b>신청 접수처</b>를 지도와 목록으로 찾아 드립니다.</span>
-        <span class="card__meta">전국 시군구 · 지도와 목록</span>
-      </RouterLink>
-    </nav>
+          <!-- 능선 셋. 뒤로 갈수록 옅어지고 덜 움직인다(공기 원근). -->
+          <path class="far" d="M0 404c168-38 286 22 430 12s246-70 402-52 254 74 368 58v198H0Z"
+                fill="#f0b678" opacity=".46" />
+          <path class="mid" d="M0 452c208-52 300 34 468 30s258-66 396-40 250 62 336 46v152H0Z"
+                fill="#d2703f" opacity=".40" />
+          <path class="near" d="M0 512c176-26 268 30 452 26s286-52 424-30 226 44 324 34v98H0Z"
+                fill="#b5563a" opacity=".52" />
 
-    <div class="side">
-      <!-- 인사말 -->
-      <div class="letter measure">
-        <p>돌봄의 무게는 겉으로 잘 드러나지 않습니다.</p>
-        <p class="letter__lead">그래서 몇 가지만 여쭙고, 지금 어느 정도인지 함께 읽어 보려 합니다.</p>
-        <p class="letter__soft">정답을 가리는 자리가 아니니 편한 대로 답해 주세요.</p>
+          <!-- 곁 — 뒤에서 감싸 안은 두 사람. 브랜드 마크와 같은 형상이되
+               여기서는 해를 등지고 지평선 위에 서 있다. 실루엣이라 표정이 없고,
+               그래서 누구든 자기 이야기로 읽을 수 있다.
+
+               자리를 둘 둔다. preserveAspectRatio="xMidYMax slice" 는 좁은
+               화면에서 좌우를 잘라내므로, 한 자리만 두면 데스크톱에서 제목에
+               가리거나 모바일에서 잘려 나간다. CSS 로 화면 폭에 따라 고른다. -->
+          <!-- 시차용 CSS transform 과 배치용 transform 속성은 같은 자리를 다툰다.
+               CSS 가 이기므로 한 요소에 둘 다 걸면 그림이 원점으로 튕겨 나간다.
+               바깥 <g> 는 움직임만, 안쪽 <g> 는 배치만 맡는다. -->
+          <g class="figs figs--wide near">
+            <g transform="translate(872 392) scale(3.4)">
+              <circle cx="22.2" cy="8" r="5.4" fill="var(--hug-back)" />
+              <path d="M12.2 30c0-8.4 4.5-12.8 10-12.8S32.2 21.6 32.2 30Z" fill="var(--hug-back)" />
+              <circle cx="12.6" cy="12.6" r="4.6" fill="var(--hug-front)" />
+              <path d="M4 30c0-6.2 3.9-9.6 8.6-9.6S21.2 23.8 21.2 30Z" fill="var(--hug-front)" />
+              <path d="M25.4 18.6c1.9 3.4-.4 7.1-4.5 7.8-3.6.6-7-.1-9.9-1.7"
+                    fill="none" stroke="var(--hug-arm)" stroke-width="3.1" stroke-linecap="round" />
+            </g>
+          </g>
+          <g class="figs figs--narrow near">
+            <g transform="translate(548 384) scale(3.9)">
+              <circle cx="22.2" cy="8" r="5.4" fill="var(--hug-back)" />
+              <path d="M12.2 30c0-8.4 4.5-12.8 10-12.8S32.2 21.6 32.2 30Z" fill="var(--hug-back)" />
+              <circle cx="12.6" cy="12.6" r="4.6" fill="var(--hug-front)" />
+              <path d="M4 30c0-6.2 3.9-9.6 8.6-9.6S21.2 23.8 21.2 30Z" fill="var(--hug-front)" />
+              <path d="M25.4 18.6c1.9 3.4-.4 7.1-4.5 7.8-3.6.6-7-.1-9.9-1.7"
+                    fill="none" stroke="var(--hug-arm)" stroke-width="3.1" stroke-linecap="round" />
+            </g>
+          </g>
+
+          <rect width="1200" height="620" filter="url(#grain)" opacity=".5" />
+        </svg>
       </div>
 
-      <!-- 조사 결과 -->
-      <section class="stat" aria-labelledby="stat-h">
-        <p class="stat__eyebrow">2024년 전국 실태조사</p>
-        <h2 id="stat-h" class="stat__h">
-          <b>{{ fmt(TOTAL) }}가구</b> 가운데 <b class="hot">{{ fmt(heavyN) }}가구</b>가
+      <div class="hero__copy container reveal is-in">
+        <p class="hero__eyebrow">발달장애인 보호자를 위한 서비스</p>
+        <h1 class="hero__h">
+          <span class="reveal-line"><span>어떤 <em>도움</em>이</span></span>
+          <span class="reveal-line" style="--reveal-delay:110ms"><span>필요하신가요?</span></span>
+        </h1>
+        <p class="hero__lead measure reveal" style="--reveal-delay:320ms">
+          로그인도 회원가입도 없이, <b>바로</b> 이용하실 수 있습니다.
+        </p>
+      </div>
+    </header>
+
+    <div class="container">
+      <!-- ── 두 메뉴 ────────────────────────────────────────────────────
+           상자를 없애고 번호·제목·괘선으로 세운다. 두 항목의 구조와 크기가
+           같아 비중은 여전히 동등하다(FR-001). -->
+      <nav class="menu" aria-label="주요 기능">
+        <RouterLink class="item reveal" to="/diagnosis/start">
+          <span class="item__no" aria-hidden="true">01</span>
+          <span class="item__body">
+            <span class="item__title">부담감 진단</span>
+            <span class="item__desc measure">
+              몇 가지 질문에 답하시면 지금의 돌봄부담 수준과 <b>그렇게 본 이유</b>를 알려 드립니다.
+            </span>
+            <span class="item__meta">
+              <template v-if="questionCount">질문 {{ questionCount }}개 · </template>약 3분
+            </span>
+          </span>
+          <span class="item__go" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 16h17M18 10l6 6-6 6" />
+            </svg>
+          </span>
+        </RouterLink>
+
+        <RouterLink class="item reveal" style="--reveal-delay:90ms" to="/map">
+          <span class="item__no" aria-hidden="true">02</span>
+          <span class="item__body">
+            <span class="item__title">복지서비스 위치 · 연락처</span>
+            <span class="item__desc measure">
+              우리 지역의 주간활동 · 청소년 방과후활동 <b>신청 접수처</b>를 지도와 목록으로 찾아 드립니다.
+            </span>
+            <span class="item__meta">전국 시군구 · 지도와 목록</span>
+          </span>
+          <span class="item__go" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 16h17M18 10l6 6-6 6" />
+            </svg>
+          </span>
+        </RouterLink>
+      </nav>
+
+      <!-- ── 인사말 ─────────────────────────────────────────────────────
+           가운데 정렬을 버렸다. 한글 긴 문장은 왼쪽 정렬이 눈이 덜 튄다. -->
+      <section class="letter reveal">
+        <p class="letter__lead measure">돌봄의 무게는 겉으로 잘 드러나지 않습니다.</p>
+        <p class="letter__body measure">그래서 몇 가지만 여쭙고, 지금 어느 정도인지 함께 읽어 보려 합니다.</p>
+        <p class="letter__soft measure">정답을 가리는 자리가 아니니 편한 대로 답해 주세요.</p>
+      </section>
+    </div>
+
+    <!-- ── 조사 결과 ──────────────────────────────────────────────────────
+         숫자를 화면 폭으로 키운다. 레퍼런스가 데이터를 다루는 방식이다. -->
+    <section class="stat bleed" aria-labelledby="stat-h">
+      <div class="container">
+        <p class="stat__eyebrow reveal">2024년 전국 실태조사</p>
+        <h2 id="stat-h" class="stat__h reveal" style="--reveal-delay:80ms">
+          <b class="stat__big">{{ fmt(TOTAL) }}가구</b> 가운데
+          <b class="stat__big stat__big--hot">{{ fmt(heavyN) }}가구</b>가<br />
           높은 돌봄부담을 안고 있었습니다.
         </h2>
 
         <!-- 1~5는 순서 있는 척도라 한 색상의 명도 단계로 그린다(무지개색 금지).
              어두울수록 부담이 크다. 색만으로 뜻이 전해지지 않게 아래 범례에
              단계 이름과 가구 수를 모두 적는다(FR-041). -->
-        <div class="bar" role="img"
+        <div class="bar reveal" style="--reveal-delay:160ms" role="img"
              :aria-label="`전체 ${fmt(TOTAL)}가구 중 최고부담군 ${fmt(burden[0].n)}가구, 고부담군 ${fmt(burden[1].n)}가구, 중간부담군 ${fmt(burden[2].n)}가구, 저부담군 ${fmt(burden[3].n)}가구, 부담 없음 ${fmt(burden[4].n)}가구`">
           <span v-for="b in burden" :key="b.step" class="bar__seg"
                 :class="`bar__seg--${b.step}`" :style="{ width: pct(b.n) + '%' }"
                 :title="`${b.name} ${fmt(b.n)}가구 (${pct(b.n).toFixed(1)}%)`"></span>
         </div>
-        <div class="brace" aria-hidden="true">
+        <div class="brace reveal" style="--reveal-delay:200ms" aria-hidden="true">
           <span class="brace__hot" :style="{ width: pct(heavyN) + '%' }"></span>
-          <span class="brace__rest"></span>
         </div>
-        <p class="scale" aria-hidden="true">
+        <p class="scale reveal" style="--reveal-delay:200ms" aria-hidden="true">
           <span>← 매우 부담된다</span><span>전혀 부담되지 않는다 →</span>
         </p>
-        <p class="bar__callout">
-          <b>{{ (heavyN / TOTAL * 100).toFixed(1) }}%</b> — 절반이 넘습니다
+
+        <p class="callout reveal" style="--reveal-delay:240ms">
+          <b>{{ (heavyN / TOTAL * 100).toFixed(1) }}%</b>
+          <span>절반이 넘습니다</span>
         </p>
 
-        <ul class="legend">
+        <ul class="legend reveal" style="--reveal-delay:280ms">
           <li v-for="b in burden" :key="b.step" :class="{ 'legend--hot': b.heavy }">
             <i :class="`sw sw--${b.step}`" aria-hidden="true"></i>
             <span class="legend__nm">{{ b.name }}</span>
@@ -112,225 +256,287 @@ const fmt = (n: number) => n.toLocaleString('ko-KR');
           </li>
         </ul>
 
-        <p class="stat__note">힘든 것은 당신만의 일이 아닙니다.</p>
+        <p class="stat__note reveal" style="--reveal-delay:320ms">힘든 것은 당신만의 일이 아닙니다.</p>
+      </div>
+    </section>
+
+    <div class="container">
+      <!-- ── 이용 흐름 ──────────────────────────────────────────────────── -->
+      <section class="flow" aria-label="이용 흐름">
+        <h2 class="flow__h reveal">진단은 이렇게 진행됩니다</h2>
+        <ol class="flow__list">
+          <li class="reveal"><b aria-hidden="true">1</b><span>몇 가지 질문에 답합니다.</span></li>
+          <li class="reveal" style="--reveal-delay:90ms">
+            <b aria-hidden="true">2</b><span>지금의 부담 수준과 <strong>그렇게 본 이유</strong>를 알려 드립니다.</span>
+          </li>
+          <li class="reveal" style="--reveal-delay:180ms">
+            <b aria-hidden="true">3</b><span>가까운 <strong>신청처를 지도로</strong> 안내해 드립니다.</span>
+          </li>
+        </ol>
       </section>
     </div>
 
-    <!-- 이용 흐름 -->
-    <section class="flow" aria-label="이용 흐름">
-      <h2 class="flow__h">진단은 이렇게 진행됩니다</h2>
-      <ol class="flow__list">
-        <li><b aria-hidden="true">1</b><span>몇 가지 질문에 답합니다.</span></li>
-        <li><b aria-hidden="true">2</b><span>지금의 부담 수준과 <strong>그렇게 본 이유</strong>를 알려 드립니다.</span></li>
-        <li><b aria-hidden="true">3</b><span>가까운 <strong class="map">신청처를 지도로</strong> 안내해 드립니다.</span></li>
-      </ol>
+    <!-- ── 맺음말 ─────────────────────────────────────────────────────────
+         유일한 어두운 면. 크림 글자 12.16:1 로 대비는 오히려 본문보다 높다.
+         레퍼런스의 '두 색' 인상이 여기서 나온다 — 색을 더 만들지 않고,
+         이미 있는 먹색과 크림을 뒤집어 쓴다. -->
+    <section class="sign bleed reveal">
+      <div class="container">
+        <p class="sign__body measure">
+          답해 주신 내용은 결과를 계산하는 데에만 쓰고, 개인을 알아볼 수 있는 형태로 남기지 않습니다.
+        </p>
+        <p class="sign__from">곁 드림</p>
+      </div>
     </section>
-
-    <!-- 맺음말 -->
-    <div class="sign">
-      <p class="sign__body measure">
-        답해 주신 내용은 결과를 계산하는 데에만 쓰고, 개인을 알아볼 수 있는 형태로 남기지 않습니다.
-      </p>
-      <p class="sign__from">곁 드림</p>
-    </div>
   </div>
 </template>
 
 <style scoped>
-/* ── 제목 ──────────────────────────────────────────────────────────────
-   눈썹 문구 → 큰 제목 → 안내 한 줄. 세 단이 크기·색·굵기로 갈린다. */
-.hero { display: grid; gap: var(--sp-sm); }
+/* ── 히어로 ──────────────────────────────────────────────────────────────
+   그림은 배경이 아니라 한 덩이의 면이다. 높이를 vh 로 잡되 상한을 둬서
+   작은 노트북에서 첫 화면이 그림만으로 차지 않게 한다. */
+/* 글이 그림 위에 겹치지 않게 위아래로 나눈다. 겹쳐 놓으면 능선 색 위에서
+   본문 명암비가 4.54:1 까지 떨어져 AA 문턱에 걸린다 — 지친 눈으로 읽는
+   화면에서 문턱을 아슬아슬하게 넘기지 않는다. 격자라 겹칠 일이 없다. */
+.hero {
+  position: relative;
+  display: grid;
+  grid-template-rows: auto 1fr;
+  min-height: min(88vh, 760px);
+  background: var(--paper);
+  overflow: hidden;
+}
+/* DOM 순서는 그림이 먼저지만(장식이라 화면낭독기가 먼저 건너뛰게), 보이는
+   순서는 글이 먼저다. 격자 행을 명시해 둘을 분리한다. */
+.hero__copy { grid-row: 1; }
+.hero__art { grid-row: 2; position: relative; min-height: clamp(230px, 34vh, 400px); }
+.hero__svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* 두 사람 — 넓은 화면은 해 앞(오른쪽), 좁은 화면은 화면 가운데.
+   좁은 화면에서는 좌우가 잘려 오른쪽 자리가 보이지 않는다. */
+.figs--narrow { display: none; }
+@media (max-width: 700px) {
+  .figs--wide { display: none; }
+  .figs--narrow { display: block; }
+  /* 휴대폰에서는 히어로 높이를 내용에 맡긴다. 88vh 를 그대로 두면 하늘이
+     한 화면을 차지해 **첫 화면에 들어가는 문(01 부담감 진단)이 안 보인다.**
+     지친 보호자가 3분 안에 끝내는 흐름이라, 첫 화면은 그림이 아니라 다음
+     행동을 보여 줘야 한다. 그림은 스크롤 한 번 안에서 충분히 읽힌다. */
+  .hero { min-height: 0; }
+  .hero__art { min-height: clamp(196px, 26vh, 260px); }
+}
+/* 시차 — 가까운 능선이 가장 많이, 먼 것은 조금만 움직인다. */
+.hero__art .near { transform: translateY(calc(var(--shift, 0px) * -1)); }
+.hero__art .mid  { transform: translateY(calc(var(--shift, 0px) * -0.6)); }
+.hero__art .far  { transform: translateY(calc(var(--shift-far, 0px) * -1)); }
+
+.hero__copy {
+  position: relative;
+  width: 100%;
+  padding-block: clamp(44px, 9vw, 104px) clamp(28px, 5vw, 56px);
+}
 .hero__eyebrow {
-  font-size: 13px; font-weight: 700; letter-spacing: .06em;
-  color: var(--primary-on-tint); margin: 0;
+  margin: 0 0 clamp(14px, 2vw, 24px);
+  font-size: 14px; font-weight: 600; letter-spacing: .09em;
+  text-transform: none; color: var(--primary-on-tint);
 }
 .hero__h {
-  font-size: 34px; font-weight: 700; line-height: 1.4; color: var(--ink);
-  margin: 0; word-break: keep-all;
+  margin: 0;
+  font-size: var(--display-1);
+  font-weight: 700;
+  line-height: 1.02;
+  letter-spacing: var(--tracking-display);
+  color: var(--ink);
 }
-/* 강조어에만 색과 밑선. 밑선은 글자 아래를 지나가는 띠라 획을 가리지 않는다. */
+/* 강조어 아래를 지나는 띠. 100px 활자에서 62% 부터 깔면 띠가 아니라 글자
+   뒤에 놓인 네모로 읽힌다. 밑줄로 보이도록 아래 22% 로 낮췄다. */
 .hero__h em {
-  font-style: normal; color: var(--primary-on-tint);
-  background: linear-gradient(var(--tertiary-tint), var(--tertiary-tint)) 0 82% / 100% 34% no-repeat;
-  padding-inline: 2px;
+  font-style: normal;
+  background: linear-gradient(transparent 78%, var(--tertiary) 78%);
+  padding-inline: .05em;
 }
-.hero__lead { font-size: 16px; color: var(--muted); margin: 0; }
-.hero__lead b { color: var(--ink); font-weight: 700; }
-
-/* 척도 양끝 — 막대가 무엇에서 무엇으로 가는지 글로 밝힌다 */
-.scale {
-  display: flex; justify-content: space-between; gap: var(--sp-sm);
-  font-size: 12px; color: var(--muted-soft); margin: 0 0 var(--sp-base);
-}
-
-/* .stack 의 간격 규칙은 .container 의 직계 자식에만 닿는다. .side 안의
-   두 덩어리는 여기서 직접 띄운다.
-   인사말과 조사 결과는 화면 폭과 상관없이 늘 위에서 아래로 읽는다. 좌우로
-   나란히 놓으면 눈이 어디를 먼저 볼지 헷갈리고 두 단의 높이도 어긋난다.
-   대신 위 두 메뉴 카드와 같은 폭을 그대로 써서 편지지의 여백선을 맞춘다. */
-.side { display: grid; gap: var(--sp-xl); }
-
-/* ── 홈페이지 모드에서 넓어진 자리를 채운다 ───────────────────────────── */
-@media (min-width: 900px) {
-  :root[data-width="wide"] .hero__h { font-size: 42px; }
-  /* 인사말과 맺음말은 한 문장이 한 줄에 앉을 때 가장 잘 읽힌다. .measure 의
-     62ch 규칙이 도로 접어 버리므로 여기서 풀고 줄바꿈을 막는다.
-     좁은 종이(640px)에서는 넘치므로 넓은 모드에서만 건다. */
-  :root[data-width="wide"] .letter,
-  :root[data-width="wide"] .sign__body { max-width: none; }
-  :root[data-width="wide"] .letter__lead,
-  :root[data-width="wide"] .sign__body { white-space: nowrap; }
-  /* 조사 결과도 종이 폭을 다 쓴다. 안쪽 여백만 한 단 더 넓힌다. */
-  :root[data-width="wide"] .stat { padding: var(--sp-xxl) var(--sp-xl); }
+.hero__lead {
+  margin: clamp(22px, 3vw, 36px) 0 0;
+  font-size: var(--lede);
+  line-height: 1.62;
+  letter-spacing: var(--tracking-lede);
+  color: var(--body);
 }
 
-/* ── 두 메뉴 ────────────────────────────────────────────────────────────
-   구조·크기는 같게(동등 비중), 색만 나눈다. */
-.menu { display: grid; gap: var(--sp-base); grid-template-columns: 1fr; }
-@media (min-width: 620px) { .menu { grid-template-columns: 1fr 1fr; } }
-.card {
-  --hue: var(--primary); --hue-tx: var(--primary-on-tint);
-  display: flex; flex-direction: column; gap: var(--sp-sm);
-  border: 1px solid var(--hairline); border-top: 4px solid var(--hue);
-  border-radius: var(--radius-lg); padding: var(--sp-lg);
-  text-decoration: none; color: var(--body);
-  background: var(--canvas); box-shadow: var(--shadow-soft);
+/* ── 메뉴 ────────────────────────────────────────────────────────────────
+   상자 없음. 위아래 괘선과 넉넉한 안쪽 여백만으로 누를 것이라고 말한다. */
+.menu { margin-top: var(--gap-section); border-top: 1px solid var(--hairline); }
+.item {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: start;
+  gap: clamp(16px, 3vw, 40px);
+  padding-block: clamp(28px, 4vw, 48px);
+  border-bottom: 1px solid var(--hairline);
+  color: inherit;
+  text-decoration: none;
+  transition: background-color .35s ease, padding-inline .35s ease;
 }
-/* 아이콘 글리프는 --icon-hue 로 따로 뽑아 둔다. 테두리·제목은 카드의 --hue 를
-   그대로 쓰고, 아이콘만 한 단 진하게 눌러 두 카드를 구분한다. */
-.card--map {
-  --hue: var(--secondary); --hue-tx: var(--secondary-on-tint);
-  --icon-fill: 26%; --icon-hue: var(--secondary-deep);
+.item:hover { background: var(--surface-soft); padding-inline: clamp(8px, 1.6vw, 20px); }
+.item__no {
+  font-size: clamp(13px, 1.4vw, 15px); font-weight: 600;
+  color: var(--muted-soft); font-variant-numeric: tabular-nums; padding-top: .5em;
 }
-.card:hover { box-shadow: var(--shadow-card); border-color: var(--hairline); border-top-color: var(--hue); }
-.card__icon {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 60px; height: 60px; border-radius: 16px;
-  background: var(--surface-strong);                       /* color-mix 미지원 폴백 */
-  background: color-mix(in srgb, var(--hue) var(--icon-fill, 15%), var(--canvas));
-  color: var(--icon-hue, var(--hue));
+.item__body { display: block; }
+.item__title {
+  display: block;
+  font-size: var(--display-3); font-weight: 700; line-height: 1.22;
+  letter-spacing: var(--tracking-display);
+  color: var(--ink);
+  word-break: keep-all;
 }
-.card__icon svg { width: 40px; height: 40px; display: block; }
-.card__title { font-size: 21px; font-weight: 700; color: var(--hue-tx); line-height: 1.4; }
-.card__desc { font-size: 15px; color: var(--muted); line-height: 1.75; word-break: keep-all; }
-.card__desc b { color: var(--ink); font-weight: 700; }
-.card__meta {
-  margin-top: auto; padding-top: var(--sp-sm);
-  border-top: 1px solid var(--hairline-soft);
-  font-size: 13px; color: var(--muted-soft);
+.item__desc {
+  display: block; margin-top: clamp(10px, 1.4vw, 16px);
+  font-size: clamp(15px, 1.5vw, 17px); line-height: 1.68; color: var(--body);
 }
+.item__meta {
+  display: block; margin-top: clamp(10px, 1.2vw, 14px);
+  font-size: 14px; color: var(--muted);
+}
+.item__go { width: clamp(26px, 3vw, 34px); color: var(--primary); padding-top: .35em; }
+.item__go svg { width: 100%; height: auto; display: block; transition: transform .35s ease; }
+.item:hover .item__go svg { transform: translateX(5px); }
 
-/* ── 인사말 ── */
-/* 첫 문장 앞을 한 줄 비운다. 16px × 행간 1.85 = 30px 이 빈 줄 한 개다. */
-.letter { color: var(--body); text-align: center; padding-top: 30px; }
-.letter p { margin: 0 0 var(--sp-lg); word-break: keep-all; }
-.letter p:last-child { margin-bottom: 0; }
-.letter__lead { font-size: 19px; line-height: 1.9; color: var(--ink); font-weight: 500; }
-.letter__soft { font-size: 15px; color: var(--muted); }
+/* ── 인사말 ────────────────────────────────────────────────────────────── */
+.letter { margin-top: var(--gap-section); }
+.letter__lead {
+  margin: 0; font-size: var(--display-2); font-weight: 600; line-height: 1.28;
+  letter-spacing: var(--tracking-display); color: var(--ink);
+}
+.letter__body {
+  margin: clamp(20px, 2.6vw, 32px) 0 0;
+  font-size: var(--lede); line-height: 1.7; color: var(--body);
+}
+.letter__soft { margin: clamp(12px, 1.6vw, 18px) 0 0; font-size: 15px; color: var(--muted); }
 
-/* ── 조사 결과 ── */
+/* ── 조사 결과 ───────────────────────────────────────────────────────────
+   살구빛 책상 위에 올려 앞뒤 섹션과 면으로 구분한다. */
 .stat {
-  background: var(--surface-soft); border: 1px solid var(--hairline);
-  border-radius: var(--radius-md); padding: var(--sp-xl) var(--sp-lg);
+  margin-top: var(--gap-section);
+  padding-block: var(--gap-section);
+  background: var(--page);
 }
 .stat__eyebrow {
-  font-size: 12px; font-weight: 700; letter-spacing: .06em;
-  color: var(--muted-soft); margin: 0 0 var(--sp-base);
+  margin: 0 0 clamp(14px, 2vw, 22px);
+  font-size: 14px; font-weight: 600; letter-spacing: .09em; color: var(--secondary-on-tint);
 }
 .stat__h {
-  font-size: 19px; font-weight: 400; line-height: 1.95; color: var(--body);
-  margin: 0 0 var(--sp-xl); word-break: keep-all;
+  margin: 0 0 clamp(32px, 5vw, 60px);
+  font-size: clamp(20px, 2.4vw, 28px); font-weight: 500; line-height: 1.5;
+  letter-spacing: var(--tracking-lede); color: var(--ink);
 }
-.stat__h b { color: var(--ink); font-weight: 700; }
-.stat__h b.hot { color: var(--plum-on-tint); font-size: 21px; }
+.stat__big {
+  font-size: var(--display-2); font-weight: 700; line-height: 1.06;
+  letter-spacing: var(--tracking-display);
+  display: inline-block; padding-block: .06em;
+}
+.stat__big--hot { color: var(--primary-on-tint); }
 
-.bar { display: flex; gap: 2px; height: 30px; margin-bottom: var(--sp-sm); }
+.bar { display: flex; width: 100%; height: clamp(22px, 3vw, 34px); overflow: hidden; }
 .bar__seg { display: block; height: 100%; }
-.bar__seg:first-child { border-radius: 4px 0 0 4px; }
-.bar__seg:last-child { border-radius: 0 4px 4px 0; }
+/* 칸 사이를 크림으로 갈라 준다 — 인접 색끼리의 경계가 아니라 각 칸이
+   검증된 크림 위에 놓이게 해서 1.4.11(3:1)을 유지한다. */
+.bar__seg + .bar__seg { border-left: 2px solid var(--paper); }
 .bar__seg--1 { background: var(--burden-1); }
 .bar__seg--2 { background: var(--burden-2); }
 .bar__seg--3 { background: var(--burden-3); }
 .bar__seg--4 { background: var(--burden-4); }
 .bar__seg--5 { background: var(--burden-5); }
 
-/* 막대와 같은 flex·gap 구조라 간격 계산까지 일치한다. 퍼센트만 맞추면
-   2px 간격 4개 때문에 몇 px 어긋난다. */
-.brace { display: flex; gap: 2px; margin-bottom: 6px; }
+.brace { display: flex; height: 8px; margin-top: 6px; }
 .brace__hot {
-  height: 7px; flex: none;
-  border: 2px solid var(--burden-2); border-top: 0; border-radius: 0 0 3px 3px;
+  display: block; height: 100%;
+  border-left: 2px solid var(--primary); border-right: 2px solid var(--primary);
+  border-bottom: 2px solid var(--primary);
 }
-.brace__rest { flex: 1; }
-.bar__callout { font-size: 14px; color: var(--muted); margin: 0 0 var(--sp-lg); }
-.bar__callout b { color: var(--tertiary-on-tint); font-size: 17px; font-weight: 700; }
+.scale {
+  display: flex; justify-content: space-between; margin: 10px 0 0;
+  font-size: 13px; color: var(--muted);
+}
 
-.legend { list-style: none; margin: 0 0 var(--sp-lg); padding: 0; display: grid; gap: var(--sp-md); }
-.legend li {
-  display: grid; grid-template-columns: auto 1fr auto; gap: var(--sp-md);
-  align-items: center; font-size: 14.5px; color: var(--muted);
-  padding-bottom: var(--sp-md); border-bottom: 1px solid var(--hairline-soft);
+.callout {
+  display: flex; align-items: baseline; gap: clamp(12px, 1.6vw, 20px);
+  margin: clamp(28px, 4vw, 48px) 0 0;
 }
-.legend li:last-child { padding-bottom: 0; border-bottom: 0; }
-.legend--hot { color: var(--ink); font-weight: 600; }
-.sw { width: 11px; height: 11px; border-radius: 3px; display: block; }
+.callout b {
+  font-size: var(--display-2); font-weight: 700; line-height: 1;
+  letter-spacing: var(--tracking-display); color: var(--primary-on-tint);
+  font-variant-numeric: tabular-nums;
+}
+.callout span { font-size: var(--lede); color: var(--body); }
+
+.legend {
+  list-style: none; margin: clamp(28px, 4vw, 44px) 0 0; padding: 0;
+  display: grid; gap: 0;
+  border-top: 1px solid var(--hairline);
+}
+.legend li {
+  display: grid; grid-template-columns: auto 1fr auto; align-items: center;
+  gap: 12px; padding-block: 13px;
+  border-bottom: 1px solid var(--hairline);
+  font-size: 15px; color: var(--body);
+}
+.legend--hot { font-weight: 600; color: var(--ink); }
+.sw { width: 15px; height: 15px; border-radius: 3px; display: block; }
 .sw--1 { background: var(--burden-1); } .sw--2 { background: var(--burden-2); }
 .sw--3 { background: var(--burden-3); } .sw--4 { background: var(--burden-4); }
 .sw--5 { background: var(--burden-5); border: 1px solid var(--hairline); }
-.legend__n { font-variant-numeric: tabular-nums; color: var(--muted-soft); }
-.legend--hot .legend__n { color: var(--body); }
-
+.legend__n { color: var(--muted); font-variant-numeric: tabular-nums; }
 .stat__note {
-  font-size: 17px; color: var(--ink); font-weight: 700;
-  margin: var(--sp-lg) 0 0; padding-top: var(--sp-lg);
-  border-top: 1px solid var(--hairline);
+  margin: clamp(28px, 4vw, 44px) 0 0;
+  font-size: var(--lede); color: var(--plum-on-tint);
 }
 
-/* ── 이용 흐름 ── */
-.flow { border-top: 1px solid var(--hairline); padding-top: var(--sp-lg); }
-/* 제목 아래 한 줄을 비운다. 16px × 행간 1.7 = 27px 이 빈 줄 한 개다. */
-.flow__h { font-size: 16px; color: var(--muted); font-weight: 600; margin: 0 0 calc(var(--sp-md) + 27px); }
-.flow__list { list-style: none; margin: 0; padding: 0; display: grid; gap: var(--sp-base); }
+/* ── 이용 흐름 ─────────────────────────────────────────────────────────── */
+.flow { margin-top: var(--gap-section); }
+.flow__h {
+  margin: 0 0 clamp(24px, 3.4vw, 40px);
+  font-size: var(--display-3); font-weight: 700; color: var(--ink);
+}
+.flow__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hairline); }
 .flow__list li {
-  display: grid; grid-template-columns: auto 1fr; gap: var(--sp-md);
-  align-items: start; align-content: start;
-  border: 1px solid var(--hairline); border-radius: var(--radius-md);
-  padding: var(--sp-base); background: var(--canvas);
+  display: grid; grid-template-columns: auto 1fr; align-items: baseline;
+  gap: clamp(16px, 2.4vw, 32px);
+  padding-block: clamp(20px, 2.6vw, 30px);
+  border-bottom: 1px solid var(--hairline);
+  font-size: clamp(16px, 1.7vw, 19px); line-height: 1.6; color: var(--body);
 }
-/* 1 → 3 으로 갈수록 동그라미가 진해진다. 걸음이 쌓여 결론으로 가는 순서를
-   명도 하나로만 말한다(무지개색 금지). 배경 명도 L 이
-   0.62 → 0.168 → 0.096 으로 단조 감소해 색을 못 봐도 순서가 읽힌다.
-   2·3 번의 흰 숫자는 각각 4.82:1 · 7.17:1 로 AA 를 넘는다. */
 .flow__list b {
-  display: inline-flex; align-items: center; justify-content: center;
-  width: 27px; height: 27px; border-radius: 50%; flex: none;
-  background: var(--primary); color: #fff; font-size: 14px; font-weight: 700;
+  font-size: clamp(15px, 1.5vw, 17px); font-weight: 600;
+  color: var(--muted-soft); font-variant-numeric: tabular-nums;
 }
-/* 첫 걸음은 가볍게 — 채운 색면 대신 연한 살구빛에 진한 숫자를 얹는다. */
-.flow__list li:first-child b {
-  background: var(--primary-disabled);                     /* color-mix 미지원 폴백 */
-  background: color-mix(in srgb, var(--primary) 20%, var(--canvas));
-  color: var(--primary-on-tint);
-}
-/* 마지막 걸음이 가장 진하다. 지도 카드 아이콘과 같은 색이라 "지도로
-   안내" 라는 문장과 위의 복지서비스 카드가 눈으로 이어진다. */
-.flow__list li:last-child b { background: var(--secondary-deep); }
-.flow__list span { font-size: 16px; line-height: 1.7; color: var(--body); word-break: keep-all; }
-.flow__list strong { color: var(--ink); font-weight: 700; }
-.flow__list strong.map { color: var(--secondary-on-tint); }
+.flow__list strong { color: var(--ink); font-weight: 600; }
 
-/* 세 단으로 벌릴 때는 숫자를 글 옆이 아니라 글 위에 얹는다.
-   옆에 두면 칸 너비는 같아도 문장 길이가 제각각이라, 1번 문장이 짧아 다음
-   숫자까지 텅 비고 2번 문장은 길어 3번 숫자에 바싹 붙어 보인다. 숫자를 한
-   줄 위로 올리면 세 숫자가 같은 줄에 같은 간격으로 놓인다. */
-@media (min-width: 860px) {
-  .flow__list { grid-template-columns: repeat(3, 1fr); column-gap: var(--sp-xl); }
-  .flow__list li { grid-template-columns: 1fr; gap: var(--sp-base); }
+/* ── 맺음말 ─────────────────────────────────────────────────────────────
+   화면에서 유일하게 뒤집힌 면. 크림 글자가 먹색 위에서 12.16:1 이다. */
+.sign {
+  margin-top: var(--gap-section);
+  padding-block: var(--gap-section);
+  background: var(--ink);
+}
+.sign__body {
+  margin: 0;
+  font-size: clamp(19px, 2.6vw, 30px); font-weight: 500; line-height: 1.55;
+  letter-spacing: var(--tracking-lede);
+  color: var(--paper);
+}
+.sign__from {
+  margin: clamp(28px, 4vw, 44px) 0 0;
+  font-size: var(--lede); color: var(--tertiary);
 }
 
-/* ── 맺음말 ── */
-.sign { border-top: 1px solid var(--hairline); padding-top: var(--sp-lg); }
-.sign__body { font-size: 14px; color: var(--muted); margin: 0 auto; word-break: keep-all; line-height: 1.75; text-align: center; }
-/* 맺음말과 서명 사이를 두 줄 비운다. 본문 14px × 행간 1.75 × 2줄 = 49px. */
-.sign__from { font-size: 18px; font-weight: 700; color: var(--plum); text-align: right; margin: 49px 0 0; }
+/* ── 좁은 화면 ───────────────────────────────────────────────────────────
+   화살표를 지우고 번호를 제목 위로 올린다. 430px 에서 3열은 제목이 두
+   글자씩 끊긴다. */
+@media (max-width: 560px) {
+  .item { grid-template-columns: 1fr; gap: 0; }
+  .item__no { padding-top: 0; margin-bottom: 8px; }
+  .item__go { display: none; }
+  .legend li { grid-template-columns: auto 1fr; }
+  .legend__n { grid-column: 2; text-align: right; }
+}
 </style>
