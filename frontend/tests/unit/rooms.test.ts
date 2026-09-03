@@ -6,7 +6,7 @@
 //   · 즐겨찾기는 브라우저에만 남고, 저장 공간을 못 써도 화면이 죽지 않는다.
 import { describe, it, expect, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { answer, opening, TOPICS } from '../../src/services/guideBot';
+import { answer, opening, TOPICS, BOT_STATS } from '../../src/services/guideBot';
 import { useFavoriteStore } from '../../src/stores/favorites';
 
 /* 이 실행 환경이 주는 localStorage 는 반쪽짜리다(clear 가 없다). 저장소는
@@ -71,10 +71,25 @@ describe('안내봇 — 무엇을 답하는가', () => {
   });
 
   it('화면에 펼쳐 둔 질문은 전부 답을 가진다 — 눌렀는데 "모르겠습니다"가 나오면 안 된다', () => {
-    const miss = TOPICS.flatMap((g) => g.items)
-      .filter((q) => answer(q).text.includes('확실히 알지 못합니다'));
-    expect(miss).toEqual([]);
-    expect(TOPICS.flatMap((g) => g.items).length).toBeGreaterThanOrEqual(20);
+    const all = TOPICS.flatMap((g) => g.items);
+    expect(all.filter((q) => answer(q).text.includes('확실히 알지 못합니다'))).toEqual([]);
+    expect(all.length).toBeGreaterThanOrEqual(100);
+    expect(BOT_STATS.asks).toBe(all.length);
+  });
+
+  it('같은 질문이 두 묶음에 겹쳐 있지 않다', () => {
+    const all = TOPICS.flatMap((g) => g.items);
+    expect(all.filter((q, i) => all.indexOf(q) !== i)).toEqual([]);
+  });
+
+  it('화면에서 누른 질문은 열쇳말 경쟁을 거치지 않고 제 규칙으로 간다', () => {
+    // 열쇳말만으로는 다른 규칙에 뺏기던 것들. 글자 그대로 맞으면 그리로 간다.
+    expect(answer('형제자매도 지원이 있나요?').text).toContain('가족 지원');
+    expect(answer('누가 만든 서비스인가요?').text).toContain('공식 창구가 아니고');
+    expect(answer('비용이 드나요?').text).toContain('무료입니다');
+    expect(answer('별점 평균은 믿을 만한가요?').text).toContain('평균이 크게 흔들립니다');
+    // 띄어쓰기·물음표가 달라도 같은 답으로 간다
+    expect(answer('얼마나걸리나요').text).toContain('3분쯤');
   });
 
   it('펼쳐 둔 질문이 엉뚱한 주제로 새지 않는다', () => {
