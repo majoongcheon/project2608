@@ -134,7 +134,8 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
           <span class="item__body">
             <span class="item__title">부담감 진단</span>
             <span class="item__desc measure">
-              몇 가지 질문에 답하시면 지금의 돌봄부담 수준과 <b>그렇게 본 이유</b>를 알려 드립니다.
+              몇 가지 질문에 답하시면 지금의 돌봄부담 수준과<br />
+              <b>그렇게 본 이유</b>를 알려 드립니다.
             </span>
             <span class="item__meta">
               <template v-if="questionCount">질문 {{ questionCount }}개 · </template>약 3분
@@ -153,7 +154,8 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
           <span class="item__body">
             <span class="item__title">복지서비스 위치 · 연락처</span>
             <span class="item__desc measure">
-              우리 지역의 주간활동 · 청소년 방과후활동 <b>신청 접수처</b>를 지도와 목록으로 찾아 드립니다.
+              우리 지역의 주간활동 · 청소년 방과후활동 <b>신청 접수처</b>를<br />
+              지도와 목록으로 찾아 드립니다.
             </span>
             <span class="item__meta">전국 시군구 · 지도와 목록</span>
           </span>
@@ -176,7 +178,8 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
           <span class="item__body">
             <span class="item__title">정보 소통방</span>
             <span class="item__desc measure">
-              진단·결과·신청처가 어떻게 되는지 <b>물어보시면 답해 드립니다.</b> 확실히 아는 것만 답하고, 모르는 것은 모른다고 말씀드립니다.
+              진단·결과·신청처가 어떻게 되는지 <b>물어보시면 답해 드립니다.</b><br />
+              확실히 아는 것만 답하고, 모르는 것은 모른다고 말씀드립니다.
             </span>
             <span class="item__meta">대화는 이 브라우저 안에만 남습니다</span>
           </span>
@@ -193,7 +196,8 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
           <span class="item__body">
             <span class="item__title">이용 후기 소통방</span>
             <span class="item__desc measure">
-              먼저 다녀오신 분들이 남긴 이야기를 읽고, <b>내 경험도 남길 수 있습니다.</b> 별명으로만 쓰고 연락처는 받지 않습니다.
+              먼저 다녀오신 분들이 남긴 이야기를 읽고, <b>내 경험도 남길 수 있습니다.</b><br />
+              별명으로만 기록하고 연락처는 받지 않습니다.
             </span>
             <span class="item__meta">기관별 후기 · 별점</span>
           </span>
@@ -210,7 +214,8 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
           <span class="item__body">
             <span class="item__title">마이페이지</span>
             <span class="item__desc measure">
-              별을 눌러 담아 두신 기관을 <b>한자리에 모아</b> 보여 드립니다. 전화번호와 주소를 매번 다시 찾지 않으셔도 됩니다.
+              별을 눌러 <b>즐겨찾기</b>에 담아 두신 기관을 <b>한자리에 모아</b> 보여 드립니다.<br />
+              전화번호와 주소를 매번 다시 찾지 않으셔도 됩니다.
             </span>
             <span class="item__meta">이 브라우저에만 저장 · 로그인 없음</span>
           </span>
@@ -425,6 +430,9 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
   color: var(--ink);
   word-break: keep-all;
 }
+/* 설명은 지은이가 정한 자리에서 줄을 나눈다(2026-09-03 16:50 기획자 지정).
+   <br> 로 나눈 두 마디는 좁은 화면에서 각자 다시 접히므로, 뜻 덩어리는
+   유지되면서 폭에도 맞는다. */
 .item__desc {
   display: block; margin-top: clamp(10px, 1.4vw, 16px);
   font-size: clamp(15px, 1.5vw, 17px); line-height: 1.6; color: var(--body);
