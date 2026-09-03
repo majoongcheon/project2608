@@ -3,7 +3,8 @@
 //
 // 2026-09-03 전면 개편 — awwwards SOTD 두 건에서 가져온 네 가지.
 //   ① 큰 활자   대제목을 화면 폭까지(clamp 40~104px). 본문과 6.5배차.
-//   ② 넓은 여백 섹션 간격을 본문 행간의 8~10배로.
+//   ② 여백      숨통은 트되 과하지 않게. 처음 168px 까지 벌렸다가 '너무 띄엄띄엄
+//               하고 스크롤이 길다'는 확인을 받고 절반으로 줄였다(14:55).
 //   ③ 이미지    노을 아래 두 사람. 저장소에 그림 파일이 하나도 없어 직접 그렸다.
 //   ④ 모션      스크롤 등장 + 히어로 시차. prefers-reduced-motion 이면 전부 끈다.
 // 카드 테두리를 걷어내고 괘선과 여백으로 가른다 — 상자가 있으면 '앱'으로 읽힌다.
@@ -27,6 +28,10 @@ const TOTAL = 3000;
 const heavyN = burden.filter((b) => b.heavy).reduce((a, b) => a + b.n, 0);
 const pct = (n: number) => (n / TOTAL) * 100;
 const fmt = (n: number) => n.toLocaleString('ko-KR');
+
+// 원반 둘레의 눈금. 시계 문자판처럼 24등분한다(Ruinart Digital Fresco 참고).
+// 장식이면서, 앞으로 넣을 원형 선택 UI 의 예고이기도 하다.
+const ticks = Array.from({ length: 24 }, (_, i) => i * 15);
 
 // ── 모션 ────────────────────────────────────────────────────────────────
 // 원칙 하나 — 연출이 실패해도 내용은 보여야 한다. 관찰자를 못 만들면
@@ -82,14 +87,18 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
 <template>
   <div class="home">
     <!-- ── 히어로 ────────────────────────────────────────────────────────
-         그림이 먼저 오고 글이 그 위에 앉는다. 레퍼런스 둘 다 첫 화면에서
-         UI 를 보여 주지 않는다. -->
+         글과 원반을 좌우로 나란히. 위아래로 쌓으면 첫 화면이 길어지고,
+         겹치면 능선 위에서 본문 명암비가 떨어진다. -->
     <header class="hero bleed">
-      <div ref="art" class="hero__art parallax" aria-hidden="true">
-        <svg class="hero__svg" viewBox="0 0 1200 620" preserveAspectRatio="xMidYMax slice">
+      <div class="hero__in container">
+      <div ref="art" class="hero__art parallax">
+        <!-- 원반. 띠로 깔면 위아래가 하드하게 잘려 '잘린 그림'으로 읽힌다 —
+             원은 잘릴 수가 없다. 둘레 눈금은 Ruinart 의 문자판 언어를 빌린 것. -->
+        <svg class="hero__disc" viewBox="0 0 400 400" role="img"
+             aria-label="해질녘 언덕 위에서 한 사람이 다른 사람을 뒤에서 안고 있는 그림">
           <defs>
-            <!-- 종이 결. 색면이 넓어질수록 매끈하면 인쇄물이 아니라 화면으로
-                 읽힌다. 아주 옅게만 얹는다. -->
+            <clipPath id="disc"><circle cx="200" cy="200" r="176" /></clipPath>
+            <!-- 종이 결. 매끈하면 인쇄물이 아니라 화면으로 읽힌다. 아주 옅게만. -->
             <filter id="grain">
               <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" />
               <feColorMatrix type="saturate" values="0" />
@@ -97,7 +106,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
             </filter>
             <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stop-color="#fffaf5" />
-              <stop offset="62%" stop-color="#fdeede" />
+              <stop offset="58%" stop-color="#fdeede" />
               <stop offset="100%" stop-color="#f7ddc4" />
             </linearGradient>
             <radialGradient id="sun" cx="50%" cy="50%" r="50%">
@@ -106,54 +115,52 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
             </radialGradient>
           </defs>
 
-          <rect width="1200" height="620" fill="url(#sky)" />
-          <!-- 해 — 지평선에 반쯤 걸린다. 저녁이지 밤이 아니다. -->
-          <circle class="far" cx="820" cy="392" r="132" fill="url(#sun)" opacity=".9" />
-
-          <!-- 능선 셋. 뒤로 갈수록 옅어지고 덜 움직인다(공기 원근). -->
-          <path class="far" d="M0 404c168-38 286 22 430 12s246-70 402-52 254 74 368 58v198H0Z"
-                fill="#f0b678" opacity=".46" />
-          <path class="mid" d="M0 452c208-52 300 34 468 30s258-66 396-40 250 62 336 46v152H0Z"
-                fill="#d2703f" opacity=".40" />
-          <path class="near" d="M0 512c176-26 268 30 452 26s286-52 424-30 226 44 324 34v98H0Z"
-                fill="#b5563a" opacity=".52" />
-
-          <!-- 곁 — 뒤에서 감싸 안은 두 사람. 브랜드 마크와 같은 형상이되
-               여기서는 해를 등지고 지평선 위에 서 있다. 실루엣이라 표정이 없고,
-               그래서 누구든 자기 이야기로 읽을 수 있다.
-
-               자리를 둘 둔다. preserveAspectRatio="xMidYMax slice" 는 좁은
-               화면에서 좌우를 잘라내므로, 한 자리만 두면 데스크톱에서 제목에
-               가리거나 모바일에서 잘려 나간다. CSS 로 화면 폭에 따라 고른다. -->
-          <!-- 시차용 CSS transform 과 배치용 transform 속성은 같은 자리를 다툰다.
-               CSS 가 이기므로 한 요소에 둘 다 걸면 그림이 원점으로 튕겨 나간다.
-               바깥 <g> 는 움직임만, 안쪽 <g> 는 배치만 맡는다. -->
-          <g class="figs figs--wide near">
-            <g transform="translate(872 392) scale(3.4)">
-              <circle cx="22.2" cy="8" r="5.4" fill="var(--hug-back)" />
-              <path d="M12.2 30c0-8.4 4.5-12.8 10-12.8S32.2 21.6 32.2 30Z" fill="var(--hug-back)" />
-              <circle cx="12.6" cy="12.6" r="4.6" fill="var(--hug-front)" />
-              <path d="M4 30c0-6.2 3.9-9.6 8.6-9.6S21.2 23.8 21.2 30Z" fill="var(--hug-front)" />
-              <path d="M25.4 18.6c1.9 3.4-.4 7.1-4.5 7.8-3.6.6-7-.1-9.9-1.7"
-                    fill="none" stroke="var(--hug-arm)" stroke-width="3.1" stroke-linecap="round" />
-            </g>
-          </g>
-          <g class="figs figs--narrow near">
-            <g transform="translate(548 384) scale(3.9)">
-              <circle cx="22.2" cy="8" r="5.4" fill="var(--hug-back)" />
-              <path d="M12.2 30c0-8.4 4.5-12.8 10-12.8S32.2 21.6 32.2 30Z" fill="var(--hug-back)" />
-              <circle cx="12.6" cy="12.6" r="4.6" fill="var(--hug-front)" />
-              <path d="M4 30c0-6.2 3.9-9.6 8.6-9.6S21.2 23.8 21.2 30Z" fill="var(--hug-front)" />
-              <path d="M25.4 18.6c1.9 3.4-.4 7.1-4.5 7.8-3.6.6-7-.1-9.9-1.7"
-                    fill="none" stroke="var(--hug-arm)" stroke-width="3.1" stroke-linecap="round" />
-            </g>
+          <!-- 문자판 눈금 24개 -->
+          <g class="ticks">
+            <line v-for="a in ticks" :key="a" x1="200" y1="12" x2="200" y2="20"
+                  :transform="`rotate(${a} 200 200)`" />
           </g>
 
-          <rect width="1200" height="620" filter="url(#grain)" opacity=".5" />
+          <g clip-path="url(#disc)">
+            <circle cx="200" cy="200" r="176" fill="url(#sky)" />
+            <!-- 해 — 지평선에 반쯤 걸린다. 저녁이지 밤이 아니다. -->
+            <circle class="far" cx="246" cy="214" r="62" fill="url(#sun)" opacity=".92" />
+
+            <!-- 능선 셋. 뒤로 갈수록 옅어지고 덜 움직인다(공기 원근). -->
+            <path class="far" d="M8 246c56-18 96 16 152 10s112-24 232-6v168H8Z"
+                  fill="#f0b678" opacity=".48" />
+            <path class="mid" d="M8 276c62-16 104 20 164 14s118-22 220-6v138H8Z"
+                  fill="#d2703f" opacity=".40" />
+            <path class="near" d="M8 306c58-12 110 18 168 12s112-18 216-4v106H8Z"
+                  fill="#b5563a" opacity=".54" />
+
+            <!-- 곁 — 뒤에서 감싸 안은 두 사람. 브랜드 마크와 같은 형상이되
+                 여기서는 해를 등지고 능선 위에 서 있다. 실루엣이라 표정이 없고,
+                 그래서 누구든 자기 이야기로 읽을 수 있다.
+
+                 시차용 CSS transform 과 배치용 transform 속성은 같은 자리를 다툰다.
+                 과 배치용 transform 속성은 같은 자리를 다툰다. CSS 가 이기므로
+                 한 요소에 둘 다 걸면 그림이 원점으로 튕겨 나간다. 바깥 <g> 는
+                 움직임만, 안쪽 <g> 는 배치만 맡는다. -->
+            <g class="near">
+              <g transform="translate(206 236) scale(2.3)">
+                <circle cx="22.2" cy="8" r="5.4" fill="var(--hug-back)" />
+                <path d="M12.2 30c0-8.4 4.5-12.8 10-12.8S32.2 21.6 32.2 30Z" fill="var(--hug-back)" />
+                <circle cx="12.6" cy="12.6" r="4.6" fill="var(--hug-front)" />
+                <path d="M4 30c0-6.2 3.9-9.6 8.6-9.6S21.2 23.8 21.2 30Z" fill="var(--hug-front)" />
+                <path d="M25.4 18.6c1.9 3.4-.4 7.1-4.5 7.8-3.6.6-7-.1-9.9-1.7"
+                      fill="none" stroke="var(--hug-arm)" stroke-width="3.1" stroke-linecap="round" />
+              </g>
+            </g>
+
+            <circle cx="200" cy="200" r="176" filter="url(#grain)" opacity=".5" />
+          </g>
+          <!-- 원반 테두리 — 종이에 찍힌 자국처럼 얇게 -->
+          <circle cx="200" cy="200" r="176" fill="none" stroke="var(--hairline)" stroke-width="1.4" />
         </svg>
       </div>
 
-      <div class="hero__copy container reveal is-in">
+      <div class="hero__copy reveal is-in">
         <p class="hero__eyebrow">발달장애인 보호자를 위한 서비스</p>
         <h1 class="hero__h">
           <span class="reveal-line"><span>어떤 <em>도움</em>이</span></span>
@@ -162,6 +169,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
         <p class="hero__lead measure reveal" style="--reveal-delay:320ms">
           로그인도 회원가입도 없이, <b>바로</b> 이용하실 수 있습니다.
         </p>
+      </div>
       </div>
     </header>
 
@@ -295,34 +303,30 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
 /* ── 히어로 ──────────────────────────────────────────────────────────────
    그림은 배경이 아니라 한 덩이의 면이다. 높이를 vh 로 잡되 상한을 둬서
    작은 노트북에서 첫 화면이 그림만으로 차지 않게 한다. */
-/* 글이 그림 위에 겹치지 않게 위아래로 나눈다. 겹쳐 놓으면 능선 색 위에서
-   본문 명암비가 4.54:1 까지 떨어져 AA 문턱에 걸린다 — 지친 눈으로 읽는
-   화면에서 문턱을 아슬아슬하게 넘기지 않는다. 격자라 겹칠 일이 없다. */
-.hero {
-  position: relative;
+/* 글과 그림을 좌우로 나란히 둔다. 위아래로 쌓으면 첫 화면이 길어져 스크롤이
+   늘어나고, 겹쳐 놓으면 능선 색 위에서 본문이 4.54:1 로 AA 문턱에 걸린다.
+   나란히 두면 둘 다 없다. */
+.hero { position: relative; background: var(--paper); }
+.hero__in {
   display: grid;
-  grid-template-rows: auto 1fr;
-  min-height: min(88vh, 760px);
-  background: var(--paper);
-  overflow: hidden;
+  grid-template-columns: minmax(0, 1.08fr) minmax(0, .92fr);
+  align-items: center;
+  gap: clamp(20px, 4vw, 56px);
+  padding-block: clamp(28px, 5vw, 72px) clamp(24px, 4vw, 56px);
 }
-/* DOM 순서는 그림이 먼저지만(장식이라 화면낭독기가 먼저 건너뛰게), 보이는
-   순서는 글이 먼저다. 격자 행을 명시해 둘을 분리한다. */
-.hero__copy { grid-row: 1; }
-.hero__art { grid-row: 2; position: relative; min-height: clamp(230px, 34vh, 400px); }
-.hero__svg { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+/* DOM 순서는 그림이 먼저지만(격자 순서만 바꾼다), 읽는 순서는 글이 먼저다. */
+.hero__copy { order: -1; }
+.hero__art { position: relative; }
+.hero__disc { display: block; width: 100%; max-width: 420px; height: auto; margin-inline: auto; }
+.ticks line { stroke: var(--hairline); stroke-width: 1.4; stroke-linecap: round; }
 /* 두 사람 — 넓은 화면은 해 앞(오른쪽), 좁은 화면은 화면 가운데.
    좁은 화면에서는 좌우가 잘려 오른쪽 자리가 보이지 않는다. */
-.figs--narrow { display: none; }
-@media (max-width: 700px) {
-  .figs--wide { display: none; }
-  .figs--narrow { display: block; }
-  /* 휴대폰에서는 히어로 높이를 내용에 맡긴다. 88vh 를 그대로 두면 하늘이
-     한 화면을 차지해 **첫 화면에 들어가는 문(01 부담감 진단)이 안 보인다.**
-     지친 보호자가 3분 안에 끝내는 흐름이라, 첫 화면은 그림이 아니라 다음
-     행동을 보여 줘야 한다. 그림은 스크롤 한 번 안에서 충분히 읽힌다. */
-  .hero { min-height: 0; }
-  .hero__art { min-height: clamp(196px, 26vh, 260px); }
+/* 좁은 화면에서는 한 줄로 세우되, 원반을 작게 둬서 첫 화면에 `01 부담감 진단`
+   이 들어오게 한다. 지친 보호자가 3분 안에 끝내는 흐름이라 첫 화면은 그림이
+   아니라 다음 행동을 보여 줘야 한다. */
+@media (max-width: 760px) {
+  .hero__in { grid-template-columns: 1fr; gap: clamp(16px, 4vw, 28px); }
+  .hero__disc { max-width: min(60vw, 240px); }
 }
 /* 시차 — 가까운 능선이 가장 많이, 먼 것은 조금만 움직인다. */
 .hero__art .near { transform: translateY(calc(var(--shift, 0px) * -1)); }
@@ -335,7 +339,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
   padding-block: clamp(44px, 9vw, 104px) clamp(28px, 5vw, 56px);
 }
 .hero__eyebrow {
-  margin: 0 0 clamp(14px, 2vw, 24px);
+  margin: 0 0 clamp(10px, 1.4vw, 16px);
   font-size: 14px; font-weight: 600; letter-spacing: .09em;
   text-transform: none; color: var(--primary-on-tint);
 }
@@ -355,9 +359,9 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
   padding-inline: .05em;
 }
 .hero__lead {
-  margin: clamp(22px, 3vw, 36px) 0 0;
+  margin: clamp(16px, 2vw, 24px) 0 0;
   font-size: var(--lede);
-  line-height: 1.62;
+  line-height: 1.55;
   letter-spacing: var(--tracking-lede);
   color: var(--body);
 }
@@ -370,7 +374,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
   grid-template-columns: auto 1fr auto;
   align-items: start;
   gap: clamp(16px, 3vw, 40px);
-  padding-block: clamp(28px, 4vw, 48px);
+  padding-block: clamp(20px, 2.8vw, 32px);
   border-bottom: 1px solid var(--hairline);
   color: inherit;
   text-decoration: none;
@@ -391,7 +395,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
 }
 .item__desc {
   display: block; margin-top: clamp(10px, 1.4vw, 16px);
-  font-size: clamp(15px, 1.5vw, 17px); line-height: 1.68; color: var(--body);
+  font-size: clamp(15px, 1.5vw, 17px); line-height: 1.6; color: var(--body);
 }
 .item__meta {
   display: block; margin-top: clamp(10px, 1.2vw, 14px);
@@ -408,8 +412,8 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
   letter-spacing: var(--tracking-display); color: var(--ink);
 }
 .letter__body {
-  margin: clamp(20px, 2.6vw, 32px) 0 0;
-  font-size: var(--lede); line-height: 1.7; color: var(--body);
+  margin: clamp(14px, 1.8vw, 20px) 0 0;
+  font-size: var(--lede); line-height: 1.58; color: var(--body);
 }
 .letter__soft { margin: clamp(12px, 1.6vw, 18px) 0 0; font-size: 15px; color: var(--muted); }
 
@@ -417,7 +421,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
    살구빛 책상 위에 올려 앞뒤 섹션과 면으로 구분한다. */
 .stat {
   margin-top: var(--gap-section);
-  padding-block: var(--gap-section);
+  padding-block: clamp(32px, 4.4vw, 64px);
   background: var(--page);
 }
 .stat__eyebrow {
@@ -425,7 +429,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
   font-size: 14px; font-weight: 600; letter-spacing: .09em; color: var(--secondary-on-tint);
 }
 .stat__h {
-  margin: 0 0 clamp(32px, 5vw, 60px);
+  margin: 0 0 clamp(22px, 3vw, 36px);
   font-size: clamp(20px, 2.4vw, 28px); font-weight: 500; line-height: 1.5;
   letter-spacing: var(--tracking-lede); color: var(--ink);
 }
@@ -460,7 +464,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
 
 .callout {
   display: flex; align-items: baseline; gap: clamp(12px, 1.6vw, 20px);
-  margin: clamp(28px, 4vw, 48px) 0 0;
+  margin: clamp(20px, 2.6vw, 32px) 0 0;
 }
 .callout b {
   font-size: var(--display-2); font-weight: 700; line-height: 1;
@@ -470,7 +474,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
 .callout span { font-size: var(--lede); color: var(--body); }
 
 .legend {
-  list-style: none; margin: clamp(28px, 4vw, 44px) 0 0; padding: 0;
+  list-style: none; margin: clamp(20px, 2.6vw, 30px) 0 0; padding: 0;
   display: grid; gap: 0;
   border-top: 1px solid var(--hairline);
 }
@@ -487,23 +491,23 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
 .sw--5 { background: var(--burden-5); border: 1px solid var(--hairline); }
 .legend__n { color: var(--muted); font-variant-numeric: tabular-nums; }
 .stat__note {
-  margin: clamp(28px, 4vw, 44px) 0 0;
+  margin: clamp(20px, 2.6vw, 30px) 0 0;
   font-size: var(--lede); color: var(--plum-on-tint);
 }
 
 /* ── 이용 흐름 ─────────────────────────────────────────────────────────── */
 .flow { margin-top: var(--gap-section); }
 .flow__h {
-  margin: 0 0 clamp(24px, 3.4vw, 40px);
+  margin: 0 0 clamp(16px, 2.2vw, 26px);
   font-size: var(--display-3); font-weight: 700; color: var(--ink);
 }
 .flow__list { list-style: none; margin: 0; padding: 0; border-top: 1px solid var(--hairline); }
 .flow__list li {
   display: grid; grid-template-columns: auto 1fr; align-items: baseline;
   gap: clamp(16px, 2.4vw, 32px);
-  padding-block: clamp(20px, 2.6vw, 30px);
+  padding-block: clamp(15px, 1.9vw, 22px);
   border-bottom: 1px solid var(--hairline);
-  font-size: clamp(16px, 1.7vw, 19px); line-height: 1.6; color: var(--body);
+  font-size: clamp(16px, 1.7vw, 19px); line-height: 1.55; color: var(--body);
 }
 .flow__list b {
   font-size: clamp(15px, 1.5vw, 17px); font-weight: 600;
@@ -515,7 +519,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
    화면에서 유일하게 뒤집힌 면. 크림 글자가 먹색 위에서 12.16:1 이다. */
 .sign {
   margin-top: var(--gap-section);
-  padding-block: var(--gap-section);
+  padding-block: clamp(36px, 4.8vw, 72px);
   background: var(--ink);
 }
 .sign__body {
@@ -525,7 +529,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
   color: var(--paper);
 }
 .sign__from {
-  margin: clamp(28px, 4vw, 44px) 0 0;
+  margin: clamp(18px, 2.4vw, 28px) 0 0;
   font-size: var(--lede); color: var(--tertiary);
 }
 
