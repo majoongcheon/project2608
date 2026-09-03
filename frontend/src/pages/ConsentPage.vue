@@ -4,6 +4,7 @@
 //   ★ 동의하지 않아도 진단·결과·연계 안내는 모두 그대로 제공된다.
 import { ref, computed } from 'vue';
 import { useRouter } from 'vue-router';
+import RoomHead from '../components/RoomHead.vue';
 import { useSurveyStore } from '../stores/survey';
 import { usePreSurveyStore } from '../stores/preSurvey';
 import { useResultStore } from '../stores/result';
@@ -68,8 +69,12 @@ function getCoords(): Promise<{ lat?: number; lng?: number }> {
 </script>
 
 <template>
-  <div class="container stack">
-    <h1>거의 다 왔습니다</h1>
+  <div class="container room stack">
+    <RoomHead
+      no="01"
+      eyebrow="부담감 진단"
+      title="거의 다 왔습니다"
+    />
 
     <div class="card stack">
       <h2>응답을 진단 정확도 개선에 사용해도 될까요?</h2>

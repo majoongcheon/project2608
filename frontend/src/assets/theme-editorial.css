@@ -131,7 +131,14 @@ p { word-break: keep-all; }
    그래서 **이 레이아웃을 쓰는 화면에서만** 틀을 끈다. App.vue 가 해당 라우트의
    <main> 에 .main--editorial 을 붙인다. 아직 개편하지 않은 화면(설문·결과·지도)
    은 편지지 틀을 그대로 유지한다 — 개편이 끝나는 대로 이 클래스를 넓힌다. */
-.main--editorial { padding-block: 0 0; }
+/* 방 안쪽은 홈 히어로와 같은 편지지 색으로. 봉투(--page, 베이지) 위에 종이가
+   놓인 것이 이 서비스의 바탕인데, .container 의 배경을 걷어내면 봉투 색이
+   그대로 드러나 방마다 바탕이 달라 보인다(실제로 그랬다 — 홈은 크림, 새 방은
+   베이지). 종이 한 장을 화면 전체로 넓히는 쪽으로 맞춘다. */
+.main--editorial { padding-block: 0 0; background: var(--paper); }
+/* 본문(종이)과 꼬리말 사이에 봉투 색이 한 줄 드러나 이음매처럼 보였다.
+   종이가 꼬리말까지 이어지도록 그 틈을 없앤다. */
+.main--editorial + .foot { margin-top: 0; }
 .main--editorial .container {
   background: none;
   border: 0;
@@ -145,3 +152,102 @@ p { word-break: keep-all; }
 
 /* 전체 폭 구간은 좌우 여백을 스스로 갖는 안쪽 .container 로 다시 좁힌다 */
 .main--editorial .bleed > .container { padding-inline: clamp(20px, 5vw, 48px); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   방(page) 공통 골격 — 2026-09-03 15:40 신설
+
+   방을 다섯 개로 늘리면서 생긴 요구다: "방을 이동할 때마다 다른 사이트에
+   들어간 느낌이 안 나도록." 화면마다 제 나름대로 꾸미면 반드시 어긋나므로,
+   **모든 방이 같은 부품을 쓰도록** 여기에 한 벌만 둔다. 새 화면을 만들 때
+   .room / .room__head / .panel / .item 을 쓰면 홈과 저절로 같아진다.
+   ═══════════════════════════════════════════════════════════════════════════ */
+
+/* ── 방 머리 ──────────────────────────────────────────────────────────────
+   홈 히어로의 축소판이다. 작은 라벨 → 큰 제목 → 리드 한 줄. 홈과 같은 활자
+   계단(--display-2 · --lede)을 쓰므로 크기 감각이 이어진다. */
+.room { padding-block: clamp(16px, 2.6vw, 30px) clamp(36px, 5.5vw, 68px); }
+.room__head { margin: 0 0 var(--gap-block); }
+.room__eyebrow {
+  margin: 0 0 clamp(8px, 1.2vw, 14px);
+  font-size: 14px; font-weight: 600; letter-spacing: .09em; color: var(--primary-on-tint);
+}
+.room__h {
+  margin: 0; font-family: var(--font-serif, inherit);
+  font-size: var(--display-2); letter-spacing: var(--tracking-display); line-height: 1.14;
+  color: var(--ink); word-break: keep-all;
+}
+.room__lead {
+  margin: clamp(12px, 1.6vw, 18px) 0 0;
+  font-size: var(--lede); letter-spacing: var(--tracking-lede);
+  line-height: 1.6; color: var(--body); max-width: var(--measure);
+}
+
+/* ── 칸 ───────────────────────────────────────────────────────────────────
+   홈이 상자를 버리고 괘선으로 갈랐으므로 방들도 같은 방식을 쓴다.
+   상자가 있으면 '앱', 괘선이면 '지면'으로 읽힌다. */
+.panel { border-top: 1px solid var(--hairline); padding-block: clamp(16px, 2.2vw, 26px); }
+.panel:first-of-type { border-top: 0; }
+.panel__h {
+  margin: 0 0 clamp(10px, 1.4vw, 16px);
+  font-family: var(--font-serif, inherit); font-size: var(--display-3);
+  letter-spacing: var(--tracking-display); line-height: 1.2; color: var(--ink);
+}
+.panel__no {
+  font-size: 13px; letter-spacing: .12em; color: var(--muted-soft);
+  font-variant-numeric: tabular-nums;
+}
+
+/* ── 편지지 틀을 모든 방에서 끈다 ─────────────────────────────────────────
+   2026-09-03 15:40 — 홈만 에디토리얼이고 나머지가 편지지라 방을 옮길 때마다
+   다른 사이트로 읽혔다. 이제 App.vue 가 모든 라우트에 .main--editorial 을
+   붙인다. 아래는 그 아래에서 옛 편지지 부품을 지면 언어로 바꿔 놓는 규칙이다.
+   화면 하나하나를 다시 쓰지 않고 부품만 갈아 끼우는 편이 어긋날 자리가 적다. */
+
+/* 상자를 지운다 — 테두리·그림자·둥근 모서리·배경을 걷고 괘선만 남긴다. */
+.main--editorial .card {
+  background: none; border: 0; border-radius: 0; box-shadow: none;
+  padding: clamp(16px, 2.2vw, 26px) 0;
+  border-top: 1px solid var(--hairline);
+}
+.main--editorial .card:first-child { border-top: 0; padding-top: 0; }
+
+/* 화면 안의 h2 는 홈의 메뉴 제목과 같은 계단에 올린다. */
+.main--editorial h2 {
+  font-family: var(--font-serif, inherit);
+  font-size: var(--display-3); line-height: 1.2; color: var(--ink);
+}
+.main--editorial h2.q { font-size: clamp(21px, 2.6vw, 30px); line-height: 1.35; }
+
+/* 단추 — 홈에는 단추가 없어 기준이 없었다. 지면 톤에 맞춰 각을 줄이고
+   글자를 키운다. 크기(min-height)는 손가락 표적이라 건드리지 않는다. */
+.main--editorial .btn {
+  border-radius: var(--radius-sm); font-size: 16px; letter-spacing: -.01em;
+}
+
+/* 목록형 선택지 — 상자 대신 괘선. 고른 것만 진하게 남는다. */
+.main--editorial .option {
+  border: 0; border-radius: 0; background: none;
+  border-bottom: 1px solid var(--hairline-soft);
+  padding-inline: 2px;
+}
+.main--editorial .option:hover { background: var(--surface-soft); border-color: var(--border-strong); }
+.main--editorial .option--on { background: none; border-bottom-color: var(--primary); }
+
+/* ── 방 사이를 잇는 꼬리 안내 ─────────────────────────────────────────────
+   방마다 아래에 "다음에 갈 만한 방"을 같은 모양으로 둔다. 다섯 방이 서로
+   이어져 있다는 인상은 이 줄에서 나온다. */
+.hop { display: flex; flex-wrap: wrap; gap: clamp(10px, 1.4vw, 18px); margin-top: var(--gap-block); }
+.hop__a {
+  display: inline-flex; align-items: center; gap: 8px; min-height: 44px;
+  padding: 8px 16px; border: 1px solid var(--hairline); border-radius: var(--radius-pill);
+  color: var(--ink); text-decoration: none; font-size: 15px;
+}
+.hop__a:hover { background: var(--surface-soft); border-color: var(--border-strong); }
+.hop__a::after { content: '→'; color: var(--primary); }
+
+/* ── 비어 있을 때 ─────────────────────────────────────────────────────────
+   다섯 방 중 셋이 "아직 아무것도 없는" 상태를 가진다. 빈 화면은 고장으로
+   읽히므로, 어디서나 같은 모양으로 '왜 비었는지 · 무엇을 하면 되는지'를 쓴다. */
+.empty { border-top: 1px solid var(--hairline); padding-block: clamp(28px, 5vw, 56px); text-align: left; }
+.empty__h { margin: 0 0 8px; font-size: 18px; font-weight: 700; color: var(--ink); }
+.empty__b { margin: 0; color: var(--muted); max-width: var(--measure); line-height: 1.6; }

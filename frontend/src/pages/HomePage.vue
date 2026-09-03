@@ -1,11 +1,14 @@
 <script setup lang="ts">
-// FR-001 — 두 메뉴를 동등한 비중으로. 사전 절차 없이 곧바로 진입(FR-002).
+// FR-001 — 두 메뉴(01 진단 · 02 위치)를 동등한 비중으로. 사전 절차 없이 곧바로 진입(FR-002).
+// 2026-09-03 15:50 방 셋(03 소통 · 04 후기 · 05 마이페이지)을 아래에 더했다.
+// 01·02 와 같은 부품을 쓰되 괘선 한 줄로 층을 갈라, 그 둘의 동등함은 그대로 둔다.
 //
 // 2026-09-03 전면 개편 — awwwards SOTD 두 건에서 가져온 네 가지.
 //   ① 큰 활자   대제목을 화면 폭까지(clamp 40~104px). 본문과 6.5배차.
 //   ② 여백      숨통은 트되 과하지 않게. 처음 168px 까지 벌렸다가 '너무 띄엄띄엄
 //               하고 스크롤이 길다'는 확인을 받고 절반으로 줄였다(14:55).
-//   ③ 이미지    노을 아래 두 사람. 저장소에 그림 파일이 하나도 없어 직접 그렸다.
+//   ③ 이미지    노을 들판에서 맞잡은 두 손(실제 사진). 처음엔 직접 그렸으나
+//               '일러스트가 구리다'는 확인을 받고 사진으로 바꿨다(15:35).
 //   ④ 모션      스크롤 등장 + 히어로 시차. prefers-reduced-motion 이면 전부 끈다.
 // 카드 테두리를 걷어내고 괘선과 여백으로 가른다 — 상자가 있으면 '앱'으로 읽힌다.
 import { onMounted, onBeforeUnmount, ref } from 'vue';
@@ -93,71 +96,25 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
       <div class="hero__in container">
       <div ref="art" class="hero__art parallax">
         <!-- 원반. 띠로 깔면 위아래가 하드하게 잘려 '잘린 그림'으로 읽힌다 —
-             원은 잘릴 수가 없다. 둘레 눈금은 Ruinart 의 문자판 언어를 빌린 것. -->
-        <svg class="hero__disc" viewBox="0 0 400 400" role="img"
-             aria-label="해질녘 언덕 위에서 한 사람이 다른 사람을 뒤에서 안고 있는 그림">
-          <defs>
-            <clipPath id="disc"><circle cx="200" cy="200" r="176" /></clipPath>
-            <!-- 종이 결. 매끈하면 인쇄물이 아니라 화면으로 읽힌다. 아주 옅게만. -->
-            <filter id="grain">
-              <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="3" seed="7" />
-              <feColorMatrix type="saturate" values="0" />
-              <feComponentTransfer><feFuncA type="linear" slope="0.055" /></feComponentTransfer>
-            </filter>
-            <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#fffaf5" />
-              <stop offset="58%" stop-color="#fdeede" />
-              <stop offset="100%" stop-color="#f7ddc4" />
-            </linearGradient>
-            <radialGradient id="sun" cx="50%" cy="50%" r="50%">
-              <stop offset="0%" stop-color="#f9cf9c" />
-              <stop offset="100%" stop-color="#f0b678" />
-            </radialGradient>
-          </defs>
+             원은 잘릴 수가 없다. 둘레 눈금은 Ruinart 의 문자판 언어를 빌린 것.
 
-          <!-- 문자판 눈금 24개 -->
-          <g class="ticks">
-            <line v-for="a in ticks" :key="a" x1="200" y1="12" x2="200" y2="20"
-                  :transform="`rotate(${a} 200 200)`" />
-          </g>
-
-          <g clip-path="url(#disc)">
-            <circle cx="200" cy="200" r="176" fill="url(#sky)" />
-            <!-- 해 — 지평선에 반쯤 걸린다. 저녁이지 밤이 아니다. -->
-            <circle class="far" cx="246" cy="214" r="62" fill="url(#sun)" opacity=".92" />
-
-            <!-- 능선 셋. 뒤로 갈수록 옅어지고 덜 움직인다(공기 원근). -->
-            <path class="far" d="M8 246c56-18 96 16 152 10s112-24 232-6v168H8Z"
-                  fill="#f0b678" opacity=".48" />
-            <path class="mid" d="M8 276c62-16 104 20 164 14s118-22 220-6v138H8Z"
-                  fill="#d2703f" opacity=".40" />
-            <path class="near" d="M8 306c58-12 110 18 168 12s112-18 216-4v106H8Z"
-                  fill="#b5563a" opacity=".54" />
-
-            <!-- 곁 — 뒤에서 감싸 안은 두 사람. 브랜드 마크와 같은 형상이되
-                 여기서는 해를 등지고 능선 위에 서 있다. 실루엣이라 표정이 없고,
-                 그래서 누구든 자기 이야기로 읽을 수 있다.
-
-                 시차용 CSS transform 과 배치용 transform 속성은 같은 자리를 다툰다.
-                 과 배치용 transform 속성은 같은 자리를 다툰다. CSS 가 이기므로
-                 한 요소에 둘 다 걸면 그림이 원점으로 튕겨 나간다. 바깥 <g> 는
-                 움직임만, 안쪽 <g> 는 배치만 맡는다. -->
-            <g class="near">
-              <g transform="translate(206 236) scale(2.3)">
-                <circle cx="22.2" cy="8" r="5.4" fill="var(--hug-back)" />
-                <path d="M12.2 30c0-8.4 4.5-12.8 10-12.8S32.2 21.6 32.2 30Z" fill="var(--hug-back)" />
-                <circle cx="12.6" cy="12.6" r="4.6" fill="var(--hug-front)" />
-                <path d="M4 30c0-6.2 3.9-9.6 8.6-9.6S21.2 23.8 21.2 30Z" fill="var(--hug-front)" />
-                <path d="M25.4 18.6c1.9 3.4-.4 7.1-4.5 7.8-3.6.6-7-.1-9.9-1.7"
-                      fill="none" stroke="var(--hug-arm)" stroke-width="3.1" stroke-linecap="round" />
-              </g>
+             2026-09-03 15:35 — 안쪽을 직접 그린 일러스트에서 **실제 사진**으로
+             바꿨다(기획자 요청). 얼굴이 나오는 사진은 "이 사람이 당사자"로 읽힐
+             수 있어 **손만 나오는 사진**을 골랐다. 노을·마른 들판이라 색을 새로
+             만들지 않고도 지금 팔레트(크림·테라코타) 안에 그대로 앉는다.
+             출처: Unsplash(Narissa de Villiers) · Unsplash License(무료·출처표기 불필요). -->
+        <div class="hero__disc">
+          <img class="hero__photo" src="/images/hero-hands.jpg" width="1100" height="1100"
+               alt="해질녘 마른 들판에서 두 사람이 손을 맞잡고 나란히 서 있다" />
+          <!-- 문자판 눈금 24개 — 원반의 언어는 그대로 남긴다. -->
+          <svg class="hero__ring" viewBox="0 0 400 400" aria-hidden="true">
+            <g class="ticks">
+              <line v-for="a in ticks" :key="a" x1="200" y1="12" x2="200" y2="20"
+                    :transform="`rotate(${a} 200 200)`" />
             </g>
-
-            <circle cx="200" cy="200" r="176" filter="url(#grain)" opacity=".5" />
-          </g>
-          <!-- 원반 테두리 — 종이에 찍힌 자국처럼 얇게 -->
-          <circle cx="200" cy="200" r="176" fill="none" stroke="var(--hairline)" stroke-width="1.4" />
-        </svg>
+            <circle cx="200" cy="200" r="176" fill="none" stroke="var(--hairline)" stroke-width="1.4" />
+          </svg>
+        </div>
       </div>
 
       <div class="hero__copy reveal is-in">
@@ -205,6 +162,63 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
               우리 지역의 주간활동 · 청소년 방과후활동 <b>신청 접수처</b>를 지도와 목록으로 찾아 드립니다.
             </span>
             <span class="item__meta">전국 시군구 · 지도와 목록</span>
+          </span>
+          <span class="item__go" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 16h17M18 10l6 6-6 6" />
+            </svg>
+          </span>
+        </RouterLink>
+
+        <!-- 03~05 (2026-09-03 추가). 앞의 둘과 **완전히 같은 구조**로 둔다 —
+             번호·제목·설명·보조설명·화살표. 방을 늘리면서 모양이 갈라지면
+             "다른 사이트"로 읽힌다. 다만 01·02 는 이 서비스가 하기로 한 두 가지고
+             03~05 는 그 둘을 돕는 자리라, 사이에 괘선 하나로 층을 만든다. -->
+        <span class="menu__gap" aria-hidden="true"></span>
+
+        <RouterLink class="item reveal" style="--reveal-delay:180ms" to="/talk">
+          <span class="item__no" aria-hidden="true">03</span>
+          <span class="item__body">
+            <span class="item__title">정보 소통방</span>
+            <span class="item__desc measure">
+              진단·결과·신청처가 어떻게 되는지 <b>물어보시면 답해 드립니다.</b> 확실히 아는 것만 답하고, 모르는 것은 모른다고 말씀드립니다.
+            </span>
+            <span class="item__meta">대화는 이 브라우저 안에만 남습니다</span>
+          </span>
+          <span class="item__go" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 16h17M18 10l6 6-6 6" />
+            </svg>
+          </span>
+        </RouterLink>
+
+        <RouterLink class="item reveal" style="--reveal-delay:240ms" to="/reviews">
+          <span class="item__no" aria-hidden="true">04</span>
+          <span class="item__body">
+            <span class="item__title">이용 후기 소통방</span>
+            <span class="item__desc measure">
+              먼저 다녀오신 분들이 남긴 이야기를 읽고, <b>내 경험도 남길 수 있습니다.</b> 별명으로만 쓰고 연락처는 받지 않습니다.
+            </span>
+            <span class="item__meta">기관별 후기 · 별점</span>
+          </span>
+          <span class="item__go" aria-hidden="true">
+            <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"
+                 stroke-linecap="round" stroke-linejoin="round">
+              <path d="M7 16h17M18 10l6 6-6 6" />
+            </svg>
+          </span>
+        </RouterLink>
+
+        <RouterLink class="item reveal" style="--reveal-delay:300ms" to="/me">
+          <span class="item__no" aria-hidden="true">05</span>
+          <span class="item__body">
+            <span class="item__title">마이페이지</span>
+            <span class="item__desc measure">
+              별을 눌러 담아 두신 기관을 <b>한자리에 모아</b> 보여 드립니다. 전화번호와 주소를 매번 다시 찾지 않으셔도 됩니다.
+            </span>
+            <span class="item__meta">이 브라우저에만 저장 · 로그인 없음</span>
           </span>
           <span class="item__go" aria-hidden="true">
             <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.6"
@@ -317,7 +331,29 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
 /* DOM 순서는 그림이 먼저지만(격자 순서만 바꾼다), 읽는 순서는 글이 먼저다. */
 .hero__copy { order: -1; }
 .hero__art { position: relative; }
-.hero__disc { display: block; width: 100%; max-width: 420px; height: auto; margin-inline: auto; }
+.hero__disc {
+  position: relative; width: 100%; max-width: 420px; aspect-ratio: 1; margin-inline: auto;
+}
+/* 사진은 눈금 안쪽 원(지름 352/400 = 88%)에 정확히 들어간다 — 그래서 6% 안쪽.
+   크기를 %로 직접 준다: <img> 는 replaced 요소라 inset 만 주고 width:auto 로 두면
+   인셋 상자가 아니라 **원본 크기(1100px)** 로 풀려 원 밖으로 터진다(실제로 그랬다). */
+.hero__photo {
+  position: absolute; top: 6%; left: 6%;
+  width: 88%; height: 88%;
+  border-radius: 50%;
+  object-fit: cover;
+  /* 맞잡은 손이 원 한가운데 오도록 아래쪽을 본다. */
+  object-position: 50% 64%;
+  /* 색을 새로 만들지 않고 있는 팔레트 쪽으로 아주 조금만 당긴다. */
+  filter: saturate(.92) contrast(1.02);
+}
+/* 종이에 인쇄된 느낌 — 크림 색을 아주 옅게 덮어 화면 사진 티를 뺀다. */
+.hero__disc::after {
+  content: ''; position: absolute; inset: 6%; border-radius: 50%;
+  background: radial-gradient(circle at 50% 30%, rgba(255, 250, 245, .28), rgba(181, 86, 58, .10));
+  pointer-events: none;
+}
+.hero__ring { position: absolute; inset: 0; width: 100%; height: 100%; }
 .ticks line { stroke: var(--hairline); stroke-width: 1.4; stroke-linecap: round; }
 /* 두 사람 — 넓은 화면은 해 앞(오른쪽), 좁은 화면은 화면 가운데.
    좁은 화면에서는 좌우가 잘려 오른쪽 자리가 보이지 않는다. */
@@ -326,13 +362,13 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
    아니라 다음 행동을 보여 줘야 한다. */
 @media (max-width: 760px) {
   .hero__in { grid-template-columns: 1fr; gap: clamp(16px, 4vw, 28px); }
-  .hero__disc { max-width: min(60vw, 240px); }
+  .hero__disc { max-width: min(62vw, 250px); }
 }
-/* 시차 — 가까운 능선이 가장 많이, 먼 것은 조금만 움직인다. */
-.hero__art .near { transform: translateY(calc(var(--shift, 0px) * -1)); }
-.hero__art .mid  { transform: translateY(calc(var(--shift, 0px) * -0.6)); }
-.hero__art .far  { transform: translateY(calc(var(--shift-far, 0px) * -1)); }
+/* 시차 — 사진이 들어오면서 능선 세 겹이 없어졌다. 원반 전체를 아주 조금만
+   움직인다(값이 크면 멀미가 난다). 눈금 고리는 제자리에 두어 기준이 된다. */
+.hero__art .hero__photo { transform: translateY(calc(var(--shift, 0px) * -0.5)); }
 
+.menu__gap { display: block; height: clamp(14px, 2vw, 26px); }
 .hero__copy {
   position: relative;
   width: 100%;

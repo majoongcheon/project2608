@@ -31,7 +31,9 @@ function restart() { store.clear(); pre.reset(); events.renew(); router.push('/'
 </script>
 
 <template>
-  <div v-if="r" class="container stack">
+  <div v-if="r" class="container room stack">
+    <p class="room__eyebrow"><span class="room__no">01</span>부담감 진단 · 결과</p>
+
     <!-- 판정된 경우 -->
     <BurdenResultCard v-if="r.decided" :label="r.burdenLabel" :description="r.burdenDescription"
                       :is-warning="r.isWarning" :name="pre.displayName()" />
@@ -127,10 +129,17 @@ function restart() { store.clear(); pre.reset(); events.renew(); router.push('/'
       <button class="btn btn--ghost" type="button" @click="restart">처음으로</button>
       <span class="muted ver">모델 {{ r.modelVersion }}</span>
     </div>
+
+    <nav class="hop" aria-label="다른 방으로">
+      <RouterLink class="hop__a" to="/talk">궁금한 것 물어보기</RouterLink>
+      <RouterLink class="hop__a" to="/reviews">다녀오신 분들의 후기</RouterLink>
+      <RouterLink class="hop__a" to="/me">저장해 둔 기관</RouterLink>
+    </nav>
   </div>
 </template>
 
 <style scoped>
+.room__no { margin-right: 10px; color: var(--muted-soft); letter-spacing: .12em; }
 .undecided { border: 2px solid var(--border-strong); background: var(--surface-soft);
   border-radius: var(--radius-lg); padding: var(--sp-lg); }
 .undecided__who { font-size: 14px; color: var(--muted); margin: 0 0 var(--sp-sm); }

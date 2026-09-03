@@ -2,6 +2,7 @@
 // 사전 입력 (FR-002a~h) — 세 항목 모두 선택 입력이며 건너뛸 수 있다.
 import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
+import RoomHead from '../components/RoomHead.vue';
 import { usePreSurveyStore } from '../stores/preSurvey';
 import { useSurveyStore } from '../stores/survey';
 import { useEventStore } from '../stores/events';
@@ -26,11 +27,13 @@ function proceed() {
 </script>
 
 <template>
-  <div class="container stack">
-    <h1>시작하기 전에</h1>
-    <p class="muted">
-      아래 세 가지는 <strong>모두 선택 사항</strong>입니다. 입력하지 않으셔도 진단은 그대로 진행됩니다.
-    </p>
+  <div class="container room stack">
+    <RoomHead
+      no="01"
+      eyebrow="부담감 진단"
+      title="시작하기 전에"
+      lead="아래 세 가지는 모두 선택 사항입니다. 입력하지 않으셔도 진단은 그대로 진행됩니다."
+    />
 
     <div class="card stack">
       <div>
