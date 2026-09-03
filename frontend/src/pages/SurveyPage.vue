@@ -36,6 +36,16 @@ watch(mode, (m) => { try { localStorage.setItem(MODE_KEY, m); } catch { /* noop 
 
 const useDial = computed(() => mode.value === 'dial' && !!s.current && isScale(s.current));
 
+/* 괄호로 시작하는 문항은 괄호를 제 줄에 둔다.
+   "(당사자가 일을 그만둔 적이 있다면) 마지막 일자리를…" 처럼 조건과 물음이
+   한 줄에 이어지면 어디까지가 조건인지 눈에 안 들어온다. 문항 글 자체는
+   그대로 두고 **화면에서만** 나눈다 — 어디서 줄을 바꿀지는 지면의 몫이다. */
+const questionLines = computed(() => {
+  const t = s.current?.text ?? '';
+  const m = /^\s*(\([^)]*\))\s*(.+)$/.exec(t);
+  return m ? [m[1], m[2]] : [t];
+});
+
 const pct = computed(() => (s.total ? Math.round(((s.index + 1) / s.total) * 100) : 0));
 const value = computed(() => (s.current ? s.answers[s.current.questionNo] : undefined));
 const isLast = computed(() => s.index === s.total - 1);
@@ -92,7 +102,12 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
              :aria-valuemax="s.total" :aria-label="`전체 ${s.total}문항 중 ${s.index + 1}번째`">
           <span :style="{ width: pct + '%' }"></span>
         </div>
-        <p class="progress__text">{{ s.index + 1 }} / {{ s.total }} 문항</p>
+        <p class="progress__text">
+          {{ s.index + 1 }} / {{ s.total }} 문항
+          <!-- 답하시는 분이 "당사자"를 자기 자신으로 읽는 일이 있었다.
+               문항마다 나오는 말이므로 문항 위가 아니라 진행 표시 옆에 조용히 둔다. -->
+          <span class="whois">‘당사자’는 돌봄을 받는 발달장애인을 가리킵니다.</span>
+        </p>
       </div>
 
       <p v-if="s.restored" class="notice">
@@ -101,7 +116,9 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
       </p>
 
       <div class="card stack">
-        <h2 class="q">{{ s.current.text }}</h2>
+        <h2 class="q">
+          <span v-for="(line, i) in questionLines" :key="i" class="q__l">{{ line }}</span>
+        </h2>
 
         <div v-if="s.current.inputType === 'number'" class="numwrap">
           <input type="number" :min="s.current.min ?? 0" :max="s.current.max ?? 200"
@@ -166,7 +183,13 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
 .progress__bar { height: 8px; background: var(--surface-strong); border-radius: var(--radius-pill); overflow: hidden; }
 .progress__bar span { display: block; height: 100%; background: var(--primary); transition: width .25s; }
 .progress__text { font-size: 14px; color: var(--muted); margin: var(--sp-xs) 0 0; }
+/* 진행 표시와 두 칸 띄우고, 좁은 화면에서는 아랫줄로 내려간다. */
+.whois { margin-left: 2ch; color: var(--muted-soft); }
+@media (max-width: 560px) { .whois { display: block; margin-left: 0; margin-top: 2px; } }
 .q { font-size: 20px; line-height: 1.4; }
+/* 조건(괄호)과 물음을 각자의 줄에. 각 줄은 좁은 화면에서 제 안에서 접힌다. */
+.q__l { display: block; }
+.q__l + .q__l { margin-top: 2px; }
 .options { display: grid; gap: var(--sp-sm); }
 .option {
   display: flex; align-items: center; gap: var(--sp-md); width: 100%; text-align: left;
