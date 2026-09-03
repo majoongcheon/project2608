@@ -5,6 +5,7 @@ import {
   findNearby, findByRegion, findById, toCard, haversineKm, type ServiceType,
 } from '../services/facilityService.js';
 import { ApiError, wrap } from '../middleware/errors.js';
+import { intParam, coordParam } from './query.js';
 
 export const facilitiesRouter = Router();
 
@@ -33,9 +34,11 @@ facilitiesRouter.get('/facilities', wrap(async (req, res) => {
 
   const q = req.query;
   const serviceType = q.serviceType ? (String(q.serviceType) as ServiceType) : undefined;
-  const limit = Math.min(Number(q.limit ?? 20), 100);
-  let lat = q.lat == null ? null : Number(q.lat);
-  let lng = q.lng == null ? null : Number(q.lng);
+  // 주소를 손으로 고쳐 limit=abc / limit=-3 을 보내면 그대로 SQL 로 내려가
+  // 500 이 났다(2026-09-03 점검). 좌표도 숫자가 아니면 여기서 걸러 낸다.
+  const limit = intParam(q.limit, { def: 20, min: 1, max: 100, name: 'limit' });
+  let lat = coordParam(q.lat, 'lat');
+  let lng = coordParam(q.lng, 'lng');
   const regionCode = q.regionCode ? String(q.regionCode) : null;
 
   if ((lat === null || lng === null) && !regionCode) {
@@ -98,7 +101,10 @@ facilitiesRouter.get('/facilities', wrap(async (req, res) => {
 // GET /facilities/:id — 상세 (FR-017·FR-019)
 facilitiesRouter.get('/facilities/:id', wrap(async (req, res) => {
   const ranges = cfg<any>('age.serviceRanges');
-  const r = await findById(Number(req.params.id));
+  // 주소창에 /facility/abc 를 치면 NaN 이 그대로 SQL 로 내려가 500 이 났다.
+  const facilityId = Number(req.params.id);
+  if (!Number.isInteger(facilityId)) throw new ApiError(400, 'BAD_ID', '기관 번호가 올바르지 않습니다.');
+  const r = await findById(facilityId);
   if (!r) throw new ApiError(404, 'NOT_FOUND', '기관을 찾을 수 없습니다.');
   const card = toCard(r, ranges, null);   // lat·lng·address 는 카드에 이미 포함된다
   res.json({
@@ -109,6 +115,9 @@ facilitiesRouter.get('/facilities/:id', wrap(async (req, res) => {
 
 // POST /facilities/:id/reports — 정보 오류 신고 (FR-019b). 신고자 연락처는 받지 않는다.
 facilitiesRouter.post('/facilities/:id/reports', wrap(async (req, res) => {
+  if (!Number.isInteger(Number(req.params.id))) {
+    throw new ApiError(400, 'BAD_ID', '기관 번호가 올바르지 않습니다.');
+  }
   const allowed = ['PHONE', 'ADDRESS', 'CLOSED', 'SERVICE', 'OTHER'];
   const type = String(req.body?.reportType ?? '');
   if (!allowed.includes(type)) {
