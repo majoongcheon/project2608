@@ -32,10 +32,6 @@ const heavyN = burden.filter((b) => b.heavy).reduce((a, b) => a + b.n, 0);
 const pct = (n: number) => (n / TOTAL) * 100;
 const fmt = (n: number) => n.toLocaleString('ko-KR');
 
-// 원반 둘레의 눈금. 시계 문자판처럼 24등분한다(Ruinart Digital Fresco 참고).
-// 장식이면서, 앞으로 넣을 원형 선택 UI 의 예고이기도 하다.
-const ticks = Array.from({ length: 24 }, (_, i) => i * 15);
-
 // ── 모션 ────────────────────────────────────────────────────────────────
 // 원칙 하나 — 연출이 실패해도 내용은 보여야 한다. 관찰자를 못 만들면
 // 모든 .reveal 에 즉시 .is-in 을 붙여 정지 상태로 둔다.
@@ -96,7 +92,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
       <div class="hero__in container">
       <div ref="art" class="hero__art parallax">
         <!-- 원반. 띠로 깔면 위아래가 하드하게 잘려 '잘린 그림'으로 읽힌다 —
-             원은 잘릴 수가 없다. 둘레 눈금은 Ruinart 의 문자판 언어를 빌린 것.
+             원은 잘릴 수가 없다.
 
              2026-09-03 15:35 — 안쪽을 직접 그린 일러스트에서 **실제 사진**으로
              바꿨다(기획자 요청). 얼굴이 나오는 사진은 "이 사람이 당사자"로 읽힐
@@ -106,12 +102,10 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
         <div class="hero__disc">
           <img class="hero__photo" src="/images/hero-hands.jpg" width="1100" height="1100"
                alt="해질녘 마른 들판에서 두 사람이 손을 맞잡고 나란히 서 있다" />
-          <!-- 문자판 눈금 24개 — 원반의 언어는 그대로 남긴다. -->
+          <!-- 테두리 한 줄만. 처음에는 시계 문자판처럼 둘레에 눈금 24개를 둘렀는데,
+               사진 위에서는 문자판이 아니라 **해에서 뻗은 빛살**로 읽혀 촌스러웠다
+               (2026-09-03 기획자 확인). 원은 잘리지 않는다는 이점만 남기고 뺐다. -->
           <svg class="hero__ring" viewBox="0 0 400 400" aria-hidden="true">
-            <g class="ticks">
-              <line v-for="a in ticks" :key="a" x1="200" y1="12" x2="200" y2="20"
-                    :transform="`rotate(${a} 200 200)`" />
-            </g>
             <circle cx="200" cy="200" r="176" fill="none" stroke="var(--hairline)" stroke-width="1.4" />
           </svg>
         </div>
@@ -354,7 +348,6 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
   pointer-events: none;
 }
 .hero__ring { position: absolute; inset: 0; width: 100%; height: 100%; }
-.ticks line { stroke: var(--hairline); stroke-width: 1.4; stroke-linecap: round; }
 /* 두 사람 — 넓은 화면은 해 앞(오른쪽), 좁은 화면은 화면 가운데.
    좁은 화면에서는 좌우가 잘려 오른쪽 자리가 보이지 않는다. */
 /* 좁은 화면에서는 한 줄로 세우되, 원반을 작게 둬서 첫 화면에 `01 부담감 진단`

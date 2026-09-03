@@ -10,7 +10,7 @@
  */
 import { ref, nextTick, onMounted } from 'vue';
 import RoomHead from '../components/RoomHead.vue';
-import { answer, opening, type BotReply } from '../services/guideBot';
+import { answer, opening, TOPICS, type BotReply } from '../services/guideBot';
 import { useEventStore } from '../stores/events';
 
 interface Msg {
@@ -114,6 +114,23 @@ onMounted(() => {
       <button class="btn" type="submit" :disabled="!draft.trim()">보내기</button>
     </form>
 
+    <!-- 무엇을 물어도 되는지 통째로 펼쳐 둔다. 대화창은 물어볼 거리가 떠오르지
+         않으면 첫 화면에서 그대로 멈춘다 — 빠른 답장 넷만으로는 이 방이 무엇을
+         아는지 가늠이 되지 않았다. 여기 적힌 것은 전부 답을 가진 질문이다. -->
+    <details class="topics" open>
+      <summary class="topics__sum">이런 것들을 물어보실 수 있어요</summary>
+      <div class="topics__body">
+        <section v-for="g in TOPICS" :key="g.group" class="topics__g">
+          <h2 class="topics__h">{{ g.group }}</h2>
+          <ul class="topics__ul">
+            <li v-for="q in g.items" :key="q">
+              <button type="button" class="quick__b" @click="send(q)">{{ q }}</button>
+            </li>
+          </ul>
+        </section>
+      </div>
+    </details>
+
     <p class="note">
       대화는 이 브라우저 안에만 남고 서버로 보내지 않습니다.
       복지 자격을 판정하지 않으며, 정확한 지원 여부는 기관에 확인해 주세요.
@@ -168,6 +185,24 @@ onMounted(() => {
 .quick__b:hover { background: var(--surface-soft); border-color: var(--border-strong); }
 
 .typing { margin: 12px 0 0; font-size: 13px; color: var(--muted-soft); }
+
+/* 물어볼 거리 목록 — 접을 수 있게 두되 처음에는 펴 둔다. 처음 온 사람에게
+   가장 필요한 것이 "무엇을 물어도 되는가" 이기 때문이다. */
+.topics { margin-top: clamp(16px, 2.4vw, 26px); border-top: 1px solid var(--hairline); }
+.topics__sum {
+  cursor: pointer; list-style: none; padding: clamp(12px, 1.6vw, 16px) 0;
+  font-size: 15px; font-weight: 700; color: var(--ink);
+}
+.topics__sum::-webkit-details-marker { display: none; }
+.topics__sum::after { content: ' ▾'; color: var(--muted-soft); font-weight: 400; }
+.topics[open] .topics__sum::after { content: ' ▴'; }
+.topics__body { padding-bottom: clamp(8px, 1.2vw, 14px); }
+.topics__g + .topics__g { margin-top: clamp(14px, 1.8vw, 20px); }
+.topics__h {
+  margin: 0 0 8px; font-family: inherit; font-size: 13px; font-weight: 700;
+  letter-spacing: .06em; color: var(--muted);
+}
+.topics__ul { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0; padding: 0; }
 
 .ask { display: flex; gap: var(--sp-sm); margin-top: clamp(14px, 2vw, 20px); }
 .ask input {

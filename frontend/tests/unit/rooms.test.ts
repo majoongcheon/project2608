@@ -6,7 +6,7 @@
 //   · 즐겨찾기는 브라우저에만 남고, 저장 공간을 못 써도 화면이 죽지 않는다.
 import { describe, it, expect, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { answer, opening } from '../../src/services/guideBot';
+import { answer, opening, TOPICS } from '../../src/services/guideBot';
 import { useFavoriteStore } from '../../src/stores/favorites';
 
 /* 이 실행 환경이 주는 localStorage 는 반쪽짜리다(clear 가 없다). 저장소는
@@ -70,11 +70,33 @@ describe('안내봇 — 무엇을 답하는가', () => {
     expect(answer('   ').text).toContain('확실히 알지 못합니다');
   });
 
+  it('화면에 펼쳐 둔 질문은 전부 답을 가진다 — 눌렀는데 "모르겠습니다"가 나오면 안 된다', () => {
+    const miss = TOPICS.flatMap((g) => g.items)
+      .filter((q) => answer(q).text.includes('확실히 알지 못합니다'));
+    expect(miss).toEqual([]);
+    expect(TOPICS.flatMap((g) => g.items).length).toBeGreaterThanOrEqual(20);
+  });
+
+  it('펼쳐 둔 질문이 엉뚱한 주제로 새지 않는다', () => {
+    // 열쇳말이 겹치기 쉬운 것들만 골라 짚는다
+    expect(answer('결과를 저장할 수 있나요?').text).toContain('보관하지 않습니다');
+    expect(answer('위치 권한을 안 주면 어떻게 되나요?').text).toContain('직접 고르시면');
+    expect(answer('우리 동네에 기관이 없다고 나와요').text).toContain('기관 정보가 들어오지 않은 지역');
+    expect(answer('제가 쓴 후기를 지우고 싶어요').text).toContain('지우기');
+    expect(answer('형제자매도 지원이 있나요?').text).toContain('가족 지원');
+    expect(answer('누가 만든 서비스인가요?').text).toContain('공식 복지 자격 판정도 하지 않습니다');
+    expect(answer('신청 방법과 서류가 궁금해요').text).toContain('확실히 안내해 드리기 어렵습니다');
+  });
+
+  it('급한 상황에는 화면에 머물지 말라고 먼저 말한다', () => {
+    expect(answer('지금 급해요').text).toContain('바로 연락하시는 편이 낫습니다');
+  });
+
   it('화면은 마크다운을 해석하지 않으므로 별표를 남기지 않는다', () => {
     const texts = [
       opening().text,
-      ...['진단', '결과', '판정 불가', '개인정보', '신청처', '이용 대상', '후기', '즐겨찾기',
-        '상담', '모델', '비용', '감사합니다', '안녕하세요', '알 수 없는 말'].map((q) => answer(q).text),
+      ...TOPICS.flatMap((g) => g.items).map((q) => answer(q).text),
+      ...['상담', '감사합니다', '안녕하세요', '알 수 없는 말'].map((q) => answer(q).text),
     ];
     for (const t of texts) expect(t).not.toContain('**');
   });
