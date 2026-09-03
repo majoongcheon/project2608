@@ -23,6 +23,15 @@ defineProps<{ label: string | null; description: string | null; isWarning: boole
 
     <p class="result__label">{{ label }}</p>
     <p class="result__desc">{{ description }}</p>
+
+    <!-- 이 진단이 실제로 할 수 있는 일의 크기를 함께 적는다.
+         2026-09-03 실측(docs/SJH-구간수-비교.md): 7문항으로는 "부담이 큰 편인가"는
+         열에 여덟을 맞히지만, 다섯 구간을 정확히 갈라내지는 못한다. 이웃한 구간끼리
+         섞이는 일이 흔하므로, 구간 이름을 정밀한 등수처럼 읽지 않도록 밝혀 둔다. -->
+    <p class="result__band">
+      7개 문항으로 가장 가까운 구간 하나를 고른 결과입니다.
+      이웃한 구간과 뚜렷이 갈리지 않는 경우도 있어, 등수가 아니라 대략의 위치로 봐 주세요.
+    </p>
   </section>
 </template>
 
@@ -39,4 +48,6 @@ defineProps<{ label: string | null; description: string | null; isWarning: boole
 .flag__icon { width: 19px; height: 19px; flex: none; }
 .result__label { font-size: 30px; font-weight: 700; color: var(--ink); margin: 0 0 var(--sp-sm); line-height: 1.25; }
 .result__desc { font-size: 16px; color: var(--body); margin: 0; }
+.result__band { font-size: 13px; color: var(--muted); margin: var(--sp-md) 0 0;
+  padding-top: var(--sp-sm); border-top: 1px solid var(--hairline-soft); line-height: 1.6; }
 </style>

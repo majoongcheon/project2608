@@ -17,6 +17,12 @@ export interface DiagnosisOutput {
   contributions: { text: string; isMinor: boolean }[] | null;
   comparison: { text: string; userValue: string; referencePct: number }[] | null;
   undecidableNotice: string | null;
+  // FR-009a — 판정이 어렵다는 사실만이 아니라 **그 이유**까지 보호자의 말로 전한다.
+  //   추론 서비스가 주는 undecidableReason(sparse|ambiguous)을 설정의 문구로 옮긴다.
+  //   설정에 문구가 아직 없으면 null 이 되어 화면에서 그 줄만 빠진다(예전 화면과 같아진다).
+  undecidableReasonText: string | null;
+  undecidableMeaning: string | null;      // '부담 없음'으로 읽히는 것을 막는다
+  undecidableNextSteps: string[] | null;  // 답을 고쳐 다시 하라는 뜻으로 읽히지 않게 쓴다
   // 추론 서비스에 연결하지 못한 경우. 판정 불가와 다르다 — 부담 수준과 무관한 장애다.
   unavailable: boolean;
   unavailableNotice: string | null;
@@ -118,6 +124,7 @@ export async function diagnose(params: {
       decided: false, internalLabel: null, burdenLabel: null, burdenDescription: null,
       isWarning: false, contributions: null, comparison: null,
       undecidableNotice: null,
+      undecidableReasonText: null, undecidableMeaning: null, undecidableNextSteps: null,
       unavailable: true,
       unavailableNotice: cfg<any>('notice.inferenceUnavailable').text,
       multipleTargetsNotice: null, immediateReferral: referral,
@@ -128,6 +135,7 @@ export async function diagnose(params: {
   const undecidable = !remote.decided;
 
   const labels = cfg<any>('burden.labels');
+  const notice = cfg<any>('undecidable.noticeText');
   const internalLabel = remote.internalLabel;
   const labelInfo = internalLabel !== null ? labels[String(internalLabel)] : null;
 
@@ -174,7 +182,15 @@ export async function diagnose(params: {
     isWarning: Boolean(labelInfo?.warning),
     contributions: contribOut,
     comparison,
-    undecidableNotice: undecidable ? cfg<any>('undecidable.noticeText').text : null,
+    undecidableNotice: undecidable ? notice.text : null,
+    // 어느 갈래로 막혔는지는 추론 서비스가 이미 알려 준다. 내부 용어(희소성·확신도)는
+    // 화면에 내보내지 않고, 설정이 가진 보호자용 문구로 바꿔서 내보낸다.
+    undecidableReasonText:
+      undecidable && remote.undecidableReason
+        ? (notice.reasons?.[remote.undecidableReason] ?? null)
+        : null,
+    undecidableMeaning: undecidable ? (notice.meaning ?? null) : null,
+    undecidableNextSteps: undecidable ? (notice.nextSteps ?? null) : null,
     unavailable: false,
     unavailableNotice: null,
     // FR-010d — 단, 판정 불가면 표시하지 않는다(FR-010f)
