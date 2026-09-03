@@ -2,6 +2,7 @@ import { Router } from 'express';
 import { randomUUID } from 'node:crypto';
 import { query, one, exec } from '../repositories/pool.js';
 import { ApiError, wrap } from '../middleware/errors.js';
+import { intParam } from './query.js';
 
 /**
  * 이용 후기 소통방 (2026-09-03)
@@ -38,7 +39,7 @@ function toCard(r: any) {
 
 // GET /reviews — 최근 후기 (소통방 첫 화면)
 reviewsRouter.get('/reviews', wrap(async (req, res) => {
-  const limit = Math.min(Number(req.query.limit ?? 30), 100);
+  const limit = intParam(req.query.limit, { def: 30, min: 1, max: 100, name: 'limit' });
   const rows = await query(
     `SELECT r.review_id, r.facility_id, r.nickname, r.rating, r.body, r.created_at,
             f.name AS facility_name

@@ -67,14 +67,27 @@ function clearAll() {
   fromBot(opening());
 }
 
+/* 저장된 대화를 다시 읽을 때는 **한 줄 한 줄 모양을 확인한다.**
+   배열이라는 것만 보고 넣었더니, 안에 null 이나 숫자가 섞인 경우
+   `m.who` 를 읽다 예외가 났다(2026-09-03 점검에서 실제로 터졌다).
+   저장소는 이용자·확장프로그램·옛 판이 언제든 건드릴 수 있는 곳이라
+   "우리가 쓴 대로 있겠지"를 전제하면 안 된다. */
+function readSaved(): Msg[] {
+  let raw: string | null = null;
+  try { raw = localStorage.getItem(KEY); } catch { return []; }
+  if (!raw) return [];
+  let parsed: unknown;
+  try { parsed = JSON.parse(raw); } catch { return []; }
+  if (!Array.isArray(parsed)) return [];
+  return parsed.filter((m: any): m is Msg =>
+    !!m && typeof m === 'object'
+    && (m.who === 'bot' || m.who === 'me')
+    && typeof m.text === 'string');
+}
+
 onMounted(() => {
   events.track('TALK_ENTER');
-  let saved: Msg[] = [];
-  try {
-    const raw = localStorage.getItem(KEY);
-    if (raw) saved = JSON.parse(raw);
-  } catch { /* 저장 공간을 못 쓰면 새 대화로 시작한다 */ }
-  msgs.value = Array.isArray(saved) ? saved : [];
+  msgs.value = readSaved();
   if (!msgs.value.length) fromBot(opening());
   else scroll();
 });
