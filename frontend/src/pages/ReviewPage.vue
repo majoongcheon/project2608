@@ -353,6 +353,14 @@ select { min-height: 48px; }
   display: inline-block; margin-top: 8px; font-size: 14px;
   color: var(--primary-on-tint); text-decoration: none; border-bottom: 1px solid currentColor;
 }
-.linklike { background: none; border: 0; padding: 0; color: var(--link); text-decoration: underline; cursor: pointer; font: inherit; font-size: 13px; }
+/* 문장 안에 섞인 글자 링크다. 한때 보이지 않는 44px 덮개(::after)로 표적을
+   넓혔는데, 그 덮개가 **바로 위 선택지의 클릭을 가로채** 답이 안 골라졌다
+   (2026-09-03 점검에서 잡음). 표적 크기 기준도 본문 속 인라인 링크는 예외로
+   두는 쪽이라, 덮개를 걷고 글의 흐름을 지킨다. */
+.linklike {
+  background: none; border: 0; padding: 0;
+  color: var(--link); text-decoration: underline; cursor: pointer; font: inherit;
+}
+.linklike { font-size: 13px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 </style>

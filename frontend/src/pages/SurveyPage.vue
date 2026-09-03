@@ -79,7 +79,7 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
   <div class="container room stack">
     <!-- 어느 방에 있는지만 한 줄로. 문항마다 큰 제목을 세우면 화면이 무거워지고
          3분 안에 끝내야 하는 흐름을 방해한다 — 여기서는 문항이 제목 자리다. -->
-    <p class="room__eyebrow"><span class="room__no">01</span>부담감 진단</p>
+    <h1 class="room__eyebrow"><span class="room__no">01</span>부담감 진단</h1>
 
     <!-- 실패를 먼저 본다. 그러지 않으면 "불러오는 중" 에서 영영 멈춘다. -->
     <div v-if="s.loadError" class="card stack" role="alert">
@@ -213,6 +213,17 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
 .notice, .warn { font-size: 14px; padding: var(--sp-md); border-radius: var(--radius-sm); margin: 0; }
 .notice { background: var(--surface-soft); color: var(--muted); }
 .warn { background: #fff4f1; color: var(--error-text); border: 1px solid #f4c7bd; }
-.modeline { margin: var(--sp-sm) 0 0; text-align: right; font-size: 13px; }
-.linklike { background: none; border: 0; padding: 0; color: var(--link); text-decoration: underline; cursor: pointer; font: inherit; }
+.modeline { margin: 2px 0 0; text-align: right; font-size: 13px; }
+/* 이 링크는 문장 안이 아니라 홀로 서 있다. 표적 크기 기준의 예외가 아니므로
+   **여백으로** 44px 를 만든다 — 절대 배치한 덮개로 넓히면 위에 있는 선택지의
+   클릭을 가로챈다(실제로 그랬다. 2026-09-03 점검). */
+.modeline .linklike { display: inline-block; padding: 11px 6px; }
+/* 문장 안에 섞인 글자 링크다. 한때 보이지 않는 44px 덮개(::after)로 표적을
+   넓혔는데, 그 덮개가 **바로 위 선택지의 클릭을 가로채** 답이 안 골라졌다
+   (2026-09-03 점검에서 잡음). 표적 크기 기준도 본문 속 인라인 링크는 예외로
+   두는 쪽이라, 덮개를 걷고 글의 흐름을 지킨다. */
+.linklike {
+  background: none; border: 0; padding: 0;
+  color: var(--link); text-decoration: underline; cursor: pointer; font: inherit;
+}
 </style>

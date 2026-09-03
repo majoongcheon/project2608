@@ -88,8 +88,13 @@ async function submitReport() {
               <option value="OTHER">기타</option>
             </select>
           </label>
-          <textarea v-model="reportDetail" rows="3" maxlength="500"
-                    placeholder="자세한 내용을 적어 주세요 (선택)"></textarea>
+          <!-- 자리표시글은 라벨이 아니다 — 글을 적기 시작하면 사라지고,
+               화면낭독기가 읽어 주지 않는 브라우저도 있다. -->
+          <label class="sel">
+            <span>자세한 내용 (선택)</span>
+            <textarea v-model="reportDetail" rows="3" maxlength="500"
+                      placeholder="어떤 점이 다른지 적어 주세요"></textarea>
+          </label>
           <button class="btn" type="button" :disabled="!reportType" @click="submitReport">신고하기</button>
         </template>
         <p v-else class="notice">신고가 접수되었습니다. 확인 후 반영하겠습니다.</p>

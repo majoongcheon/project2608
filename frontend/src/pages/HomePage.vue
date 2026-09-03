@@ -64,23 +64,30 @@ onMounted(async () => {
   );
   document.querySelectorAll('.reveal').forEach((el) => io!.observe(el));
 
-  // 히어로 시차 — 스크롤량의 일부만 그림에 준다. 값이 크면 멀미가 난다.
-  const onScroll = () => {
-    if (raf) return;
-    raf = requestAnimationFrame(() => {
-      raf = 0;
-      const y = window.scrollY;
-      if (art.value && y < window.innerHeight * 1.2) {
-        art.value.style.setProperty('--shift', `${y * 0.12}px`);
-        art.value.style.setProperty('--shift-far', `${y * 0.045}px`);
-      }
-    });
-  };
   window.addEventListener('scroll', onScroll, { passive: true });
-  onBeforeUnmount(() => window.removeEventListener('scroll', onScroll));
 });
 
-onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); });
+// 히어로 시차 — 스크롤량의 일부만 그림에 준다. 값이 크면 멀미가 난다.
+// setup 안에서 만든다: onMounted 의 async 콜백 안에서 onBeforeUnmount 를 부르면
+// await 뒤에는 컴포넌트가 붙어 있지 않아 **등록이 통째로 무시된다**. 실제로
+// Vue 가 경고를 냈고, 홈을 떠나도 스크롤 감시가 남아 있었다(2026-09-03 점검).
+const onScroll = () => {
+  if (raf) return;
+  raf = requestAnimationFrame(() => {
+    raf = 0;
+    const y = window.scrollY;
+    if (art.value && y < window.innerHeight * 1.2) {
+      art.value.style.setProperty('--shift', `${y * 0.12}px`);
+      art.value.style.setProperty('--shift-far', `${y * 0.045}px`);
+    }
+  });
+};
+
+onBeforeUnmount(() => {
+  window.removeEventListener('scroll', onScroll);
+  io?.disconnect();
+  if (raf) cancelAnimationFrame(raf);
+});
 </script>
 
 <template>
