@@ -7,6 +7,7 @@ import { api } from '../services/apiClient';
 import { useEventStore } from '../stores/events';
 import FacilityCard from '../components/FacilityCard.vue';
 import MapView from '../components/MapView.vue';
+import RoomHead from '../components/RoomHead.vue';
 
 const events = useEventStore();
 const regions = ref<any[]>([]);
@@ -83,9 +84,13 @@ function expand() {
 </script>
 
 <template>
-  <div class="container stack">
-    <h1>복지서비스 신청처 찾기</h1>
-    <p class="muted">주간활동서비스와 청소년 방과후활동서비스의 신청 접수처를 안내합니다.</p>
+  <div class="container room stack">
+    <RoomHead
+      no="02"
+      eyebrow="복지서비스 위치 · 연락처"
+      title="신청 접수처 찾기"
+      lead="주간활동서비스와 청소년 방과후활동서비스의 신청 접수처를 지도와 목록으로 안내합니다."
+    />
 
     <!-- 아직 고르기 전 — 조작부보다 먼저 온다. 설명을 읽고 나서 버튼을 만나야 순서가 맞다 -->
     <div v-if="!started && !loading" class="firststep">
@@ -162,6 +167,12 @@ function expand() {
         인근 {{ suggestedRadius }}km까지 넓혀 찾기
       </button>
     </p>
+
+    <nav class="hop" aria-label="다른 방으로">
+      <RouterLink class="hop__a" to="/reviews">이용 후기 소통방</RouterLink>
+      <RouterLink class="hop__a" to="/me">저장해 둔 기관</RouterLink>
+      <RouterLink class="hop__a" to="/talk">정보 소통방</RouterLink>
+    </nav>
   </div>
 </template>
 

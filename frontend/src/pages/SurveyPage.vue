@@ -66,7 +66,11 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
 </script>
 
 <template>
-  <div class="container stack">
+  <div class="container room stack">
+    <!-- 어느 방에 있는지만 한 줄로. 문항마다 큰 제목을 세우면 화면이 무거워지고
+         3분 안에 끝내야 하는 흐름을 방해한다 — 여기서는 문항이 제목 자리다. -->
+    <p class="room__eyebrow"><span class="room__no">01</span>부담감 진단</p>
+
     <!-- 실패를 먼저 본다. 그러지 않으면 "불러오는 중" 에서 영영 멈춘다. -->
     <div v-if="s.loadError" class="card stack" role="alert">
       <h2>문항을 불러오지 못했습니다</h2>
@@ -158,6 +162,7 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
 </template>
 
 <style scoped>
+.room__no { margin-right: 10px; color: var(--muted-soft); letter-spacing: .12em; }
 .progress__bar { height: 8px; background: var(--surface-strong); border-radius: var(--radius-pill); overflow: hidden; }
 .progress__bar span { display: block; height: 100%; background: var(--primary); transition: width .25s; }
 .progress__text { font-size: 14px; color: var(--muted); margin: var(--sp-xs) 0 0; }

@@ -11,6 +11,10 @@ export const router = createRouter({
     { path: '/diagnosis/result', name: 'result', component: () => import('../pages/ResultPage.vue') },
     { path: '/map', name: 'map', component: () => import('../pages/MapPage.vue') },
     { path: '/facility/:id', name: 'facility', component: () => import('../pages/FacilityDetailPage.vue') },
+    // 2026-09-03 — 방 셋을 더 두었다. 홈 메뉴의 03·04·05 와 번호를 맞춘다.
+    { path: '/talk', name: 'talk', component: () => import('../pages/TalkPage.vue') },
+    { path: '/reviews', name: 'reviews', component: () => import('../pages/ReviewPage.vue') },
+    { path: '/me', name: 'me', component: () => import('../pages/MyPage.vue') },
     { path: '/:pathMatch(.*)*', redirect: '/' },
   ],
 });

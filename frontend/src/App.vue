@@ -67,10 +67,11 @@ const isHome = computed(() => route.name === 'home');
     </div>
   </header>
 
-  <!-- 에디토리얼 레이아웃(2026-09-03 개편)을 쓰는 화면에서는 편지지 틀을 끈다.
-       theme-editorial.css 가 .main--editorial 아래에서 플랩·봉랍·여백선을
-       걷어낸다. 아직 개편하지 않은 화면은 편지지 틀 그대로다. -->
-  <main id="main" :class="{ 'main--editorial': isHome }">
+  <!-- 에디토리얼 레이아웃(2026-09-03 개편). 15:40 부터 **모든 방**이 이 틀을
+       쓴다 — 홈만 지면이고 나머지가 편지지라 방을 옮길 때마다 다른 사이트에
+       들어간 것처럼 읽혔다(기획자 지적). theme-editorial.css 가 이 클래스
+       아래에서 봉투 플랩·봉랍·여백선을 걷어내고 옛 부품을 지면 언어로 바꾼다. -->
+  <main id="main" class="main--editorial">
     <RouterView />
   </main>
 
