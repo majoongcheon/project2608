@@ -14,8 +14,10 @@ defineProps<{ name: string; notice: string }>();
 </template>
 
 <style scoped>
-.unavailable { background: var(--surface); border: 1px solid var(--hairline);
-  border-radius: var(--radius); padding: var(--sp-lg); }
+/* --surface·--radius 는 토큰에 없던 이름이라 배경이 투명하고 모서리가 각지게 나왔다.
+   같은 자리에 오는 .result·.undecided 와 같은 값으로 맞춘다. */
+.unavailable { background: var(--surface-soft); border: 1px solid var(--hairline);
+  border-radius: var(--radius-lg); padding: var(--sp-lg); }
 .unavailable__who { font-size: 14px; color: var(--muted); margin: 0 0 var(--sp-sm); }
 .unavailable__title { font-size: 22px; font-weight: 700; color: var(--ink);
   margin: 0 0 var(--sp-sm); }

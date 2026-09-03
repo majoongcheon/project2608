@@ -23,6 +23,8 @@ const coords = ref<{ lat: number; lng: number } | null>(null);
 const loading = ref(false);
 const locError = ref('');
 
+// 아직 아무것도 고르지 않은 상태. 이때 화면이 비어 있으면 무엇을 해야 하는지 알 수 없다.
+const started = computed(() => Boolean(regionCode.value) || Boolean(coords.value));
 const sidos = computed(() => [...new Set(regions.value.map((r) => r.sidoName))]);
 const inSido = computed(() => regions.value.filter((r) => r.sidoName === sido.value));
 const center = computed(() => coords.value ?? regionCenter.value);
@@ -129,7 +131,22 @@ function expand() {
       </button>
     </div>
 
-    <MapView v-if="facilities.length" :center="center" :facilities="facilities"
+    <!-- 아직 고르기 전 — 빈 화면 대신 무엇을 하면 되는지 먼저 알린다 -->
+    <div v-if="!started && !loading" class="firststep">
+      <p class="firststep__head">두 가지 방법 중 편한 쪽으로 찾으실 수 있습니다.</p>
+      <ul class="firststep__list">
+        <li><strong>현재 위치에서 찾기</strong> — 가까운 순서로 안내해 드립니다. 위치 권한을 물어봅니다.</li>
+        <li><strong>지역 직접 선택</strong> — 위치 권한을 허용하지 않으셔도 됩니다. 시·도와 시·군·구를 고르세요.</li>
+      </ul>
+      <p class="firststep__note">
+        진단을 하지 않으셔도 이 화면만 따로 쓰실 수 있습니다.
+        기관 정보가 아직 준비되지 않은 지역은 목록에 <em>(준비 중)</em>으로 표시됩니다.
+      </p>
+    </div>
+
+    <!-- 기준 위치가 정해졌으면 결과가 0곳이어도 지도는 보여 준다.
+         빈 지도가 아니라 "여기를 기준으로 찾았다"는 것이 눈에 보여야 다음 행동을 고를 수 있다. -->
+    <MapView v-if="started && center" :center="center" :facilities="facilities"
              :radius-km="radiusKm" :center-label="centerLabel" />
 
     <p v-if="loading" class="notice">기관을 찾고 있습니다…</p>
@@ -156,6 +173,12 @@ select { width: 100%; padding: 12px var(--sp-md); font: inherit; min-height: 48p
   border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--canvas); }
 .notice { background: var(--surface-soft); color: var(--muted); font-size: 14px;
   padding: var(--sp-md); border-radius: var(--radius-sm); margin: 0; }
+.firststep { background: var(--surface-soft); border: 1px solid var(--hairline);
+  border-radius: var(--radius-md); padding: var(--sp-base); }
+.firststep__head { margin: 0 0 var(--sp-sm); font-size: 15px; font-weight: 700; color: var(--ink); }
+.firststep__list { margin: 0; padding-left: 1.15em; font-size: 15px; }
+.firststep__list li + li { margin-top: var(--sp-xs); }
+.firststep__note { margin: var(--sp-md) 0 0; font-size: 13px; color: var(--muted); line-height: 1.6; }
 .pendingbox { background: #fffaf3; border: 1px solid #f0d9b5; border-radius: var(--radius-md); padding: var(--sp-base); }
 .pendingbox p { margin: 0 0 var(--sp-sm); font-size: 15px; }
 .linklike { background: none; border: 0; padding: 0; color: var(--link); text-decoration: underline; cursor: pointer; font: inherit; }
