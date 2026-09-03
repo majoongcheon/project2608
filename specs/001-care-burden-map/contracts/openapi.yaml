@@ -577,6 +577,13 @@ components:
                   - MAP_ENTER
                   - FACILITY_DETAIL
                   - CONTACT_ACTION
+                  # 2026-09-03 방 셋(정보 소통방·후기 소통방·마이페이지) 추가분.
+                  # 저장 필드는 늘리지 않는다 — 종류 이름만 늘어난다.
+                  - TALK_ENTER
+                  - TALK_MESSAGE
+                  - REVIEW_ENTER
+                  - REVIEW_WRITE
+                  - MYPAGE_ENTER
                 description: FR-027이 열거한 종류로 한정한다.
               occurredAt: { type: string, format: date-time }
               questionNo: { type: integer, nullable: true, description: 이탈 문항 번호 }

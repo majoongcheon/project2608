@@ -239,7 +239,10 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
         <p class="stat__eyebrow reveal">2024년 전국 실태조사</p>
         <h2 id="stat-h" class="stat__h reveal" style="--reveal-delay:80ms">
           <b class="stat__big">{{ fmt(TOTAL) }}가구</b> 가운데
-          <b class="stat__big stat__big--hot">{{ fmt(heavyN) }}가구</b>가<br />
+          <!-- 숫자와 뒤에 붙는 조사를 한 덩어리로 묶는다. `.stat__big` 이
+               inline-block 이라 그 경계에서 줄이 끊겨 "1,629가구 / 가" 로
+               갈라졌다 — word-break:keep-all 은 이 경계까지는 막지 못한다. -->
+          <span class="stat__grp"><b class="stat__big stat__big--hot">{{ fmt(heavyN) }}가구</b>가</span><br />
           높은 돌봄부담을 안고 있었습니다.
         </h2>
 
@@ -468,6 +471,7 @@ onBeforeUnmount(() => { io?.disconnect(); if (raf) cancelAnimationFrame(raf); })
   display: inline-block; padding-block: .06em;
 }
 .stat__big--hot { color: var(--primary-on-tint); }
+.stat__grp { white-space: nowrap; }
 
 .bar { display: flex; width: 100%; height: clamp(22px, 3vw, 34px); overflow: hidden; }
 .bar__seg { display: block; height: 100%; }

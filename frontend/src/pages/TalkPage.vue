@@ -68,6 +68,7 @@ function clearAll() {
 }
 
 onMounted(() => {
+  events.track('TALK_ENTER');
   let saved: Msg[] = [];
   try {
     const raw = localStorage.getItem(KEY);
