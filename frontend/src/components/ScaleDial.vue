@@ -237,7 +237,7 @@ const tabIndexOf = (i: number) =>
   width: 13px; height: 13px; border-radius: 50%;
   background: var(--canvas); border: 2px solid var(--border-strong);
 }
-.tick__num { position: relative; font-size: 12px; transform: translate(var(--nx), var(--ny)); }
+.tick__num { position: relative; font-size: 12px; transform: translate(var(--nx, 0px), var(--ny, 0px)); }
 .tick:hover .tick__dot { border-color: var(--primary); }
 
 /* 초점 표시 — 48px 표적 전체에 사각 링을 두르면 그 선이 눈금 숫자를 덮어
@@ -266,7 +266,7 @@ const tabIndexOf = (i: number) =>
 /* 양 끝 라벨 — 눈금 1·5 와 같은 높이(--end-y)에서 원 바깥에 붙는다.
    감싸개 높이 = 원 높이라 이 비율이 곧 눈금의 세로 자리다. */
 .end {
-  position: absolute; top: var(--end-y); transform: translateY(-50%);
+  position: absolute; top: var(--end-y, 50%); transform: translateY(-50%);
   width: clamp(50px, 16%, 72px);
   font-size: 13px; line-height: 1.35; color: var(--muted);
   word-break: keep-all;

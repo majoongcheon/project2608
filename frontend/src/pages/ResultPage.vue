@@ -32,7 +32,7 @@ function restart() { store.clear(); pre.reset(); events.renew(); router.push('/'
 
 <template>
   <div v-if="r" class="container room stack">
-    <p class="room__eyebrow"><span class="room__no">01</span>부담감 진단 · 결과</p>
+    <h1 class="room__eyebrow"><span class="room__no">01</span>부담감 진단 · 결과</h1>
 
     <!-- 판정된 경우 -->
     <BurdenResultCard v-if="r.decided" :label="r.burdenLabel" :description="r.burdenDescription"

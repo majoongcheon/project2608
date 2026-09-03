@@ -23,6 +23,8 @@ const radiusKm = ref<number | null>(null);
 const coords = ref<{ lat: number; lng: number } | null>(null);
 const loading = ref(false);
 const locError = ref('');
+// 서버가 응답하지 않을 때. 아무 말 없이 멈추면 이용자는 자기 잘못인 줄 안다.
+const loadError = ref('');
 
 // 아직 아무것도 고르지 않은 상태. 이때 화면이 비어 있으면 무엇을 해야 하는지 알 수 없다.
 const started = computed(() => Boolean(regionCode.value) || Boolean(coords.value));
@@ -37,12 +39,19 @@ const centerLabel = computed(() => {
 
 onMounted(async () => {
   events.track('MAP_ENTER');
-  const d = await api.regions();
-  regions.value = d.regions;
+  // 감싸지 않으면 서버가 죽었을 때 여기서 그대로 터지고, 화면은 아무 말 없이
+  // 멈춘 채로 남는다(2026-09-03 점검에서 실제로 그랬다).
+  try {
+    const d = await api.regions();
+    regions.value = d.regions;
+  } catch {
+    loadError.value = '지역 목록을 불러오지 못했습니다. 잠시 후 다시 들어와 주세요.';
+  }
 });
 
 async function search(q: Record<string, unknown>) {
   loading.value = true;
+  loadError.value = '';
   try {
     const d = await api.facilities({ ...q, serviceType: serviceType.value || undefined, limit: 30 });
     facilities.value = d.facilities;
@@ -51,6 +60,9 @@ async function search(q: Record<string, unknown>) {
     regionCenter.value = d.regionCenter ?? regionCenter.value;
     suggestedRadius.value = d.suggestedRadiusKm;
     radiusKm.value = d.radiusKm;
+  } catch {
+    facilities.value = [];
+    loadError.value = '기관 정보를 불러오지 못했습니다. 잠시 후 다시 시도해 주세요.';
   } finally { loading.value = false; }
 }
 
@@ -110,6 +122,7 @@ function expand() {
         현재 위치에서 가까운 곳 찾기
       </button>
       <p v-if="locError" class="notice">{{ locError }}</p>
+      <p v-if="loadError" class="notice" role="alert">{{ loadError }}</p>
 
       <div class="selects">
         <label class="sel">

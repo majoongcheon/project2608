@@ -231,9 +231,14 @@ onMounted(() => {
 .ask .btn { flex: none; }
 
 .note { margin: clamp(12px, 1.6vw, 18px) 0 0; font-size: 13px; color: var(--muted); line-height: 1.6; }
+/* 문장 안에 섞인 글자 링크다. 한때 보이지 않는 44px 덮개(::after)로 표적을
+   넓혔는데, 그 덮개가 **바로 위 선택지의 클릭을 가로채** 답이 안 골라졌다
+   (2026-09-03 점검에서 잡음). 표적 크기 기준도 본문 속 인라인 링크는 예외로
+   두는 쪽이라, 덮개를 걷고 글의 흐름을 지킨다. */
 .linklike {
-  background: none; border: 0; padding: 0; margin-left: 6px;
-  color: var(--link); text-decoration: underline; cursor: pointer; font: inherit; font-size: 13px;
+  background: none; border: 0; padding: 0;
+  color: var(--link); text-decoration: underline; cursor: pointer; font: inherit;
 }
+.linklike { margin-left: 6px; font-size: 13px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
 </style>
