@@ -4,7 +4,9 @@
 --   cb_event_log_v1        : session_id 있음 · 응답 내용 없음
 --   cb_training_response_v1: 응답 내용 있음 · session_id 없음
 --   조인 키가 존재하지 않아야 저장소 분리가 구조적으로 성립한다.
---   db/tests/separation.test.ts 가 컬럼 교집합이 공집합인지 검증한다.
+--   db/scripts/verify.js 가 이것을 검증한다 (`npm run verify`).
+--   model_version·question_set_version 은 수천 건이 공유하는 저카디널리티
+--   속성이라 개별 기록을 좁히지 못하므로 예외로 둔다 — data-model.md 참조.
 
 -- ── 4.1 익명 집계 로그 (FR-027~FR-030) ──────────────────────────────
 --   저장 금지(FR-028): 이름·연락처·계정, 별명, IP, 개별 문항 응답,

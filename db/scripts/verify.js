@@ -68,6 +68,20 @@ if (linkable.length === 0) {
   bad(`저장소 분리 위반 — 기록을 연결할 수 있는 공통 컬럼: ${linkable.join(', ')}`);
 }
 
+// 2026-09-03 — 후기 소통방 테이블이 생기면서 그물 밖에 있던 곳을 메운다.
+// 후기는 사람이 직접 쓴 글이라, 관측 저장소 어느 쪽과도 개별 기록을 이어
+// 붙일 수 있는 컬럼을 가져서는 안 된다(원칙 III, FR-032 의 취지).
+const rvCols = await q(`
+  SELECT COLUMN_NAME c FROM information_schema.COLUMNS
+   WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = 'cb_facility_review_v1'`);
+if (rvCols.length) {
+  const rv = new Set(rvCols.map((r) => r.c));
+  const rvLinkable = [...rv].filter((c) => (a.has(c) || b.has(c)) && !LINK_SAFE.has(c));
+  rvLinkable.length === 0
+    ? ok('후기 저장소 분리: 관측 저장소와 연결 가능한 공통 컬럼 0개')
+    : bad(`후기 저장소 분리 위반 — 공통 컬럼: ${rvLinkable.join(', ')}`);
+}
+
 // 시각으로도 짝지을 수 없어야 한다 — 학습 저장소는 초 단위로 절삭해 저장한다.
 const [ts] = await q(`SELECT COUNT(*) n FROM cb_training_response_v1
                        WHERE MICROSECOND(submitted_at) <> 0`);

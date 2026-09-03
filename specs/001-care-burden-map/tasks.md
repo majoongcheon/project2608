@@ -67,7 +67,7 @@ description: "Task list for 돌봄부담 경량 진단 및 지도 기반 복지�
       `cb_training_response_v1`. **두 테이블은 공통 컬럼을 하나도 두지 않는다**(FR-032).
       `cb_event_log_v1`에 응답·별명·IP·좌표 컬럼을, `cb_training_response_v1`에 `session_id`를
       만들지 않는다
-- [X] **T013** `db/tests/separation.test.ts` — 두 관측 테이블의 컬럼 집합 교집합이 공집합인지
+- [X] **T013** `db/scripts/verify.js` — 두 관측 테이블에 **기록을 연결할 수 있는** 공통 컬럼이 없는지
       검증. **조인 키가 존재하지 않음을 스키마로 증명하는 테스트**(FR-032, 원칙 III)
 - [X] **T014** [P] `db/seeds/regions.ts` — 행정표준코드 기준 **229개 시군구** 적재.
       `center_lat`/`center_lng`(지역 직접 선택 시 기준 좌표) 포함. 적재 후 행 수 229 확인
