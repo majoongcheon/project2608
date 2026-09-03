@@ -117,8 +117,13 @@ describe('ScaleDial — 화면낭독기', () => {
     expect(sr).toEqual(OPTIONS.map((o) => o.label));
   });
 
-  it('양 끝이 무엇인지 눈으로도 남긴다', () => {
-    expect(mk(undefined).find('.ends').text()).toContain('매우 싫어한다');
-    expect(mk(undefined).find('.ends').text()).toContain('매우 좋아한다');
+  it('양 끝이 무엇인지 눈으로도 남긴다 — 눈금 1·5 와 같은 높이에 붙인다', () => {
+    const w = mk(undefined);
+    expect(w.find('.end--min').text()).toBe('매우 싫어한다');
+    expect(w.find('.end--max').text()).toBe('매우 좋아한다');
+    // 라벨의 세로 자리(--end-y)가 눈금 1·5 의 세로 자리와 같아야 나란히 선다
+    const endY = /--end-y:\s*([\d.]+)%/.exec(w.find('.dialwrap').attributes('style') ?? '')?.[1];
+    const tickY = /top:\s*([\d.]+)%/.exec(w.findAll('.tick')[0].attributes('style') ?? '')?.[1];
+    expect(Number(endY)).toBeCloseTo(Number(tickY), 5);
   });
 });

@@ -55,6 +55,12 @@ const posOf = (i: number) => {
   };
 };
 
+/* 양 끝 라벨(매우 싫어한다 / 매우 좋아한다)을 **눈금 1·5 바로 옆**에 세운다.
+   원 아래에 나란히 두었더니 "어느 쪽이 어느 쪽인지"가 눈금과 이어지지 않아
+   첫 화면에서 무엇을 하는 자리인지 읽히지 않았다(사용자 지적). 감싸개 높이는
+   원 높이와 같으므로, 눈금과 같은 세로 비율을 그대로 쓰면 정확히 나란해진다. */
+const endY = computed(() => `${50 - R * Math.cos((SPAN / 2) * Math.PI / 180)}%`);
+
 // 부채꼴 호의 양 끝. 각도를 바꾸면 호도 따라오도록 좌표를 계산해 둔다.
 const arcPath = computed(() => {
   const r = R * 2, rad = (d: number) => (d * Math.PI) / 180;
@@ -141,7 +147,9 @@ const tabIndexOf = (i: number) =>
 </script>
 
 <template>
-  <div class="dialwrap">
+  <div class="dialwrap" :style="{ '--end-y': endY }">
+    <span class="end end--min" aria-hidden="true">{{ options[0]?.label }}</span>
+    <span class="end end--max" aria-hidden="true">{{ options[options.length - 1]?.label }}</span>
     <div
       ref="dial"
       class="dial"
@@ -195,19 +203,15 @@ const tabIndexOf = (i: number) =>
       </p>
     </div>
 
-    <!-- 양 끝이 무엇인지 글자로 남긴다. 숫자만으로는 방향을 알 수 없다. -->
-    <p class="ends" aria-hidden="true">
-      <span>{{ options[0]?.label }}</span>
-      <span>{{ options[options.length - 1]?.label }}</span>
-    </p>
   </div>
 </template>
 
 <style scoped>
-.dialwrap { display: block; }
+/* 감싸개는 원과 양 끝 라벨을 함께 담는다. 좌우 여백만큼 원이 줄어든다. */
+.dialwrap { position: relative; padding-inline: clamp(54px, 17%, 76px); }
 .dial {
   position: relative;
-  width: min(100%, 320px);
+  width: min(100%, 300px);
   aspect-ratio: 1;
   margin: 0 auto;
   touch-action: none;          /* 돌리는 동안 화면이 같이 스크롤되지 않게 */
@@ -257,12 +261,18 @@ const tabIndexOf = (i: number) =>
   font-size: clamp(17px, 4.6vw, 22px); font-weight: 700; line-height: 1.3;
   color: var(--ink); word-break: keep-all;
 }
-.dial__hint { font-size: 13px; line-height: 1.5; color: var(--muted-soft); }
+.dial__hint { font-size: 13px; line-height: 1.5; color: var(--muted); }
 
-.ends {
-  display: flex; justify-content: space-between; gap: var(--sp-sm);
-  margin: var(--sp-sm) 0 0; font-size: 13px; color: var(--muted);
+/* 양 끝 라벨 — 눈금 1·5 와 같은 높이(--end-y)에서 원 바깥에 붙는다.
+   감싸개 높이 = 원 높이라 이 비율이 곧 눈금의 세로 자리다. */
+.end {
+  position: absolute; top: var(--end-y); transform: translateY(-50%);
+  width: clamp(50px, 16%, 72px);
+  font-size: 13px; line-height: 1.35; color: var(--muted);
+  word-break: keep-all;
 }
+.end--min { left: 0; text-align: right; }
+.end--max { right: 0; text-align: left; }
 
 /* 화면낭독기 전용 — 눈에는 안 보이지만 읽힌다. display:none 은 읽히지 않는다. */
 .sr {
