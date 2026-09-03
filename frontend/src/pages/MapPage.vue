@@ -87,6 +87,19 @@ function expand() {
     <h1>복지서비스 신청처 찾기</h1>
     <p class="muted">주간활동서비스와 청소년 방과후활동서비스의 신청 접수처를 안내합니다.</p>
 
+    <!-- 아직 고르기 전 — 조작부보다 먼저 온다. 설명을 읽고 나서 버튼을 만나야 순서가 맞다 -->
+    <div v-if="!started && !loading" class="firststep">
+      <p class="firststep__head">두 가지 방법 중 편한 쪽으로 찾으실 수 있습니다.</p>
+      <ul class="firststep__list">
+        <li><strong>현재 위치에서 찾기</strong> — 가까운 순서로 안내해 드립니다. 위치 권한을 물어봅니다.</li>
+        <li><strong>지역 직접 선택</strong> — 위치 권한을 허용하지 않으셔도 됩니다. 시·도와 시·군·구를 고르세요.</li>
+      </ul>
+      <p class="firststep__note">
+        진단을 하지 않으셔도 이 화면만 따로 쓰실 수 있습니다.
+        기관 정보가 아직 준비되지 않은 지역은 목록에 <em>(준비 중)</em>으로 표시됩니다.
+      </p>
+    </div>
+
     <div class="card stack">
       <button class="btn btn--secondary btn--block" type="button" @click="useMyLocation">
         현재 위치에서 가까운 곳 찾기
@@ -129,19 +142,6 @@ function expand() {
       <button v-if="suggestedRadius" class="btn btn--ghost" type="button" @click="expand">
         인근 {{ suggestedRadius }}km 범위로 넓혀 찾기
       </button>
-    </div>
-
-    <!-- 아직 고르기 전 — 빈 화면 대신 무엇을 하면 되는지 먼저 알린다 -->
-    <div v-if="!started && !loading" class="firststep">
-      <p class="firststep__head">두 가지 방법 중 편한 쪽으로 찾으실 수 있습니다.</p>
-      <ul class="firststep__list">
-        <li><strong>현재 위치에서 찾기</strong> — 가까운 순서로 안내해 드립니다. 위치 권한을 물어봅니다.</li>
-        <li><strong>지역 직접 선택</strong> — 위치 권한을 허용하지 않으셔도 됩니다. 시·도와 시·군·구를 고르세요.</li>
-      </ul>
-      <p class="firststep__note">
-        진단을 하지 않으셔도 이 화면만 따로 쓰실 수 있습니다.
-        기관 정보가 아직 준비되지 않은 지역은 목록에 <em>(준비 중)</em>으로 표시됩니다.
-      </p>
     </div>
 
     <!-- 기준 위치가 정해졌으면 결과가 0곳이어도 지도는 보여 준다.
