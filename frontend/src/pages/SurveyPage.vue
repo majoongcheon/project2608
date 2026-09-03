@@ -2,16 +2,39 @@
 // 진단 설문 (FR-004d·FR-005·FR-006·FR-007·FR-011b)
 //   진행률 표시 · 이전 문항 이동 · "해당사항 없음" 선택지.
 //   설문 도중에는 어떤 중간 결과도 보여주지 않는다.
-import { computed, onMounted } from 'vue';
+import { computed, onMounted, ref, watch } from 'vue';
 import { useRouter } from 'vue-router';
 import { useSurveyStore } from '../stores/survey';
 import { useEventStore } from '../stores/events';
+import ScaleDial from '../components/ScaleDial.vue';
 
 const router = useRouter();
 const s = useSurveyStore();
 const events = useEventStore();
 
 onMounted(async () => { await s.load(); events.track('SURVEY_START'); });
+
+/* ── 원형 다이얼을 쓸 문항 고르기 ───────────────────────────────────────
+   시계 문자판은 **순서**를 뜻한다. 1~5 처럼 한 방향으로 세지는 척도에만 맞다.
+   실측(2026-09-03): 7문항 중 1·2·3 만 5단계 척도이고, 4번(생계 책임자 8지)
+   5번(퇴사 사유 15지 + 해당사항 없음) 6번(관계)은 **순서가 없는 항목**이다.
+   여기에 다이얼을 쓰면 "아버지가 형제자매보다 낮은 값"처럼 읽힌다 — 쓰지 않는다.
+
+   문항 데이터에 척도 여부 표시가 없어 형태로 가른다: 선택지가 정확히 5개이고
+   값이 1..5 로 연속이며 빈 값이 없을 것. (문항 집합에 `scale` 표시를 넣는 것이
+   본래 맞고, 그러면 이 추정은 지울 수 있다.) */
+function isScale(q: any): boolean {
+  const o = q?.options;
+  if (!Array.isArray(o) || o.length !== 5) return false;
+  return o.every((x: any, i: number) => x?.value === i + 1);
+}
+// 보기 전환. 원형이 불편한 사람에게 원형만 남기지 않는다 — 고른 값은 기억한다.
+const MODE_KEY = 'cb.answerMode';
+const mode = ref<'dial' | 'list'>('dial');
+try { if (localStorage.getItem(MODE_KEY) === 'list') mode.value = 'list'; } catch { /* noop */ }
+watch(mode, (m) => { try { localStorage.setItem(MODE_KEY, m); } catch { /* noop */ } });
+
+const useDial = computed(() => mode.value === 'dial' && !!s.current && isScale(s.current));
 
 const pct = computed(() => (s.total ? Math.round(((s.index + 1) / s.total) * 100) : 0));
 const value = computed(() => (s.current ? s.answers[s.current.questionNo] : undefined));
@@ -22,7 +45,9 @@ function choose(v: number | null) {
   if (!s.current) return;
   s.answer(s.current.questionNo, v);
   events.track('QUESTION_MOVE', { questionNo: s.current.questionNo });
-  if (!isLast.value) setTimeout(() => s.next(), 160);
+  // 목록에서 한 번 누르는 것은 확정이라 바로 넘긴다. 다이얼은 돌리는 동안
+  // 값이 계속 바뀌므로 넘기면 안 된다 — 지나가는 값에서 화면이 튄다.
+  if (!isLast.value && !useDial.value) setTimeout(() => s.next(), 160);
 }
 
 function onNumber(e: Event) {
@@ -77,9 +102,17 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
         <div v-if="s.current.inputType === 'number'" class="numwrap">
           <input type="number" :min="s.current.min ?? 0" :max="s.current.max ?? 200"
                  inputmode="numeric" :value="value ?? ''" @input="onNumber"
-                 :aria-label="s.current.text" />
+                 :ariaLabel="s.current.text" />
           <span class="unit">{{ s.current.unit }}</span>
         </div>
+
+        <ScaleDial
+          v-else-if="useDial"
+          :options="s.current.options"
+          :model-value="value"
+          :ariaLabel="s.current.text"
+          @update:model-value="choose"
+        />
 
         <div v-else class="options" role="radiogroup" :aria-label="s.current.text">
           <button v-for="o in s.current.options" :key="String(o.value)" type="button"
@@ -89,6 +122,14 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
             <span>{{ o.label }}</span>
           </button>
         </div>
+
+        <!-- 원형이 불편하면 목록으로. 척도 문항에서만 뜻이 있는 단추다. -->
+        <p v-if="s.current.inputType !== 'number' && isScale(s.current)" class="modeline">
+          <button class="linklike" type="button"
+                  @click="mode = mode === 'dial' ? 'list' : 'dial'">
+            {{ mode === 'dial' ? '목록으로 고르기' : '문자판으로 고르기' }}
+          </button>
+        </p>
       </div>
 
       <div class="nav">
@@ -138,5 +179,6 @@ function restart() { s.clearDraft(); router.push('/diagnosis/start'); }
 .notice, .warn { font-size: 14px; padding: var(--sp-md); border-radius: var(--radius-sm); margin: 0; }
 .notice { background: var(--surface-soft); color: var(--muted); }
 .warn { background: #fff4f1; color: var(--error-text); border: 1px solid #f4c7bd; }
+.modeline { margin: var(--sp-sm) 0 0; text-align: right; font-size: 13px; }
 .linklike { background: none; border: 0; padding: 0; color: var(--link); text-decoration: underline; cursor: pointer; font: inherit; }
 </style>
