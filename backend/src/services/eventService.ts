@@ -7,6 +7,10 @@ export const EVENT_TYPES = [
   'PRESURVEY_ENTER', 'PRESURVEY_PASS', 'SURVEY_START', 'QUESTION_MOVE',
   'SURVEY_COMPLETE', 'SURVEY_ABANDON', 'RESULT_SHOWN', 'MAP_ENTER',
   'FACILITY_DETAIL', 'CONTACT_ACTION',
+  // 2026-09-03 방 셋을 더하며 추가. 화면이 보내고 있었는데 여기 없어서
+  // **조용히 버려지고 있었다**(DB 에 한 건도 안 들어감 — 실측으로 확인).
+  // 새로 저장하는 값은 없다. 컬럼은 그대로고 종류 이름만 늘어난다(FR-028 유지).
+  'TALK_ENTER', 'TALK_MESSAGE', 'REVIEW_ENTER', 'REVIEW_WRITE', 'MYPAGE_ENTER',
 ] as const;
 export type EventType = (typeof EVENT_TYPES)[number];
 

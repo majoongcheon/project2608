@@ -111,6 +111,18 @@
 /* ── 활자 기본값 재설정 ───────────────────────────────────────────────────
    h1/h2 는 각 화면에서 크기를 따로 정한다. 여기서는 큰 활자에서 무너지는
    행간·자간만 바로잡는다. */
+/* ── 한글은 단어 가운데서 끊지 않는다 ────────────────────────────────────
+   `p { word-break: keep-all }` 만 두었더니 <span> 으로 짜인 곳(홈 메뉴 설명,
+   보조 설명)이 규칙을 못 받아 "알려 드립 / 니다." "별명으 / 로만" 처럼
+   **단어 한가운데서 줄이 끊겼다**(기획자 지적, 화면 실측으로 재확인).
+   word-break 는 상속되는 성질이라 뿌리에 한 번 걸면 모든 글이 함께 받는다.
+   대신 끊을 자리가 없는 아주 긴 낱말(주소·영문)은 넘치지 않도록
+   overflow-wrap 으로 숨통을 터 둔다 — 이것이 없으면 가로 스크롤이 생긴다. */
+body {
+  word-break: keep-all;
+  overflow-wrap: break-word;
+}
+
 h1, h2 { text-wrap: balance; word-break: keep-all; }
 h1 { letter-spacing: var(--tracking-display); line-height: 1.06; }
 h2 { letter-spacing: var(--tracking-display); line-height: 1.14; }
