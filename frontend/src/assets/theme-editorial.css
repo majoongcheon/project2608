@@ -28,7 +28,10 @@
      현재 화면은 대제목 48px · 본문 16px 로 3배차뿐이라 첫 화면이 눌려 있다.
      아래는 6.5배차다. vw 를 쓰되 min/max 를 둬서 확대·축소에서 깨지지 않게
      한다(FR-040 — 고정 높이가 아니라 흐르는 값). */
-  --display-1: clamp(40px, 9.5vw, 104px);   /* 히어로 대제목 */
+  /* 히어로가 2단(글 | 원반)이 되면서 왼쪽 칸이 좁아졌다. 104px 를 그대로
+     두면 '필요하신가요?' 의 물음표가 칸 밖으로 나가고, 줄 등장 연출용
+     overflow:hidden 에 잘려 나간다 — 실제로 잘렸다(14:57 확인). */
+  --display-1: clamp(38px, 6vw, 70px);      /* 히어로 대제목 */
   --display-2: clamp(28px, 5.2vw, 56px);    /* 섹션 제목 · 통계 숫자 */
   --display-3: clamp(22px, 3.4vw, 34px);    /* 메뉴 항목 제목 */
   --lede:      clamp(17px, 1.9vw, 22px);    /* 리드 문장 */
@@ -38,10 +41,12 @@
   --tracking-lede: -0.012em;
 
   /* ── 여백 계단 ────────────────────────────────────────────────────────
-     기존 --sp-section(64px)은 섹션 사이를 가르기에 모자란다. 레퍼런스는
-     '한 화면에 한 가지'가 원칙이라 섹션 간격이 본문 행간의 8~10배다. */
-  --gap-section: clamp(72px, 11vw, 168px);
-  --gap-block: clamp(28px, 4vw, 56px);
+     처음엔 레퍼런스대로 168px 까지 벌렸는데, 실제로 보니 **글끼리 너무 떨어져
+     보이고 스크롤이 길어졌다**(2026-09-03 기획자 확인). 레퍼런스는 한 화면에
+     한 가지만 두는 홍보 사이트라 그 간격이 성립하지만, 여기는 3분 안에 진단을
+     끝내야 하는 도구다. 간격은 '구분되는 최소'까지만 준다 — 절반으로 줄였다. */
+  --gap-section: clamp(40px, 5.5vw, 84px);
+  --gap-block: clamp(20px, 2.6vw, 34px);
 
   /* 읽기 폭 — 한글 본문은 한 줄 35~45자가 편하다 */
   --measure: 34em;
@@ -70,8 +75,9 @@
 }
 .reveal.is-in { opacity: 1; transform: none; }
 
-/* 글자가 아래에서 올라오는 연출. 제목 한 줄에만 쓴다. */
-.reveal-line { display: block; overflow: hidden; }
+/* 글자가 아래에서 올라오는 연출. 제목 한 줄에만 쓴다.
+   overflow:hidden 이 가로로도 자르므로, 글자 오른쪽에 숨 쉴 틈을 둔다. */
+.reveal-line { display: block; overflow: hidden; padding-right: .12em; }
 .reveal-line > span {
   display: block;
   transform: translateY(105%);
