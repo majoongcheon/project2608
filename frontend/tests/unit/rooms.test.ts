@@ -6,7 +6,7 @@
 //   · 즐겨찾기는 브라우저에만 남고, 저장 공간을 못 써도 화면이 죽지 않는다.
 import { describe, it, expect, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { answer, opening, TOPICS, BOT_STATS } from '../../src/services/guideBot';
+import { answer, opening, TOPICS, BOT_STATS, isFallback } from '../../src/services/guideBot';
 import { useFavoriteStore } from '../../src/stores/favorites';
 
 /* 이 실행 환경이 주는 localStorage 는 반쪽짜리다(clear 가 없다). 저장소는
@@ -141,7 +141,7 @@ describe('안내봇 — 무엇을 답하는가', () => {
   });
 
   it('아직 없는 기능은 없다고 말한다 — 있는 척하지 않는다', () => {
-    expect(answer('후기를 신고하고 싶어요').text).toContain('신고를 받는 화면이 없습니다');
+    // 신고는 09-04 오후에 실제로 만들었으므로 여기서 빠졌다. 아래 전용 테스트가 받는다.
     expect(answer('후기를 수정할 수 있나요').text).toContain('고치는 기능은 아직 없습니다');
     expect(answer('다크모드 있나요').text).toContain('아직 없습니다');
   });
@@ -160,6 +160,35 @@ describe('안내봇 — 무엇을 답하는가', () => {
     expect(BOT_STATS.rules).toBeGreaterThan(listed.length / 2);
     expect(listed).not.toContain('쿠키를 쓰나요');
     expect(answer('쿠키를 쓰나요').text).toContain('쿠키는 쓰지 않습니다');
+  });
+
+  /* ── 3차(09-04 오후) — 신고·미답변 질문 수집·운영 지속 ────────────────── */
+  it('답을 못 낸 것만 isFallback 이다 — 화면이 이걸로 미답변 질문을 가려낸다', () => {
+    expect(isFallback(answer('오늘 서울 날씨 어때요?'))).toBe(true);
+    expect(isFallback(answer('   '))).toBe(true);
+    // 화면에 펼쳐 둔 질문은 하나도 미답변으로 새지 않는다 = 서버로도 안 간다
+    expect(TOPICS.flatMap((g) => g.items).filter((q) => isFallback(answer(q)))).toEqual([]);
+  });
+
+  it('대화 저장 안내가 미답변 질문 수집을 숨기지 않는다', () => {
+    // 이 문구가 사실과 어긋나면 서비스가 이용자에게 거짓말을 하게 된다.
+    const t = answer('여기 나눈 대화는 어디에 남나요?').text;
+    expect(t).toContain('브라우저 안에만 남습니다');
+    expect(t).toContain('답해 드리지 못한 질문은 그 문장만 따로');
+    expect(t).toContain('누가 물으셨는지는 함께 보내지 않고');
+    // 개인정보 총론에도 같은 사실이 있어야 한다
+    expect(answer('개인정보는 어떻게 되나요?').text).toContain('답해 드리지 못한 질문');
+  });
+
+  it('후기 신고를 이제 받는다고 말한다 — 없다고 하던 답이 남아 있으면 안 된다', () => {
+    const t = answer('후기를 신고하고 싶어요').text;
+    expect(t).toContain('신고');
+    expect(t).not.toContain('신고를 받는 화면이 없습니다');
+    expect(t).toContain('가려집니다');
+  });
+
+  it('계속 운영한다고 답한다', () => {
+    expect(answer('이 서비스는 언제까지 운영하나요').text).toContain('문을 닫을 계획은 없습니다');
   });
 
   it('화면은 마크다운을 해석하지 않으므로 별표를 남기지 않는다', () => {

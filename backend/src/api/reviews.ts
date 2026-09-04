@@ -122,3 +122,54 @@ reviewsRouter.delete('/reviews/:id', wrap(async (req, res) => {
   }
   res.status(204).end();
 }));
+
+// POST /reviews/:id/reports — 후기 신고 (2026-09-04)
+//
+// 005 에서 is_hidden 컬럼만 만들어 두고 받는 자리를 안 만들었다. 누구나 볼 수
+// 있는 글인데 가릴 통로가 없었다.
+//
+// 신고자를 식별하지 않는다. 로그인이 없으니 "한 사람이 여러 번" 을 서버가
+// 가려낼 수 없고, 가려내려면 사람을 식별해야 해서 그 길은 택하지 않았다.
+// 같은 브라우저의 반복은 화면에서 막고(cb.reportedReviews), 서버는 세기만 한다.
+const REPORT_TYPES = ['ABUSE', 'PRIVACY', 'ADVERTISING', 'FALSE', 'OTHER'] as const;
+
+/** 몇 건이면 가릴 것인가. 사람이 볼 때까지 그냥 두면 피해가 계속된다. */
+const HIDE_AT = 3;
+
+reviewsRouter.post('/reviews/:id/reports', wrap(async (req, res) => {
+  const reviewId = Number(req.params.id);
+  if (!Number.isInteger(reviewId)) throw new ApiError(400, 'BAD_ID', '글 번호가 올바르지 않습니다.');
+
+  const type = String(req.body?.reportType ?? '');
+  if (!(REPORT_TYPES as readonly string[]).includes(type)) {
+    throw new ApiError(400, 'BAD_TYPE', '신고 사유를 골라 주세요.');
+  }
+  const detail = clean(req.body?.detail, 300);
+  // 신고 사유에 본인 연락처를 적는 분이 있다. 후기 본문과 같은 기준으로 막는다.
+  if (detail && CONTACT.test(detail)) {
+    throw new ApiError(400, 'CONTACT_IN_TEXT',
+      '전화번호·이메일·주민등록번호는 담을 수 없습니다. 지우고 다시 보내 주세요.');
+  }
+
+  const target = await one<any>(
+    'SELECT review_id, is_hidden FROM cb_facility_review_v1 WHERE review_id = ?', [reviewId]);
+  if (!target) throw new ApiError(404, 'REVIEW_NOT_FOUND', '글을 찾을 수 없습니다.');
+
+  await exec(
+    'INSERT INTO cb_review_report_v1 (review_id, report_type, detail, created_at) VALUES (?, ?, ?, NOW())',
+    [reviewId, type, detail || null]);
+
+  const c = await one<any>(
+    'SELECT COUNT(*) AS n FROM cb_review_report_v1 WHERE review_id = ?', [reviewId]);
+  const count = Number(c?.n ?? 0);
+
+  // 지우지 않고 가린다 — 무엇이 신고되었는지 남아야 나중에 판단할 수 있다.
+  let hidden = Number(target.is_hidden) === 1;
+  if (!hidden && count >= HIDE_AT) {
+    await exec('UPDATE cb_facility_review_v1 SET is_hidden = 1 WHERE review_id = ?', [reviewId]);
+    hidden = true;
+  }
+
+  // 몇 건 쌓였는지는 알려주지 않는다 — 남은 횟수를 세어 몰려드는 일을 막는다.
+  res.status(201).json({ received: true, hidden });
+}));

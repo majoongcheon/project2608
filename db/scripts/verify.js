@@ -9,7 +9,7 @@ const warn = (m) => console.log(`  ${Y}!${N} ${m}`);
 let failed = false;
 
 const con = await connect();
-const q = async (sql) => (await con.query(sql))[0];
+const q = async (sql, params) => (await con.query(sql, params))[0];
 
 // 학습 데이터 (읽기 전용 — 변경되면 안 된다)
 const [ds] = await q("SELECT COUNT(*) n, SUM(split='train') tr, SUM(split='test') te FROM cb_dataset_v1");
@@ -81,6 +81,31 @@ if (rvCols.length) {
     ? ok('후기 저장소 분리: 관측 저장소와 연결 가능한 공통 컬럼 0개')
     : bad(`후기 저장소 분리 위반 — 공통 컬럼: ${rvLinkable.join(', ')}`);
 }
+
+// 2026-09-04 — 새로 생긴 두 저장소도 같은 그물에 넣는다.
+//   cb_review_report_v1   신고. 신고자를 식별하지 않는다.
+//   cb_talk_unanswered_v1 안내봇이 답하지 못한 질문. 사람이 직접 쓴 글이다.
+// 둘 다 관측 저장소와 개별 기록을 이어 붙일 수 있는 컬럼을 가져서는 안 된다.
+for (const t of ['cb_review_report_v1', 'cb_talk_unanswered_v1']) {
+  const c = await q(`
+    SELECT COLUMN_NAME c FROM information_schema.COLUMNS
+     WHERE TABLE_SCHEMA = DATABASE() AND TABLE_NAME = ?`, [t]);
+  if (!c.length) { bad(`${t} 테이블이 없습니다 — db/migrations/006 을 적용하세요`); continue; }
+  const names = new Set(c.map((r) => r.c));
+  const linkableHere = [...names].filter((n) => (a.has(n) || b.has(n)) && !LINK_SAFE.has(n));
+  linkableHere.length === 0
+    ? ok(`${t} 분리: 관측 저장소와 연결 가능한 공통 컬럼 0개`)
+    : bad(`${t} 분리 위반 — 공통 컬럼: ${linkableHere.join(', ')}`);
+}
+
+// 미답변 질문에는 사람이 알아볼 수 있는 정보가 남으면 안 된다.
+// 백엔드가 막고 있지만, 막는 쪽이 고장 나도 여기서 걸리게 둔다.
+const [tu] = await q(`SELECT COUNT(*) n FROM cb_talk_unanswered_v1
+                       WHERE text REGEXP '01[0-9]{1}[- .]?[0-9]{3,4}[- .]?[0-9]{4}'
+                          OR text REGEXP '[[:alnum:]._+-]+@[[:alnum:].-]+'`);
+Number(tu.n) === 0
+  ? ok('미답변 질문에 연락처 꼴 0건')
+  : bad(`미답변 질문에 연락처로 보이는 글이 있습니다: ${tu.n}건`);
 
 // 시각으로도 짝지을 수 없어야 한다 — 학습 저장소는 초 단위로 절삭해 저장한다.
 const [ts] = await q(`SELECT COUNT(*) n FROM cb_training_response_v1

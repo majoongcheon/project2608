@@ -9,6 +9,7 @@ import { diagnosesRouter } from './api/diagnoses.js';
 import { facilitiesRouter } from './api/facilities.js';
 import { metaRouter } from './api/meta.js';
 import { reviewsRouter } from './api/reviews.js';
+import { talkRouter } from './api/talk.js';
 import { eventsRouter } from './api/events.js';
 import { notFound, errorHandler } from './middleware/errors.js';
 import { startJobs } from './jobs/scheduler.js';
@@ -43,6 +44,7 @@ export async function createApp() {
   api.use(facilitiesRouter);
   api.use(metaRouter);
   api.use(reviewsRouter);
+  api.use(talkRouter);
   api.use(eventsRouter);
   app.use('/api/v1', api);
 

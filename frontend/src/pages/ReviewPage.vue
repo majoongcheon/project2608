@@ -59,6 +59,62 @@ function rememberToken(id: number, token: string) {
 }
 const mine = (id: number) => Boolean(tokens()[String(id)]);
 
+// ── 신고 (2026-09-04) ─────────────────────────────────────────────────────
+// 005 에서 가리는 컬럼만 만들어 두고 받는 자리를 안 만들었다. 누구나 볼 수
+// 있는 글인데 가릴 통로가 없었다.
+//
+// 로그인이 없어 "한 사람이 여러 번" 을 서버가 가려낼 수 없다. 가려내려면
+// 사람을 식별해야 해서 그 길은 택하지 않았고, 같은 브라우저의 반복만 여기서
+// 막는다. 완전하지 않다는 것을 알고 고른 절충이다.
+const REPORTED = 'cb.reportedReviews';
+const REPORT_REASONS = [
+  { v: 'ABUSE', t: '욕설·비방이 담겨 있습니다' },
+  { v: 'PRIVACY', t: '누군가를 알아볼 수 있는 정보가 있습니다' },
+  { v: 'ADVERTISING', t: '광고나 홍보로 보입니다' },
+  { v: 'FALSE', t: '사실과 다른 내용입니다' },
+  { v: 'OTHER', t: '그 밖의 이유' },
+];
+
+const reportOpen = ref<number | null>(null);
+const reportType = ref('');
+const reportDetail = ref('');
+const reportError = ref('');
+const reportSending = ref(false);
+
+function reportedIds(): number[] {
+  try { return JSON.parse(localStorage.getItem(REPORTED) ?? '[]'); } catch { return []; }
+}
+const alreadyReported = (id: number) => reportedIds().includes(id);
+function rememberReported(id: number) {
+  try {
+    const list = reportedIds();
+    if (!list.includes(id)) localStorage.setItem(REPORTED, JSON.stringify([...list, id]));
+  } catch { /* noop */ }
+}
+
+function openReport(id: number) {
+  reportOpen.value = reportOpen.value === id ? null : id;
+  reportType.value = '';
+  reportDetail.value = '';
+  reportError.value = '';
+}
+
+async function sendReport(id: number) {
+  if (!reportType.value) { reportError.value = '신고 사유를 골라 주세요.'; return; }
+  reportSending.value = true;
+  reportError.value = '';
+  try {
+    const r = await api.reportReview(id, { reportType: reportType.value, detail: reportDetail.value });
+    rememberReported(id);
+    reportOpen.value = null;
+    events.track('REVIEW_REPORT');
+    // 여러 분이 같은 글을 신고하면 그 자리에서 가려진다. 그때는 목록을 다시 읽는다.
+    if (r?.hidden) { await loadRecent(); if (target.value) await loadFacilityReviews(target.value.facilityId); }
+  } catch (e: any) {
+    reportError.value = e?.message ?? '신고를 접수하지 못했습니다. 잠시 후 다시 시도해 주세요.';
+  } finally { reportSending.value = false; }
+}
+
 function when(iso: string) {
   const d = new Date(iso);
   const days = Math.floor((Date.now() - d.getTime()) / 86_400_000);
@@ -251,8 +307,34 @@ onMounted(async () => {
                 <span class="sr">{{ r.rating }}점</span>
                 <b>{{ r.nickname }}</b><span class="rv__when">{{ when(r.createdAt) }}</span>
                 <button v-if="mine(r.reviewId)" type="button" class="linklike" @click="removeMine(r.reviewId)">지우기</button>
+                <button v-else-if="alreadyReported(r.reviewId)" type="button" class="linklike is-done" disabled>신고함</button>
+                <button v-else type="button" class="linklike" @click="openReport(r.reviewId)"
+                        :aria-expanded="reportOpen === r.reviewId" :aria-controls="`rp-${r.reviewId}`">신고</button>
               </p>
               <p class="rv__body">{{ r.body }}</p>
+              <div v-if="reportOpen === r.reviewId" :id="`rp-${r.reviewId}`" class="rp">
+                <p class="rp__h">어떤 점이 문제인지 알려 주세요</p>
+                <ul class="rp__opts">
+                  <li v-for="o in REPORT_REASONS" :key="o.v">
+                    <label><input type="radio" name="rp" :value="o.v" v-model="reportType" /> {{ o.t }}</label>
+                  </li>
+                </ul>
+                <label class="rp__detail">
+                  <span>덧붙일 말 (선택)</span>
+                  <textarea v-model="reportDetail" rows="2" maxlength="300"
+                            placeholder="전화번호·이메일은 적지 말아 주세요"></textarea>
+                </label>
+                <p v-if="reportError" class="err" role="alert">{{ reportError }}</p>
+                <p class="rp__note">
+                  신고하신 분이 누구인지는 남기지 않습니다. 여러 분이 같은 글을 신고하면 그 글은 화면에서 가려집니다.
+                </p>
+                <div class="rp__act">
+                  <button type="button" class="btn btn--sm" :disabled="reportSending" @click="sendReport(r.reviewId)">
+                    {{ reportSending ? '보내는 중…' : '신고 보내기' }}
+                  </button>
+                  <button type="button" class="linklike" @click="openReport(r.reviewId)">그만두기</button>
+                </div>
+              </div>
             </li>
           </ul>
         </div>
@@ -281,8 +363,34 @@ onMounted(async () => {
             <span class="sr">{{ r.rating }}점</span>
             <b>{{ r.nickname }}</b><span class="rv__when">{{ when(r.createdAt) }}</span>
             <button v-if="mine(r.reviewId)" type="button" class="linklike" @click="removeMine(r.reviewId)">지우기</button>
+            <button v-else-if="alreadyReported(r.reviewId)" type="button" class="linklike is-done" disabled>신고함</button>
+            <button v-else type="button" class="linklike" @click="openReport(r.reviewId)"
+                    :aria-expanded="reportOpen === r.reviewId" :aria-controls="`rp-${r.reviewId}`">신고</button>
           </p>
           <p class="rv__body">{{ r.body }}</p>
+          <div v-if="reportOpen === r.reviewId" :id="`rp-${r.reviewId}`" class="rp">
+            <p class="rp__h">어떤 점이 문제인지 알려 주세요</p>
+            <ul class="rp__opts">
+              <li v-for="o in REPORT_REASONS" :key="o.v">
+                <label><input type="radio" name="rp" :value="o.v" v-model="reportType" /> {{ o.t }}</label>
+              </li>
+            </ul>
+            <label class="rp__detail">
+              <span>덧붙일 말 (선택)</span>
+              <textarea v-model="reportDetail" rows="2" maxlength="300"
+                        placeholder="전화번호·이메일은 적지 말아 주세요"></textarea>
+            </label>
+            <p v-if="reportError" class="err" role="alert">{{ reportError }}</p>
+            <p class="rp__note">
+              신고하신 분이 누구인지는 남기지 않습니다. 여러 분이 같은 글을 신고하면 그 글은 화면에서 가려집니다.
+            </p>
+            <div class="rp__act">
+              <button type="button" class="btn btn--sm" :disabled="reportSending" @click="sendReport(r.reviewId)">
+                {{ reportSending ? '보내는 중…' : '신고 보내기' }}
+              </button>
+              <button type="button" class="linklike" @click="openReport(r.reviewId)">그만두기</button>
+            </div>
+          </div>
           <RouterLink v-if="r.facilityId" class="rv__fac" :to="`/facility/${r.facilityId}`">
             {{ r.facilityName ?? '기관 보기' }} →
           </RouterLink>
@@ -363,4 +471,22 @@ select { min-height: 48px; }
 }
 .linklike { font-size: 13px; }
 .sr { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+/* 신고 (2026-09-04) — 후기 카드 안에서 펼쳐지는 작은 판.
+   따로 뜨는 창을 쓰지 않는다. 어느 글을 신고하는지 눈에서 떨어지면 안 된다. */
+.rp {
+  margin: .6rem 0 .2rem;
+  padding: .75rem .85rem;
+  border-left: 2px solid var(--line, #d9cfc2);
+  background: rgba(0, 0, 0, .02);
+}
+.rp__h { margin: 0 0 .45rem; font-size: .92rem; font-weight: 600; }
+.rp__opts { margin: 0 0 .55rem; padding: 0; list-style: none; display: grid; gap: .28rem; }
+.rp__opts label { display: flex; gap: .4rem; align-items: baseline; font-size: .9rem; cursor: pointer; }
+.rp__detail { display: block; font-size: .86rem; }
+.rp__detail span { display: block; margin-bottom: .25rem; opacity: .75; }
+.rp__detail textarea { width: 100%; box-sizing: border-box; }
+.rp__note { margin: .5rem 0 .6rem; font-size: .82rem; opacity: .75; line-height: 1.5; }
+.rp__act { display: flex; gap: .75rem; align-items: center; }
+.linklike.is-done { opacity: .5; cursor: default; }
 </style>

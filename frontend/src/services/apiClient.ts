@@ -26,6 +26,14 @@ export const api = {
   facility: (id: number) => request<any>(`/facilities/${id}`),
   report: (id: number, body: unknown) =>
     request<any>(`/facilities/${id}/reports`, { method: 'POST', body: JSON.stringify(body) }),
+
+  /** 후기 신고 (2026-09-04). 신고자를 식별하지 않는다 — 서버는 세기만 한다. */
+  reportReview: (reviewId: number, body: unknown) =>
+    request<any>(`/reviews/${reviewId}/reports`, { method: 'POST', body: JSON.stringify(body) }),
+
+  /** 안내봇이 답하지 못한 질문만 남긴다 (2026-09-04). 답한 것은 보내지 않는다. */
+  talkUnanswered: (text: string) =>
+    request<any>('/talk/unanswered', { method: 'POST', body: JSON.stringify({ text }) }),
   diagnose: (body: unknown) => request<any>('/diagnoses', { method: 'POST', body: JSON.stringify(body) }),
   cancel: (token: string) => request<void>(`/diagnoses/${token}`, { method: 'DELETE' }),
   events: (body: unknown) => request<void>('/events', { method: 'POST', body: JSON.stringify(body) }),

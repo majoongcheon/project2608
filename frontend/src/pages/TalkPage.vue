@@ -10,7 +10,8 @@
  */
 import { ref, nextTick, onMounted } from 'vue';
 import RoomHead from '../components/RoomHead.vue';
-import { answer, opening, TOPICS, BOT_STATS, type BotReply } from '../services/guideBot';
+import { answer, opening, TOPICS, BOT_STATS, isFallback, type BotReply } from '../services/guideBot';
+import { api } from '../services/apiClient';
 import { useEventStore } from '../stores/events';
 
 interface Msg {
@@ -58,7 +59,18 @@ function send(text?: string) {
 
   // 곧바로 답이 튀어나오면 읽기 전에 화면이 넘어간다. 한 박자만 둔다.
   typing.value = true;
-  window.setTimeout(() => { typing.value = false; fromBot(answer(t)); }, 320);
+  window.setTimeout(() => {
+    typing.value = false;
+    const r = answer(t);
+    fromBot(r);
+    // 답하지 못한 질문만 남긴다(2026-09-04). 무엇을 더 적어야 하는지 추측
+    // 대신 실측으로 정하려는 것이다. 답을 낸 질문은 이미 규칙이 있으니
+    // 보내지 않는다 — 대화가 통째로 서버에 가는 것이 아니다.
+    // 화면에서 누른 단추는 반드시 답이 있으므로 자연히 걸리지 않는다.
+    if (isFallback(r)) {
+      api.talkUnanswered(t).catch(() => { /* 기록 실패로 대화가 끊기면 안 된다 */ });
+    }
+  }, 320);
 }
 
 function clearAll() {
