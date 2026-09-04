@@ -1,0 +1,406 @@
+{
+  "__meta__": {
+    "대조 방법": "코드북은 코드별 빈도를 함께 싣는다. 우리 cb_dataset_v1 의 빈도와 전수 일치하는 블록을 찾아 대응을 확정했다 — 이름이 아니라 숫자로 맞췄으므로 의심의 여지가 없다.",
+    "무엇": "원 조사표 코드북(docs/kor_codebook_20240072.pdf)의 보기 라벨과, 서비스가 화면에 내는 라벨의 대조표",
+    "왜": "2026-09-03 E4 라벨이 원본과 어긋난 결함이 있었다(docs/JSG-결함-E4선택지-라벨불일치.md). 코드값은 모델이 학습한 값이라 라벨이 어긋나면 조용히 틀린 판정이 나간다. 같은 일이 다시 나지 않게 못을 박는다.",
+    "작성": "2026-09-04 신지현 세션",
+    "판정": {
+      "MEANING_DRIFT": "뜻이 달라짐 — 이용자가 다른 칸을 고를 수 있다",
+      "NARROWED": "범위가 좁아짐",
+      "same": "글자까지 같음",
+      "wording": "어미·표기만 다름 (뜻 같음)"
+    }
+  },
+  "daily_routine_satisfaction": {
+    "options": {
+      "1": {
+        "codebook": "매우 싫어한다",
+        "freq": 12,
+        "note": "",
+        "service": "매우 싫어한다",
+        "verdict": "same"
+      },
+      "2": {
+        "codebook": "싫어하는 편이다",
+        "freq": 101,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "싫어하는 편",
+        "verdict": "wording"
+      },
+      "3": {
+        "codebook": "그저 그렇다",
+        "freq": 1078,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "보통",
+        "verdict": "wording"
+      },
+      "4": {
+        "codebook": "좋아하는 편이다",
+        "freq": 1539,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "좋아하는 편",
+        "verdict": "wording"
+      },
+      "5": {
+        "codebook": "매우 좋아한다",
+        "freq": 265,
+        "note": "",
+        "service": "매우 좋아한다",
+        "verdict": "same"
+      }
+    },
+    "originalItem": "G8",
+    "questionNo": 1
+  },
+  "family_support_for_employment": {
+    "options": {
+      "1": {
+        "codebook": "전혀 지지하지 않는다",
+        "freq": 352,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "전혀 지지하지 않음",
+        "verdict": "wording"
+      },
+      "2": {
+        "codebook": "지지하지 않는 편이다",
+        "freq": 465,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "별로 지지하지 않음",
+        "verdict": "wording"
+      },
+      "3": {
+        "codebook": "그저 그렇다",
+        "freq": 454,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "보통",
+        "verdict": "wording"
+      },
+      "4": {
+        "codebook": "지지하는 편이다",
+        "freq": 881,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "지지하는 편",
+        "verdict": "wording"
+      },
+      "5": {
+        "codebook": "매우 지지한다",
+        "freq": 844,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "매우 지지함",
+        "verdict": "wording"
+      }
+    },
+    "originalItem": "F5",
+    "questionNo": 2
+  },
+  "help_needed_hours": {
+    "options": {
+      "1": {
+        "codebook": "일과시간의 대부분 필요함(12시간 이상)",
+        "freq": 641,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "일과 대부분(하루 12시간 이상)",
+        "verdict": "wording"
+      },
+      "2": {
+        "codebook": "6시간 이상 12시간 미만",
+        "freq": 518,
+        "note": "원본은 \"6시간 이상 12시간 미만\"이라는 시간 구간이다. \"하루 절반 정도\"로 바꾸면 6시간 도움이 필요한 사람이 3번을 고를 수 있다",
+        "service": "하루 절반 정도",
+        "verdict": "MEANING_DRIFT"
+      },
+      "3": {
+        "codebook": "2시간 이상 6시간 미만",
+        "freq": 627,
+        "note": "원본은 \"2시간 이상 6시간 미만\". \"하루 몇 시간 정도\"는 경계가 없다",
+        "service": "하루 몇 시간 정도",
+        "verdict": "MEANING_DRIFT"
+      },
+      "4": {
+        "codebook": "2시간 미만",
+        "freq": 411,
+        "note": "원본은 \"2시간 미만\". \"아주 잠깐이면 충분\"은 주관적이다",
+        "service": "아주 잠깐이면 충분",
+        "verdict": "MEANING_DRIFT"
+      },
+      "5": {
+        "codebook": "다른 사람의 도움이나 보호가 필요하지 않음",
+        "freq": 803,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "도움이 필요하지 않음",
+        "verdict": "wording"
+      }
+    },
+    "originalItem": "G6",
+    "questionNo": 3
+  },
+  "household_head_type": {
+    "options": {
+      "1": {
+        "codebook": "아버지",
+        "freq": 1618,
+        "note": "",
+        "service": "아버지",
+        "verdict": "same"
+      },
+      "2": {
+        "codebook": "어머니",
+        "freq": 634,
+        "note": "",
+        "service": "어머니",
+        "verdict": "same"
+      },
+      "3": {
+        "codebook": "장애인 당사자",
+        "freq": 348,
+        "note": "",
+        "service": "장애인 당사자",
+        "verdict": "same"
+      },
+      "4": {
+        "codebook": "형제자매",
+        "freq": 139,
+        "note": "",
+        "service": "형제자매",
+        "verdict": "same"
+      },
+      "5": {
+        "codebook": "조부모",
+        "freq": 39,
+        "note": "",
+        "service": "조부모",
+        "verdict": "same"
+      },
+      "6": {
+        "codebook": "배우자",
+        "freq": 149,
+        "note": "",
+        "service": "배우자",
+        "verdict": "same"
+      },
+      "7": {
+        "codebook": "자녀",
+        "freq": 38,
+        "note": "",
+        "service": "자녀",
+        "verdict": "same"
+      },
+      "8": {
+        "codebook": "기타",
+        "freq": 35,
+        "note": "",
+        "service": "기타",
+        "verdict": "same"
+      }
+    },
+    "originalItem": "I4",
+    "questionNo": 4
+  },
+  "last_job_quit_reason": {
+    "options": {
+      "1": {
+        "codebook": "낮은 임금 수준",
+        "freq": 10,
+        "note": "",
+        "service": "낮은 임금 수준",
+        "verdict": "same"
+      },
+      "10": {
+        "codebook": "도와줄 사람이 없음",
+        "freq": 8,
+        "note": "",
+        "service": "도와줄 사람이 없음",
+        "verdict": "same"
+      },
+      "11": {
+        "codebook": "출퇴근의 어려움",
+        "freq": 7,
+        "note": "",
+        "service": "출퇴근의 어려움",
+        "verdict": "same"
+      },
+      "12": {
+        "codebook": "장애상태, 건강 등의 악화",
+        "freq": 40,
+        "note": "",
+        "service": "장애상태, 건강 등의 악화",
+        "verdict": "same"
+      },
+      "13": {
+        "codebook": "가사, 돌봄, 이사 등 가족적 사유",
+        "freq": 13,
+        "note": "",
+        "service": "가사, 돌봄, 이사 등 가족적 사유",
+        "verdict": "same"
+      },
+      "14": {
+        "codebook": "다른(더 나은) 일자리로 이직하기 위해",
+        "freq": 6,
+        "note": "",
+        "service": "다른(더 나은) 일자리로 이직하기 위해",
+        "verdict": "same"
+      },
+      "15": {
+        "codebook": "기타",
+        "freq": 3,
+        "note": "",
+        "service": "기타",
+        "verdict": "same"
+      },
+      "2": {
+        "codebook": "열악한 근무환경",
+        "freq": 15,
+        "note": "",
+        "service": "열악한 근무환경",
+        "verdict": "same"
+      },
+      "3": {
+        "codebook": "계약기간 만료",
+        "freq": 72,
+        "note": "",
+        "service": "계약기간 만료",
+        "verdict": "same"
+      },
+      "4": {
+        "codebook": "영업부진, 폐업 등",
+        "freq": 20,
+        "note": "",
+        "service": "영업부진, 폐업 등",
+        "verdict": "same"
+      },
+      "5": {
+        "codebook": "장애에 대한 이해와 배려 부족",
+        "freq": 32,
+        "note": "",
+        "service": "장애에 대한 이해와 배려 부족",
+        "verdict": "same"
+      },
+      "6": {
+        "codebook": "업무 자체가 힘들고 어려움",
+        "freq": 45,
+        "note": "",
+        "service": "업무 자체가 힘들고 어려움",
+        "verdict": "same"
+      },
+      "7": {
+        "codebook": "직장(사업체)에서의 부적응(근태 및 대인관계 문제 등)",
+        "freq": 30,
+        "note": "",
+        "service": "직장(사업체)에서의 부적응(근태 및 대인관계 문제 등)",
+        "verdict": "same"
+      },
+      "8": {
+        "codebook": "장애인 당사자가 근로의지 부족(흥미를 갖지 못함 등)",
+        "freq": 19,
+        "note": "",
+        "service": "장애인 당사자가 근로의지 부족(흥미를 갖지 못함 등)",
+        "verdict": "same"
+      },
+      "9": {
+        "codebook": "장애인 당사자의 근로능력 부족, 업무성과 미흡",
+        "freq": 37,
+        "note": "",
+        "service": "장애인 당사자의 근로능력 부족, 업무성과 미흡",
+        "verdict": "same"
+      }
+    },
+    "originalItem": "E4",
+    "questionNo": 5
+  },
+  "relation_to_person": {
+    "options": {
+      "1": {
+        "codebook": "아버지",
+        "freq": 418,
+        "note": "",
+        "service": "아버지",
+        "verdict": "same"
+      },
+      "2": {
+        "codebook": "어머니",
+        "freq": 1913,
+        "note": "",
+        "service": "어머니",
+        "verdict": "same"
+      },
+      "3": {
+        "codebook": "형제자매",
+        "freq": 219,
+        "note": "",
+        "service": "형제자매",
+        "verdict": "same"
+      },
+      "4": {
+        "codebook": "조부모",
+        "freq": 55,
+        "note": "",
+        "service": "조부모",
+        "verdict": "same"
+      },
+      "5": {
+        "codebook": "배우자",
+        "freq": 168,
+        "note": "",
+        "service": "배우자",
+        "verdict": "same"
+      },
+      "6": {
+        "codebook": "자녀",
+        "freq": 68,
+        "note": "",
+        "service": "자녀",
+        "verdict": "same"
+      },
+      "7": {
+        "codebook": "그 외 가족 및 친인척 :",
+        "freq": 70,
+        "note": "\"(당사자 포함)\"은 원본에 없는 말이다. 원본 7은 \"그 외 가족 및 친인척\"이다 (2026-09-03 기획자 지시로 추가)",
+        "service": "그 외 가족(당사자 포함)",
+        "verdict": "MEANING_DRIFT"
+      },
+      "8": {
+        "codebook": "가족 및 친인척이 아닌 보호자 :",
+        "freq": 89,
+        "note": "원본은 \"가족 및 친인척이 아닌 보호자\". \"친인척\"이 빠져 조카·사촌의 자리가 모호하다",
+        "service": "가족이 아닌 보호자",
+        "verdict": "NARROWED"
+      }
+    },
+    "originalItem": "A1",
+    "questionNo": 6
+  },
+  "understands_work_meaning": {
+    "options": {
+      "1": {
+        "codebook": "잘 이해하고 있음",
+        "freq": 784,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "잘 이해한다",
+        "verdict": "wording"
+      },
+      "2": {
+        "codebook": "정확하게는 아니지만 어느 정도는 이해하는 편임",
+        "freq": 696,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "어느 정도 이해한다",
+        "verdict": "wording"
+      },
+      "3": {
+        "codebook": "조금은 이해하고 있지만 잘 모르는 편임",
+        "freq": 609,
+        "note": "원본은 \"조금은 이해하고 있지만 잘 모르는 편임\"(부분 이해 있음)인데 \"거의 이해하지 못한다\"는 4번 쪽으로 끌린다",
+        "service": "거의 이해하지 못한다",
+        "verdict": "MEANING_DRIFT"
+      },
+      "4": {
+        "codebook": "의미를 전혀 이해하지 못함",
+        "freq": 911,
+        "note": "어미·표기만 다르고 뜻은 같다",
+        "service": "전혀 이해하지 못한다",
+        "verdict": "wording"
+      }
+    },
+    "originalItem": "F1",
+    "questionNo": 7
+  }
+}
